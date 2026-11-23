@@ -1,2 +1,3 @@
 Feature-coverage.html linguist-documentation -linguist-detectable
 pilots/btn_co/*.html linguist-documentation -linguist-detectable
+START.BAT text eol=crlf

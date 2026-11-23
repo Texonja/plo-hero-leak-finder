@@ -2,9 +2,9 @@ PLO Hero Leak Finder for Windows x64
 
 Getting started
 
-1. Extract the entire ZIP and open the PLO Hero Leak Finder folder.
-2. Run PLO Hero Leak Finder.exe. The package includes Python and the
-   desktop runtime. Keep the extracted files together.
+1. Right-click the ZIP in File Explorer and choose Extract all.
+2. Open the extracted folder and double-click START.BAT. Keep the
+   PLO Hero Leak Finder folder beside it. Python is included.
 3. Select Library > HeroDemo to try the public sample from both networks.
 
 Importing completed hands
