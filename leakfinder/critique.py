@@ -28,9 +28,19 @@ def critique_for(snap, event, advice):
         return None
     if snap.street == "Preflop":
         from .preflop_critique import review_preflop
+        from .preflop_spots import review_common
         from .sb_reference import compare_sb
 
-        return compare_sb(snap, event) or review_preflop(snap, event, advice)
+        existing = compare_sb(snap, event) or review_preflop(snap, event, advice)
+        if existing:
+            return existing
+        if (
+            advice
+            and advice.can_compare(snap)
+            and advice.difference(event.action, event.amount)
+        ):
+            return None
+        return review_common(snap, event)
     if snap.street in ("Flop", "Turn"):
         from .early_critique import review_early
 

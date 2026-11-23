@@ -24,6 +24,7 @@ with a single matching Hero.
 
 Hands to review opens after import with up to twelve hands. Action critiques
 shows all flagged decisions, the alternative, and what could favor your line.
+Use the spot filter to review first-in opens or responses to a 3-bet.
 Each opens the original decision. Reveal the played action to see its critique
 at the table. The guide coverage count shows how often its rules could compare
 actions. Agreement with a rule does not establish optimal play.

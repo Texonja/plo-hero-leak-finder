@@ -26,6 +26,19 @@ SUITS = {
     "d": ("♦", "#3066a2"),
     "c": ("♣", "#23715c"),
 }
+CRITIQUE_SPOTS = {
+    "First-in opens": (
+        "rfi_",
+        "sb_fold_reference",
+        "preflop_early_weak_entry",
+        "preflop_fold_supported_open",
+    ),
+    "Facing a 3-bet": (
+        "threebet_",
+        "preflop_weak_threebet_defense",
+        "preflop_cold_threebet_exposed",
+    ),
+}
 
 
 class HandReview(ttk.Frame):
@@ -61,6 +74,14 @@ class HandReview(ttk.Frame):
             self.controls, text="Study spots", command=self._toggle_study
         )
         self.study_button.pack(side="left")
+        self.critique_spot = ttk.Combobox(
+            self.controls,
+            state="readonly",
+            width=17,
+            values=("All spots", *CRITIQUE_SPOTS),
+        )
+        self.critique_spot.current(0)
+        self.critique_spot.bind("<<ComboboxSelected>>", self._filter_critiques)
         self.back = ttk.Button(
             self.controls, text="Back to results", command=self._close_related
         )
@@ -137,6 +158,7 @@ class HandReview(ttk.Frame):
         self.study_button.state(["disabled"])
         self._hide_pager()
         self.back.pack_forget()
+        self.critique_spot.pack_forget()
         self._clear_cards(message)
 
     def _clear_cards(self, message):
@@ -194,9 +216,14 @@ class HandReview(ttk.Frame):
 
     def _toggle_critiques(self):
         self.show_critiques = not self.show_critiques
+        self.critique_spot.current(0)
         self.differences.set(False)
         self.show_study = False
         self.related_pattern = ""
+        self.page = 0
+        self._render()
+
+    def _filter_critiques(self, _event):
         self.page = 0
         self._render()
 
@@ -244,6 +271,13 @@ class HandReview(ttk.Frame):
         if self.show_critiques:
             selected = queue.critiques
             heading = "Action critiques"
+            self.critique_spot.pack(side="left", padx=(8, 0))
+            spot = self.critique_spot.get()
+            if spot in CRITIQUE_SPOTS:
+                selected = tuple(
+                    i for i in selected if i.node.startswith(CRITIQUE_SPOTS[spot])
+                )
+                empty = f"No action critiques for {spot.lower()} in the current room, street and hand selection."
         elif self.show_study:
             selected = queue.study
             heading = "Study spots"
@@ -265,6 +299,8 @@ class HandReview(ttk.Frame):
             selected = queue.patterns
             heading = "Review patterns"
             pattern_page = True
+        if not self.show_critiques:
+            self.critique_spot.pack_forget()
         total = len(selected)
         if heading and total:
             pages = (total + REVIEW_PAGE_SIZE - 1) // REVIEW_PAGE_SIZE

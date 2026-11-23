@@ -138,6 +138,27 @@ class DesktopTests(unittest.TestCase):
         self.assertIn(item.evidence, text)
         self.assertIn(item.explanation, text)
 
+    def test_first_in_critique_filter_opens_demo_hand_at_its_recorded_fold(self):
+        home = self.app.home
+        home.critique_button.invoke()
+        home.critique_spot.set("First-in opens")
+        home._filter_critiques(None)
+        self.assertIn("Action critiques 1–1", home.summary.get())
+        item = next(
+            i for i in self.app.queue.critiques if i.node == "rfi_supported_hand"
+        )
+        dialog = self.app.open_item(item)
+        self.addCleanup(dialog.close)
+        self.assertEqual(
+            (dialog.snapshot.number, dialog.snapshot.ref), ("9000000086", "Action 3")
+        )
+        dialog.toggle_played()
+        self.assertIn("Played: fold", dialog.timeline.get("1.0", "end"))
+        home.critique_spot.set("Facing a 3-bet")
+        home._filter_critiques(None)
+        self.assertFalse(home.following.winfo_manager())
+        self.assertEqual(len(home.rows.winfo_children()), 1)
+
     def test_pattern_drilldown_and_paging_with_known_action_differences(self):
         # Deliberate counterfactual: the BB checked after a limp holding AAKKds.
         # Thirteen distinct records exercise both sides of the page boundary.

@@ -22,6 +22,7 @@ from .opponent_history import (
     postflop_opponent,
     river_opponent,
 )
+from .preflop_spots import threebet_price_note
 from .range_review import build_range_review, river_price_note
 from .replay_view import available_actions, chip_text, load_snapshot, river_result
 from .sb_reference import sb_reference
@@ -426,6 +427,7 @@ class TableDialog:
         suggestion = advice_at(snap) if self.actor == self.profile else None
         if eligible and suggestion and river_opponent(snap):
             suggestion = apply_history(snap, suggestion, self._opponent_history(snap))
+        critique = None
         if self.revealed and self.actor == self.profile:
             critique = critique_for(snap, self.played_event, suggestion)
             if critique:
@@ -459,6 +461,13 @@ class TableDialog:
                 "can differ. The sample does not split completing from raising here.\n",
                 "amount",
             )
+        if self.actor == self.profile and (
+            not critique or not critique.rule.startswith("threebet_")
+        ):
+            price_note = threebet_price_note(snap)
+            if price_note:
+                box.insert("end", "\nFACING A 3-BET\n", "street")
+                box.insert("end", price_note + "\n", "amount")
         if suggestion is not None:
             box.insert("end", "\nGUIDE · " + suggestion.title.upper() + "\n", "street")
             box.insert(
