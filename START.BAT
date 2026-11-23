@@ -1,7 +1,5 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
-set "appdir=%~dp0PLO Hero Leak Finder"
-if exist "%appdir%\" goto portable
 set "appdir=%~dp0."
 if exist "%appdir%\runtime\" goto portable
 if not exist "%appdir%\launch.pyw" goto incomplete
@@ -31,7 +29,7 @@ goto failed
 
 :incomplete
 echo The application files are missing. Open the ZIP in File Explorer,
-echo choose "Extract all", then double-click START.BAT in the extracted folder.
+echo choose "Extract all", then open the PLO Hero Leak Finder folder and run START.BAT.
 :failed
 pause
 exit /b 1
