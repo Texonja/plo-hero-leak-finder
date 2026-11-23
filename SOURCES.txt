@@ -1,0 +1,43 @@
+PLO Hero Leak Finder
+
+Source snapshots used for this local application
+
+CoinPoker PLO Population Analyzer
+Revision 5ae9a9036f16ddefad25f069d2aefa0fbc7b85a7
+https://github.com/Texonja/coinpoker-plo-population-analyzer/tree/5ae9a9036f16ddefad25f069d2aefa0fbc7b85a7
+Shared CoinPoker headers, position assignment, action and card patterns,
+board buckets, known-card classification and selected population-node
+predicates. The original MIT notice is in leakfinder/vendor/CoinPoker-MIT.txt.
+
+PLO Multiaccount Detector
+Revision 2956860995a19a0db6e6d3676d7fc88486fd93e0
+https://github.com/Texonja/plo-multiaccount-detector/tree/2956860995a19a0db6e6d3676d7fc88486fd93e0
+HM2 COPY decoding and streaming, iPoker semantics used as an audit reference,
+sanitized real XML regression inputs and portable runtime packaging approach.
+
+CoinPoker Population Strength Analyzer
+Revision 6e50528b7219356c72b470f904e589c0fecbe138
+https://github.com/Texonja/coinpoker-population-strength-analyzer/tree/6e50528b7219356c72b470f904e589c0fecbe138
+Five-card evaluator, exact Omaha best hand enumeration and sanitized source
+records used by regression tests and HeroDemo.
+
+The detector and strength snapshots did not include a top-level license.
+This list traces the owner's source artifacts. The MIT notice applies to
+the cited MIT component. Sample derivation details are in demo/README.txt.
+
+Runtime
+
+CPython for Windows x64, Tcl/Tk, SQLite and standard runtime components
+are included under runtime/. See runtime/LICENSE.txt and component notices
+shipped with those files. The Windows GUI launcher uses distlib. Its
+license is included in runtime/distlib-LICENSE.txt.
+
+Product research
+
+The vendor's public description of Leak Buster 3 and its public FAQ informed
+the coverage matrix. HM2's public reports and hand import documentation
+informed desktop navigation. Calculations, metric definitions and UI are
+part of this independent local application.
+https://pokerleakbuster.com/
+https://pokerleakbuster.com/faq/
+https://hm2faq.holdemmanager.com/categories/Reports/

@@ -1,0 +1,1540 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>PLO4 hand guide</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#edf2f6;color:#192f43;font:16px/1.5 'Segoe UI',Arial,sans-serif}
+main{max-width:1060px;margin:auto;padding:22px 16px}header{background:#ffc88e;border-radius:8px;padding:18px 22px}
+h1,h2,h3,p{margin:4px 0 10px}h2{margin-top:22px}.scroll{overflow-x:auto}table{width:100%;border-collapse:collapse;background:white;text-align:left}
+th,td{padding:9px 12px;vertical-align:top;border-bottom:1px solid #dae4eb}thead{background:#dbe5ed}th{min-width:130px}
+dl,article{background:white;padding:14px 18px;border:1px solid #cbd7e0;border-radius:6px}dt{font-weight:700}dd{margin:2px 0 12px}
+article{margin:10px 0}.cards{display:inline-flex;gap:4px;margin:3px 0}.card{background:#f0f4f6;border:1px solid #b7c7d3;border-radius:3px;padding:1px 5px;font-weight:700}
+.heart,.diamond{color:#843545}summary{cursor:pointer;font-weight:600}pre{max-height:300px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}
+</style><main><header><h1>PLO4 hand guide</h1><p>Study recommendations for completed CoinPoker and iPoker hands.</p></header>
+<p>Start with <b>Import</b>. <b>Hands to review</b> prioritizes decisions where the guide suggests a different action.
+<b>Guide differences only</b> lists those spots. Open a hand to replay the exact decision and inspect the source.</p>
+<p>The HeroDemo guide makes a recommendation for 270 decisions and flags 37 differences. A hand can contain multiple decisions.
+Two suggested actions indicate a close spot. More complex decisions get a question for manual review.</p>
+<p>A sizing difference can qualify for review at 25 percentage points of the pot. The comparison uses amounts remaining opponents can actually match. Suggested sizing depends on plausible calls, prior action, and stacks.</p>
+<p><a href="#river">River without the nuts</a> · <a href="#postflop">Other postflop decisions</a></p>
+<h2>Preflop by position</h2><div class="scroll"><table>
+<thead><tr><th>Position</th><th>First in</th><th>Facing an open and later action</th></tr></thead><tbody><tr><th>UTG and other early positions</th><td>Open AA and strong hands with useful suits and connectivity.</td><td>When opening first in, consider who can still 3-bet.</td></tr><tr><th>HJ</th><td>Open strong groups. Save weaker connected hands for later positions.</td><td>Calling an UTG open requires a different range from defending against a late open.</td></tr><tr><th>CO and BTN</th><td>Open supported KK, suited connected hands, and other playable groups.</td><td>Position gives you more room to call. Some strong groups can 3-bet against a late open.</td></tr><tr><th>SB and heads-up BTN/SB</th><td>Open strong or well-connected hands. Consider completing with marginal hands.</td><td>When facing an open, account for playing out of position postflop at tables with three or more seats.</td></tr><tr><th>BB</th><td>After limps, the BB can see a free flop. Strong groups can raise for value.</td><td>Consider the call price and opener position. A small open gives you more room to call.</td></tr></tbody></table></div>
+<h2>From limps to the river</h2><dl><dt>Limpers or an open with a caller</dt><dd>The guide identifies clear value raises and folds. In close spots, weigh the number of players, the price, and who can still raise.</dd><dt>Facing a 3-bet or another raise</dt><dd>With AA, depth and side cards guide the choice between calling and reraising. Weakly connected hands tend to fold against a high price. Consider cold 3-bets, squeezes, and 4-bets separately.</dd><dt>Flop</dt><dd>Compare value betting and checking, including c-bet opportunities and action after the raiser checks. Consider made hands and draws. Top set can call or raise a bet on boards that allow neither a flush nor a straight.</dd><dt>Turn</dt><dd>Reassess the made hand, possible flushes and straights, board pairing, and call price after the turn. For close draws, check which outs are clean and how much value a hit can earn.</dd><dt>River</dt><dd>Look for value with the nuts. With a weak made hand facing pressure, consider the size and the players remaining. For a close bluff catch, look at the equity threshold and plausible bluffs from earlier action.</dd></dl>
+<p>The guide requires four known Hero cards. Postflop hand strength uses exactly two hole cards and three board cards.
+Stack depth, rake, and opponent ranges remain part of the manual review.</p>
+<h2 id="river">Ten river decisions without the nuts</h2>
+<p>Five hands come from each network. The app checks blockers, made hands, and missed draws against the river board, then considers the line and sizing. The examples show two cards from a possible PLO4 holding. The other two can change the best made hand and how it fits the line. Betting or bluffing frequencies require separate evidence.</p>
+<p>In a heads-up pot, the call price is the amount to call divided by the pot after calling, before rake. If Hero only beats bluffs and ties are impossible, that percentage is the minimum bluff share. Weaker value bets also count toward winning outcomes when Hero beats them. Multiway decisions account for players still to act and possible side pots.</p>
+<article id="hand-9000002844-river"><h3>CoinPoker #9000002844 · River · BB vs SB · call a small bet</h3><span class="cards"><span class="card diamond">Q♦</span><span class="card diamond">3♦</span><span class="card club">5♣</span><span class="card heart">2♥</span></span><p>Board <b>Ks Ah 9d 8d 2d</b></p><p>Played call · Suggested call. SB flop check. SB turn check. SB bet 1 BB on the river. Calling costs 1 BB. The raw threshold is 25.0% equity before rake. Stronger value hands can include Ad Kd (Ace-high flush). Examples of weaker made hands include Jd Td (Jack-high flush). Check which of them bet. Possible bluffs include Jc Tc (high card A), Ad 3c (pair A, kicker K). You hold Qd, 3d in a suit that can make a flush on this board. Examples show two-card combinations from legal PLO4 holdings. Call at this price when the bet can also include weaker value hands.</p><p>Both players checked the flop and turn. BB has a flush with Q♦ and 3♦ and needs 25% equity to call. A weaker J♦T♦ flush can bet small. A♦T♦ and K♦J♦ beat Hero. A bare A♦ can bluff when the other three cards are not diamonds. Calling is reasonable at this price.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 81 · Line 32</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000002844: PLO 4 (₮0.10/₮0.25) 2026/01/05 10:48:00 CEST
+Table &#x27;800044&#x27; 6-max Seat #5 is the button
+Seat 1: HeroDemo (₮30.71 in chips)
+Seat 2: 877fae3b (₮24.25 in chips)
+Seat 3: 44f19589 (₮28.56 in chips)
+Seat 4: fb9c7373 (₮50.23 in chips)
+Seat 5: 22e1c918 (₮34.68 in chips)
+Seat 6: 2e48dcc1 (₮16.52 in chips)
+2e48dcc1: posts small blind ₮0.10
+HeroDemo: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to HeroDemo [Qd 3d 5c 2h]
+Dealt to 877fae3b
+Dealt to 44f19589
+Dealt to fb9c7373
+Dealt to 22e1c918
+Dealt to 2e48dcc1
+877fae3b: folds
+44f19589: folds
+fb9c7373: folds
+22e1c918: folds
+2e48dcc1: calls ₮0.15
+HeroDemo: checks
+*** FLOP *** [Ks Ah 9d]
+2e48dcc1: checks
+HeroDemo: checks
+*** TURN *** [Ks Ah 9d] [8d]
+2e48dcc1: checks
+HeroDemo: checks
+*** RIVER *** [Ks Ah 9d 8d] [2d]
+2e48dcc1: bets ₮0.25
+HeroDemo: calls ₮0.25
+*** SHOWDOWN ***
+HeroDemo: shows [Qd 3d 5c 2h] (Flush)
+HeroDemo collected ₮0.93 from pot
+2e48dcc1: shows [Jc 8s 6s 4s] (One Pair)
+*** SUMMARY ***
+Total pot ₮1 | Rake ₮0.05 | Splash Fee ₮0.02
+Hand was run once
+Board [ Ks Ah 9d 8d 2d ]
+Game ended: 2026/01/05 10:49:30 CEST
+Seat 1: HeroDemo showed [Qd 3d 5c 2h] and won (₮0.93) with Flush
+Seat 2: 877fae3b folded before Flop (didn&#x27;t bet)
+Seat 3: 44f19589 folded before Flop (didn&#x27;t bet)
+Seat 4: fb9c7373 folded before Flop (didn&#x27;t bet)
+Seat 5: 22e1c918 folded before Flop (didn&#x27;t bet)
+Seat 6: 2e48dcc1 showed [Jc 8s 6s 4s] and lost with One Pair
+
+</pre></details></article><article id="hand-9000001429-river"><h3>CoinPoker #9000001429 · River · SB vs CO · value bet or check</h3><span class="cards"><span class="card heart">J♥</span><span class="card heart">4♥</span><span class="card diamond">J♦</span><span class="card spade">4♠</span></span><p>Board <b>3c 2c Kc Js 2s</b></p><p>Played bet 75% pot (22.76 BB) · Suggested bet about 55% pot (16.70 BB) or check. The last preflop raiser was BTN. CO flop check. CO turn call. Value targets include 3h 3d (full house, 333 and 22), Ac Qc (Ace-high flush). Stronger combinations such as Kh Kd (full house, KKK and 22), 2h 2d (quads 2 with K) can call or raise. This size gives weaker hands room to call. Examples show two-card combinations from legal PLO4 holdings.</p><p>SB acts first on the river with JJJ22 after CO called the turn. Smaller full houses such as 33 and strong flushes such as A♣Q♣ are value targets. KK and 22 beat Hero. A larger bet makes sense if flushes or smaller full houses call often enough. Hero bet around 75% pot.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 41 · Line 40</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000001429: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/03 11:38:00 CEST
+Table &#x27;800029&#x27; 6-max Seat #2 is the button
+Seat 1: 7d69b9eb (₮43.60 in chips)
+Seat 2: 5dfcb25b (₮72.89 in chips)
+Seat 3: HeroDemo (₮27.83 in chips)
+Seat 4: 0a7a1b05 (₮32.83 in chips)
+Seat 5: 40c60800 (₮43.19 in chips)
+Seat 6: a49ad755 (₮11.21 in chips)
+7d69b9eb: posts ante ₮0.04
+5dfcb25b: posts ante ₮0.04
+HeroDemo: posts ante ₮0.04
+0a7a1b05: posts ante ₮0.04
+40c60800: posts ante ₮0.04
+a49ad755: posts ante ₮0.04
+HeroDemo: posts small blind ₮0.10
+0a7a1b05: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to 7d69b9eb
+Dealt to 5dfcb25b
+Dealt to HeroDemo [Jh 4h Jd 4s]
+Dealt to 0a7a1b05
+Dealt to 40c60800
+Dealt to a49ad755
+40c60800: folds
+a49ad755: folds
+7d69b9eb: calls ₮0.25
+5dfcb25b: raises ₮0.85 to ₮1.10
+HeroDemo: calls ₮1
+0a7a1b05: folds
+7d69b9eb: calls ₮0.85
+*** FLOP *** [3c 2c Kc]
+HeroDemo: checks
+7d69b9eb: checks
+5dfcb25b: checks
+*** TURN *** [3c 2c Kc] [Js]
+HeroDemo: bets ₮1.90
+7d69b9eb: calls ₮1.90
+5dfcb25b: folds
+*** RIVER *** [3c 2c Kc Js] [2s]
+HeroDemo: bets ₮5.69
+7d69b9eb: calls ₮5.69
+*** SHOWDOWN ***
+HeroDemo: shows [Jh 4h Jd 4s] (Full House)
+HeroDemo collected ₮18 from pot
+7d69b9eb: mucks hand
+*** SUMMARY ***
+Total pot ₮18.97 | Rake ₮0.95 | Splash Fee ₮0.02
+Hand was run once
+Board [ 3c 2c Kc Js 2s ]
+Game ended: 2026/01/03 11:39:30 CEST
+Seat 1: 7d69b9eb didn&#x27;t show
+Seat 2: 5dfcb25b folded on the Turn
+Seat 3: HeroDemo showed [Jh 4h Jd 4s] and won (₮18) with Full House
+Seat 4: 0a7a1b05 folded before Flop (didn&#x27;t bet)
+Seat 5: 40c60800 folded before Flop (didn&#x27;t bet)
+Seat 6: a49ad755 folded before Flop (didn&#x27;t bet)
+
+</pre></details></article><article id="hand-9000004214-river"><h3>CoinPoker #9000004214 · River · BTN vs CO · thin value with a straight</h3><span class="cards"><span class="card diamond">A♦</span><span class="card diamond">Q♦</span><span class="card spade">4♠</span><span class="card club">3♣</span></span><p>Board <b>6h 5h 7c 3d 2c</b></p><p>Played bet 50% pot (6.4 BB) · Suggested bet about 35% pot (4.47 BB) or check. The last preflop raiser was CO. CO flop check / call. CO turn check. CO checked the river. Target weaker straights such as 4c 2d (6-high straight). Stronger straights such as 9c 8c (9-high straight) can continue. Around one-third pot gives the weaker straights a price to call. Check behind when the preceding action rarely contains them. You hold 4s from the ranks 8–4 , which make a straight topped by a 8. Examples show two-card combinations from legal PLO4 holdings.</p><p>CO called the flop and checked the turn and river. Hero has a seven-high straight. A4 makes a weaker straight that can call. 84 and 98 make stronger straights. A medium or small value bet depends on how many weaker straights reach the river.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 145 · Line 39</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000004214: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/07 08:28:00 CEST
+Table &#x27;800014&#x27; 6-max Seat #6 is the button
+Seat 1: 016698d5 (₮54.88 in chips)
+Seat 2: fe66c75e (₮35.16 in chips)
+Seat 3: d77503cb (₮41.51 in chips)
+Seat 4: fc8666b1 (₮18.23 in chips)
+Seat 5: 5bba6abd (₮26.42 in chips)
+Seat 6: HeroDemo (₮47.23 in chips)
+016698d5: posts ante ₮0.04
+fe66c75e: posts ante ₮0.04
+d77503cb: posts ante ₮0.04
+fc8666b1: posts ante ₮0.04
+5bba6abd: posts ante ₮0.04
+HeroDemo: posts ante ₮0.04
+016698d5: posts small blind ₮0.10
+fe66c75e: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to 016698d5
+Dealt to fe66c75e
+Dealt to d77503cb
+Dealt to fc8666b1
+Dealt to 5bba6abd
+Dealt to HeroDemo [Ad Qd 4s 3c]
+d77503cb: folds
+fc8666b1: folds
+5bba6abd: raises ₮0.25 to ₮0.50
+HeroDemo: calls ₮0.50
+016698d5: folds
+fe66c75e: folds
+*** FLOP *** [6h 5h 7c]
+5bba6abd: checks
+HeroDemo: bets ₮0.80
+5bba6abd: calls ₮0.80
+*** TURN *** [6h 5h 7c] [3d]
+5bba6abd: checks
+HeroDemo: checks
+*** RIVER *** [6h 5h 7c 3d] [2c]
+5bba6abd: checks
+HeroDemo: bets ₮1.60
+5bba6abd: folds
+HeroDemo: RETURN ₮1.60
+*** SHOWDOWN ***
+HeroDemo collected ₮3.01 from pot
+*** SUMMARY ***
+Total pot ₮3.19 | Rake ₮0.16 | Splash Fee ₮0.02
+Hand was run once
+Board [ 6h 5h 7c 3d 2c ]
+Game ended: 2026/01/07 08:29:30 CEST
+Seat 1: 016698d5 folded before Flop (didn&#x27;t bet)
+Seat 2: fe66c75e folded before Flop (didn&#x27;t bet)
+Seat 3: d77503cb folded before Flop (didn&#x27;t bet)
+Seat 4: fc8666b1 folded before Flop (didn&#x27;t bet)
+Seat 5: 5bba6abd folded on the River
+Seat 6: HeroDemo showed [Ad Qd 4s 3c] and won (₮3.01)
+
+</pre></details></article><article id="hand-9000002860-river"><h3>CoinPoker #9000002860 · River · BTN/SB vs BB · value bet or check</h3><span class="cards"><span class="card spade">J♠</span><span class="card spade">8♠</span><span class="card diamond">9♦</span><span class="card diamond">7♦</span></span><p>Board <b>Tc Ts 3d Qs 2s</b></p><p>Played check · Suggested check or bet about 33% pot (2.85 BB). The last preflop raiser was BTN/SB. BB flop check. BB turn check / call. BB checked the river. Value targets include 9s 7s (Queen-high flush). Stronger combinations such as Qd Qc (full house, QQQ and TT), As Ks (Ace-high flush) can call or raise. This size gives weaker hands room to call. You hold Js, 8s in a suit that can make a flush on this board. Examples show two-card combinations from legal PLO4 holdings.</p><p>BB called the turn and checked the river. J♠8♠ makes a flush and a weaker 9♠7♠ can call a small bet. QT can make a full house, and A♠K♠ makes a higher flush. Checking is a good starting point when weaker hands rarely call.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 97 · Line 23</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000002860: PLO 4 (₮0.25/₮0.50/₮0.08) 2026/01/05 11:20:00 CEST
+Table &#x27;800060&#x27; 6-max Seat #3 is the button
+Seat 3: HeroDemo (₮97.92 in chips)
+Seat 4: 04adc3dd (₮50 in chips)
+HeroDemo: posts ante ₮0.08
+04adc3dd: posts ante ₮0.08
+HeroDemo: posts small blind ₮0.25
+04adc3dd: posts big blind ₮0.50
+*** HOLE CARDS ***
+Dealt to HeroDemo [Js 8s 9d 7d]
+Dealt to 04adc3dd
+HeroDemo: raises ₮0.50 to ₮1
+04adc3dd: calls ₮0.50
+*** FLOP *** [Tc Ts 3d]
+04adc3dd: checks
+HeroDemo: checks
+*** TURN *** [Tc Ts 3d] [Qs]
+04adc3dd: checks
+HeroDemo: bets ₮1.08
+04adc3dd: calls ₮1.08
+*** RIVER *** [Tc Ts 3d Qs] [2s]
+04adc3dd: checks
+HeroDemo: checks
+*** SHOWDOWN ***
+HeroDemo: shows [Js 8s 9d 7d] (Flush)
+HeroDemo collected ₮4.05 from pot
+04adc3dd: shows [As Qd Jd 5d] (Two Pair)
+*** SUMMARY ***
+Total pot ₮4.32 | Rake ₮0.22 | Splash Fee ₮0.05
+Hand was run once
+Board [ Tc Ts 3d Qs 2s ]
+Game ended: 2026/01/05 11:21:30 CEST
+Seat 3: HeroDemo showed [Js 8s 9d 7d] and won (₮4.05) with Flush
+Seat 4: 04adc3dd showed [As Qd Jd 5d] and lost with Two Pair
+
+</pre></details></article><article id="hand-9000000024-river"><h3>CoinPoker #9000000024 · River · BTN vs CO · multiway fold</h3><span class="cards"><span class="card spade">A♠</span><span class="card spade">Q♠</span><span class="card club">K♣</span><span class="card heart">9♥</span></span><p>Board <b>Tc Ac 5h 5c 2h</b></p><p>Played fold · Suggested fold. The last preflop raiser was BTN. CO flop check. CO turn check. CO bet 18.16 BB on the river. Calling costs 18.16 BB. The raw threshold is 25.0% equity before rake in the current pot, before the other players act. HJ can still act behind you. Stronger value hands can include Ah Ad (full house, AAA and 55), Qc Jc (Ace-high flush). Examples of weaker made hands include Ad Qc (two pair, A and 5), Kd Qc (pair 5, kicker A). Check which of them bet. Possible bluffs include Kd Qc (pair 5, kicker A). You hold Kc in a suit that can make a flush on this board. This includes the highest available card of that suit off the board. Examples show two-card combinations from legal PLO4 holdings. Fold a weak bluff catcher when multiple players remain.</p><p>Three players checked both streets. CO bets half pot, with HJ still to act behind Hero. Hero has aces and fives and only one club. K♣ blocks the king-high flush on an A♣ board. A full house such as A5 and stronger made hands can value bet.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 24 · Line 43</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000024: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 12:48:00 CEST
+Table &#x27;800024&#x27; 6-max Seat #3 is the button
+Seat 1: 3da566a4 (₮25.38 in chips)
+Seat 2: b5eac60a (₮26.45 in chips)
+Seat 3: HeroDemo (₮26.17 in chips)
+Seat 4: 77d85620 (₮34.31 in chips)
+Seat 5: 5a9b3e6f (₮10 in chips)
+Seat 6: 187a9269 (₮28.39 in chips)
+3da566a4: posts ante ₮0.04
+b5eac60a: posts ante ₮0.04
+HeroDemo: posts ante ₮0.04
+77d85620: posts ante ₮0.04
+5a9b3e6f: posts ante ₮0.04
+187a9269: posts ante ₮0.04
+77d85620: posts small blind ₮0.10
+5a9b3e6f: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to 3da566a4
+Dealt to b5eac60a
+Dealt to HeroDemo [As Qs Kc 9h]
+Dealt to 77d85620
+Dealt to 5a9b3e6f
+Dealt to 187a9269
+187a9269: folds
+3da566a4: raises ₮0.37 to ₮0.62
+b5eac60a: calls ₮0.62
+HeroDemo: raises ₮2.21 to ₮2.83
+77d85620: folds
+5a9b3e6f: folds
+3da566a4: calls ₮2.21
+b5eac60a: calls ₮2.21
+*** FLOP *** [Tc Ac 5h]
+3da566a4: checks
+b5eac60a: checks
+HeroDemo: checks
+*** TURN *** [Tc Ac 5h] [5c]
+3da566a4: checks
+b5eac60a: checks
+HeroDemo: checks
+*** RIVER *** [Tc Ac 5h 5c] [2h]
+3da566a4: checks
+b5eac60a: bets ₮4.54
+HeroDemo: folds
+3da566a4: folds
+b5eac60a: RETURN ₮4.54
+*** SHOWDOWN ***
+b5eac60a collected ₮8.61 from pot
+*** SUMMARY ***
+Total pot ₮9.08 | Rake ₮0.45 | Splash Fee ₮0.02
+Hand was run once
+Board [ Tc Ac 5h 5c 2h ]
+Game ended: 2026/01/01 12:49:30 CEST
+Seat 1: 3da566a4 folded on the River
+Seat 2: b5eac60a won (₮8.61)
+Seat 3: HeroDemo folded on the River
+Seat 4: 77d85620 folded before Flop (didn&#x27;t bet)
+Seat 5: 5a9b3e6f folded before Flop (didn&#x27;t bet)
+Seat 6: 187a9269 folded before Flop (didn&#x27;t bet)
+
+</pre></details></article><article id="hand-9000005984-river"><h3>iPoker #9000005984 · River · BTN vs BB · multiway fold</h3><span class="cards"><span class="card diamond">A♦</span><span class="card heart">K♥</span><span class="card heart">9♥</span><span class="card club">7♣</span></span><p>Board <b>9s 6d 2s Th Jc</b></p><p>Played fold · Suggested fold. The last preflop raiser was BTN. BB flop check. BB turn check. BB bet 5.25 BB on the river. Calling costs 5.25 BB. The raw threshold is 25.0% equity before rake in the current pot, before the other players act. SB can still act behind you. Stronger value hands can include Kc Qc (King-high straight), Jh Jd (three of a kind J, kicker T). Examples of weaker made hands include Kc 9c (pair 9, kicker K). Check which of them bet. Possible bluffs include As Ks (high card A), 8c 5c (high card J). You hold Kh from the ranks K–Q , which make a straight topped by a king. Examples show two-card combinations from legal PLO4 holdings. Fold a weak bluff catcher when multiple players remain.</p><p>SB checked and can act after BTN. BB bets half pot after two checked streets. Hero has one pair. KQ can make a king-high straight, and A♠K♠ can represent a missed draw. The additional player favors folding.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 138 · Action 16</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000005984&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,50/€1,00&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable185&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,50&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€1,00&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:39:42&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;100&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-04 22:33:41&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€483,71&lt;/bets&gt;&#13;
+  &lt;wins&gt;€361,56&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€59,00&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€186,05&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000005984&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-04 23:18:36&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€8,75&quot; chips=&quot;€517,82&quot; dealer=&quot;0&quot; name=&quot;CalmGrinder88&quot; rakeamount=&quot;€0,70&quot; seat=&quot;1&quot; win=&quot;€9,80&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€141,24&quot; dealer=&quot;0&quot; name=&quot;FlatRoad99&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€171,11&quot; dealer=&quot;0&quot; name=&quot;QuietPilot505&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,50&quot; chips=&quot;€70,74&quot; dealer=&quot;1&quot; name=&quot;HeroDemo&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,50&quot; chips=&quot;€364,78&quot; dealer=&quot;0&quot; name=&quot;NeonB0l7&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,50&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€1,00&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;FlatRoad99&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;FlatRoad99&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;QuietPilot505&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;QuietPilot505&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;DA HK H9 C7&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;HeroDemo&quot; sum=&quot;€3,50&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;NeonB0l7&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;NeonB0l7&quot; sum=&quot;€3,00&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;CalmGrinder88&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€2,50&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;S9 D6 S2&lt;/cards&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;H10&lt;/cards&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;CJ&lt;/cards&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€5,25&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;17&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></article><article id="hand-9000010026-river"><h3>iPoker #9000010026 · River · SB vs BB · facing a raise</h3><span class="cards"><span class="card spade">6♠</span><span class="card spade">7♠</span><span class="card heart">Q♥</span><span class="card diamond">Q♦</span></span><p>Board <b>5c Jc 8s 4s 9h</b></p><p>Played call · Suggested fold. You put in 5.94 BB on the river before the opponent responded. BB flop check. BB turn call. BB raised to 20.94 BB on the river. Calling costs 15 BB. The raw threshold is 29.5% equity before rake. If you only beat bluffs and ties are impossible, at least 29.5% of their bets must be bluffs. Stronger value hands can include Qc Tc (Queen-high straight). Examples of weaker made hands include Jh Jd (three of a kind J, kicker 9). Check which of them bet. You can tie with 7c 6c (9-high straight). Possible bluffs include Ac Kc (high card A), 6c 3c (high card J). You hold Qd and Qh from the ranks Q–T , which make a straight topped by a queen. Examples show two-card combinations from legal PLO4 holdings. After the earlier aggression, look for a specific reason to expect a bluff raise.</p><p>SB bet 66% pot and BB raised all-in. Hero&#x27;s nine-high straight faces a 15 BB call into 35.88 BB, a price of 29.5%. QT and T7 can make stronger straights. A♣K♣ can represent a missed turn draw. The call needs enough shoves from weaker hands or ties.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 235 · Action 17</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000010026&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable027&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:22:29&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;102&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-16 17:42:55&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€170,17&lt;/bets&gt;&#13;
+  &lt;wins&gt;€189,04&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€51,10&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€124,30&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000010026&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-16 17:51:19&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€26,08&quot; dealer=&quot;1&quot; name=&quot;DustyScript&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€12,47&quot; chips=&quot;€65,50&quot; dealer=&quot;0&quot; name=&quot;HeroDemo&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€12,47&quot; chips=&quot;€12,47&quot; dealer=&quot;0&quot; name=&quot;RunnerFore5t64&quot; rakeamount=&quot;€1,69&quot; seat=&quot;5&quot; win=&quot;€23,75&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€80,87&quot; dealer=&quot;0&quot; name=&quot;frost_bluff&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€176,82&quot; dealer=&quot;0&quot; name=&quot;NeonB0l7&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;AndreRaises19&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;RunnerFore5t64&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;DustyScript&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;S6 S7 HQ DQ&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;RunnerFore5t64&quot; type=&quot;Pocket&quot;&gt;H2 SQ D10 S10&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;frost_bluff&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;NeonB0l7&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;AndreRaises19&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;frost_bluff&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;AndreRaises19&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;DustyScript&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,25&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;RunnerFore5t64&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;RunnerFore5t64&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;DustyScript&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;C5 CJ S8&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;HeroDemo&quot; sum=&quot;€1,50&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;RunnerFore5t64&quot; sum=&quot;€1,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;DustyScript&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;S4&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;HeroDemo&quot; sum=&quot;€2,97&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;RunnerFore5t64&quot; sum=&quot;€10,47&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;17&quot; player=&quot;HeroDemo&quot; sum=&quot;€7,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;H9&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></article><article id="hand-9000008038-river"><h3>iPoker #9000008038 · River · BTN · multiway · check</h3><span class="cards"><span class="card heart">6♥</span><span class="card heart">7♥</span><span class="card diamond">6♦</span><span class="card club">5♣</span></span><p>Board <b>Tc 2h 7d Th 8d</b></p><p>Played check · Suggested check. The last preflop raiser was UTG. SB flop check. SB turn check. SB checked the river. Weaker hands that can call for value include 7c 5d (two pair, T and 7). Stronger hands include Td 8c (full house, TTT and 88), Jc 9c (Jack-high straight). Missed draws such as Ah Kh (pair T, kicker A) are more likely to fold than call a value bet. Check by default. You hold 6d and 6h from the ranks 9–6 , which make a straight topped by a T. Examples show two-card combinations from legal PLO4 holdings.</p><p>Three players checked the flop and turn. Hero has tens and sevens on a paired river. J9 makes a straight and T7 a full house. Hero beats missed hearts such as K♥Q♥. A weaker call and folds from stronger hands are both difficult to find, so check.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 197 · Action 16</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000008038&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,50/€1,00&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable039&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,50&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€1,00&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:03:50&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;74&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-09 22:15:43&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€483,61&lt;/bets&gt;&#13;
+  &lt;wins&gt;€343,83&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€56,50&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€244,47&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000008038&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-09 22:23:32&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€3,50&quot; chips=&quot;€60,00&quot; dealer=&quot;1&quot; name=&quot;HeroDemo&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,50&quot; chips=&quot;€375,32&quot; dealer=&quot;0&quot; name=&quot;NashNeedles&quot; rakeamount=&quot;€0,76&quot; seat=&quot;3&quot; win=&quot;€10,74&quot;/&gt;&#13;
+    &lt;player bet=&quot;€1,00&quot; chips=&quot;€145,24&quot; dealer=&quot;0&quot; name=&quot;SilverMaverick&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,50&quot; chips=&quot;€140,20&quot; dealer=&quot;0&quot; name=&quot;TenViking&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€78,07&quot; dealer=&quot;0&quot; name=&quot;comet_nomad&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;NashNeedles&quot; sum=&quot;€0,50&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;SilverMaverick&quot; sum=&quot;€1,00&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;H6 H7 D6 C5&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;NashNeedles&quot; type=&quot;Pocket&quot;&gt;C8 CK S10 CJ&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;SilverMaverick&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;TenViking&quot; type=&quot;Pocket&quot;&gt;SQ S7 C6 CQ&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;comet_nomad&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;TenViking&quot; sum=&quot;€3,50&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;comet_nomad&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;HeroDemo&quot; sum=&quot;€3,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;NashNeedles&quot; sum=&quot;€3,00&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;SilverMaverick&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;NashNeedles&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;TenViking&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;C10 H2 D7&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;NashNeedles&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;TenViking&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;H10&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;NashNeedles&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;TenViking&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;D8&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></article><article id="hand-9000009995-river"><h3>iPoker #9000009995 · River · BTN vs SB · check</h3><span class="cards"><span class="card diamond">3♦</span><span class="card heart">J♥</span><span class="card club">3♣</span><span class="card heart">Q♥</span></span><p>Board <b>2h Kd 7h 2c 8d</b></p><p>Played bet 33% pot (6.93 BB) · Suggested check. The last preflop raiser was BTN. SB flop check. SB turn bet. SB checked the river. Credible calls from weaker hands are scarce. Stronger hands include Kh Kc (full house, KKK and 22), Ac 2d (three of a kind 2, kicker A). Missed draws such as Ah Th (pair 2, kicker A) are more likely to fold than call a value bet. Check by default. Examples show two-card combinations from legal PLO4 holdings.</p><p>SB bet the turn and checked the river. Hero already beats missed hearts such as A♥T♥, and Hero&#x27;s two hearts block some missed draws. A bluff would need to target better hands such as a weaker 7x. The line favors checking.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 205 · Action 13</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;session sessioncode=&quot;S8000009995&quot;&gt;
+ &lt;general&gt;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;
+  &lt;mode&gt;real&lt;/mode&gt;
+  &lt;gametype&gt;Omaha PL €0,50/€1,00&lt;/gametype&gt;
+  &lt;tablename&gt;SampleTable196&lt;/tablename&gt;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;
+  &lt;smallblind&gt;€0,50&lt;/smallblind&gt;
+  &lt;bigblind&gt;€1,00&lt;/bigblind&gt;
+  &lt;duration&gt;04:02:15&lt;/duration&gt;
+  &lt;gamecount&gt;285&lt;/gamecount&gt;
+  &lt;startdate&gt;2026-05-16 15:01:04&lt;/startdate&gt;
+  &lt;currency&gt;EUR&lt;/currency&gt;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;
+  &lt;bets&gt;€1.253,74&lt;/bets&gt;
+  &lt;wins&gt;€808,78&lt;/wins&gt;
+  &lt;chipsin&gt;€99,00&lt;/chipsin&gt;
+  &lt;chipsout&gt;€160,88&lt;/chipsout&gt;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;
+ &lt;/general&gt;
+  &lt;game gamecode=&quot;9000009995&quot;&gt;
+  &lt;general&gt;
+   &lt;startdate&gt;2026-05-16 18:49:46&lt;/startdate&gt;
+   &lt;players&gt;
+    &lt;player bet=&quot;€8,75&quot; chips=&quot;€533,98&quot; dealer=&quot;0&quot; name=&quot;LukaBarrels&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;
+    &lt;player bet=&quot;€3,50&quot; chips=&quot;€82,48&quot; dealer=&quot;0&quot; name=&quot;NoSeatDog&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;
+    &lt;player bet=&quot;€15,68&quot; chips=&quot;€111,42&quot; dealer=&quot;1&quot; name=&quot;HeroDemo&quot; rakeamount=&quot;€1,40&quot; seat=&quot;8&quot; win=&quot;€19,60&quot;/&gt;
+   &lt;/players&gt;
+  &lt;/general&gt;
+  &lt;round no=&quot;0&quot;&gt;
+   &lt;action no=&quot;1&quot; player=&quot;LukaBarrels&quot; sum=&quot;€0,50&quot; type=&quot;1&quot;/&gt;
+   &lt;action no=&quot;2&quot; player=&quot;NoSeatDog&quot; sum=&quot;€1,00&quot; type=&quot;2&quot;/&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;1&quot;&gt;
+   &lt;cards player=&quot;LukaBarrels&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;
+   &lt;cards player=&quot;NoSeatDog&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;D3 HJ C3 HQ&lt;/cards&gt;
+   &lt;action no=&quot;3&quot; player=&quot;HeroDemo&quot; sum=&quot;€3,50&quot; type=&quot;23&quot;/&gt;
+   &lt;action no=&quot;4&quot; player=&quot;LukaBarrels&quot; sum=&quot;€3,00&quot; type=&quot;3&quot;/&gt;
+   &lt;action no=&quot;5&quot; player=&quot;NoSeatDog&quot; sum=&quot;€2,50&quot; type=&quot;3&quot;/&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;2&quot;&gt;
+   &lt;action no=&quot;6&quot; player=&quot;LukaBarrels&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;
+   &lt;action no=&quot;7&quot; player=&quot;NoSeatDog&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;
+   &lt;action no=&quot;8&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;
+   &lt;cards type=&quot;Flop&quot;&gt;H2 DK H7&lt;/cards&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;3&quot;&gt;
+   &lt;action no=&quot;9&quot; player=&quot;LukaBarrels&quot; sum=&quot;€5,25&quot; type=&quot;5&quot;/&gt;
+   &lt;action no=&quot;10&quot; player=&quot;NoSeatDog&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;
+   &lt;action no=&quot;11&quot; player=&quot;HeroDemo&quot; sum=&quot;€5,25&quot; type=&quot;3&quot;/&gt;
+   &lt;cards type=&quot;Turn&quot;&gt;C2&lt;/cards&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;4&quot;&gt;
+   &lt;action no=&quot;12&quot; player=&quot;LukaBarrels&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;
+   &lt;action no=&quot;13&quot; player=&quot;HeroDemo&quot; sum=&quot;€6,93&quot; type=&quot;5&quot;/&gt;
+   &lt;action no=&quot;14&quot; player=&quot;LukaBarrels&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;
+   &lt;cards type=&quot;River&quot;&gt;D8&lt;/cards&gt;
+  &lt;/round&gt;
+ &lt;/game&gt;
+ </pre></details></article><article id="hand-9000014007-river"><h3>iPoker #9000014007 · River · BB vs SB · fold a set</h3><span class="cards"><span class="card heart">8♥</span><span class="card heart">7♥</span><span class="card club">7♣</span><span class="card spade">7♠</span></span><p>Board <b>7d Ts 4d Qd Ac</b></p><p>Played fold · Suggested fold. SB flop bet / call. SB turn check. SB bet 12 BB on the river. Calling costs 12 BB. The raw threshold is 20.0% equity before rake. Stronger value hands can include Ad Kd (Ace-high flush), Kc Jc (Ace-high straight). Examples of weaker made hands include 4h 4c (three of a kind 4, kicker A), Ad Qc (two pair, A and Q). Check which of them bet. Possible bluffs include Jc 9c (high card A). Examples show two-card combinations from legal PLO4 holdings. The opponent already called a raise. Fold the set to this river bet without a flush blocker.</p><p>SB called a flop raise, checked the turn, and bet one-third pot on the river. Hero&#x27;s three pocket sevens make a set here. A K♦J♦ flush or a KJ Broadway straight can bet for value. A missed draw is possible. Without a flush blocker, there is a case for folding even at this price.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 298 · Action 16</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000014007&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,10/€0,25&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable008&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,10&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,25&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;00:27:22&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;33&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-23 20:17:25&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€16,66&lt;/bets&gt;&#13;
+  &lt;wins&gt;€7,14&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€24,75&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€28,29&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000014007&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-23 20:25:10&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€0,25&quot; chips=&quot;€24,31&quot; dealer=&quot;0&quot; name=&quot;VikingHero4&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€55,34&quot; dealer=&quot;0&quot; name=&quot;RedBolt168&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,25&quot; chips=&quot;€21,62&quot; dealer=&quot;1&quot; name=&quot;pot_flop&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€7,25&quot; chips=&quot;€19,79&quot; dealer=&quot;0&quot; name=&quot;ShortCheckback&quot; rakeamount=&quot;€0,60&quot; seat=&quot;8&quot; win=&quot;€8,40&quot;/&gt;&#13;
+    &lt;player bet=&quot;€4,25&quot; chips=&quot;€25,00&quot; dealer=&quot;0&quot; name=&quot;HeroDemo&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;ShortCheckback&quot; sum=&quot;€0,10&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,25&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;VikingHero4&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;RedBolt168&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;pot_flop&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;ShortCheckback&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;H8 H7 C7 S7&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;VikingHero4&quot; sum=&quot;€0,25&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;RedBolt168&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;pot_flop&quot; sum=&quot;€0,25&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;ShortCheckback&quot; sum=&quot;€0,15&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;ShortCheckback&quot; sum=&quot;€1,00&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;HeroDemo&quot; sum=&quot;€4,00&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;VikingHero4&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;pot_flop&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;ShortCheckback&quot; sum=&quot;€3,00&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;D7 S10 D4&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;ShortCheckback&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;DQ&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;ShortCheckback&quot; sum=&quot;€3,00&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;CA&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></article>
+<h2 id="postflop">More postflop checks on real hands</h2>
+<p>Each study note starts with information available before the decision. The follow-up describes the actual line and known later action. The observed response applies to the played size.</p>
+<article id="hand-9000000030-flop"><h3>CoinPoker #9000000030 · Flop · BB · stab after a missed c-bet</h3><span class="cards"><span class="card heart">K♥</span><span class="card heart">8♥</span><span class="card heart">2♥</span><span class="card spade">10♠</span></span><p>Board <b>9c 5s 2d</b></p><p>Played check · Suggested check. No next card immediately makes a straight or flush for Hero. Check with so few immediate ways to make a straight or flush. Taking the initiative alone offers little reason to bluff.</p><p>SB raised preflop and checked to BB. Hero has a pair of twos and no next card immediately makes a straight or flush. Checking preserves showdown value. A missed c-bet alone offers little reason to stab.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 30 · Line 28</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000030: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 13:00:00 CEST
+Table &#x27;800030&#x27; 6-max Seat #6 is the button
+Seat 1: cec82e0e (₮22.52 in chips)
+Seat 3: HeroDemo (₮25.99 in chips)
+Seat 4: b094b1a9 (₮34.09 in chips)
+Seat 5: ba5d6393 (₮10 in chips)
+Seat 6: f6d5add1 (₮27.42 in chips)
+cec82e0e: posts ante ₮0.04
+HeroDemo: posts ante ₮0.04
+b094b1a9: posts ante ₮0.04
+ba5d6393: posts ante ₮0.04
+f6d5add1: posts ante ₮0.04
+cec82e0e: posts small blind ₮0.10
+HeroDemo: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to cec82e0e
+Dealt to HeroDemo [Kh 8h 2h Ts]
+Dealt to b094b1a9
+Dealt to ba5d6393
+Dealt to f6d5add1
+b094b1a9: folds
+ba5d6393: folds
+f6d5add1: folds
+cec82e0e: raises ₮0.50 to ₮0.75
+HeroDemo: calls ₮0.50
+*** FLOP *** [9c 5s 2d]
+cec82e0e: checks
+HeroDemo: checks
+*** TURN *** [9c 5s 2d] [Jc]
+cec82e0e: checks
+HeroDemo: bets ₮1.70
+cec82e0e: folds
+HeroDemo: RETURN ₮1.70
+*** SHOWDOWN ***
+HeroDemo collected ₮1.60 from pot
+*** SUMMARY ***
+Total pot ₮1.70 | Rake ₮0.08 | Splash Fee ₮0.02
+Hand was run once
+Board [ 9c 5s 2d Jc ]
+Game ended: 2026/01/01 13:01:30 CEST
+Seat 1: cec82e0e folded on the Turn
+Seat 3: HeroDemo showed [Kh 8h 2h Ts] and won (₮1.60)
+Seat 4: b094b1a9 folded before Flop (didn&#x27;t bet)
+Seat 5: ba5d6393 folded before Flop (didn&#x27;t bet)
+Seat 6: f6d5add1 folded before Flop (didn&#x27;t bet)
+
+</pre></details></article><article id="hand-9000000030-turn"><h3>CoinPoker #9000000030 · Turn · BB · turn stab after a checked-through flop</h3><span class="cards"><span class="card heart">K♥</span><span class="card heart">8♥</span><span class="card heart">2♥</span><span class="card spade">10♠</span></span><p>Board <b>9c 5s 2d Jc</b></p><p>Played bet 100% pot (6.8 BB) · Suggested manual review. Of 44 unseen cards, 8 can make a straight or flush on the next street. At least 6 make the verified current nuts or a tie. The count is based on the unseen deck before weighting the opponent&#x27;s range. A semibluff bet depends on which hands the opponent folds. Checking preserves the price of the next card. Sizing depends on an estimate of that range.</p><p>SB checked again. The J♣ gives Hero eight of 44 unseen cards that make a river straight. Six make the verified current nuts or a tie. A bet also needs to account for which hands SB actually folds.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 30 · Line 31</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000030: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 13:00:00 CEST
+Table &#x27;800030&#x27; 6-max Seat #6 is the button
+Seat 1: cec82e0e (₮22.52 in chips)
+Seat 3: HeroDemo (₮25.99 in chips)
+Seat 4: b094b1a9 (₮34.09 in chips)
+Seat 5: ba5d6393 (₮10 in chips)
+Seat 6: f6d5add1 (₮27.42 in chips)
+cec82e0e: posts ante ₮0.04
+HeroDemo: posts ante ₮0.04
+b094b1a9: posts ante ₮0.04
+ba5d6393: posts ante ₮0.04
+f6d5add1: posts ante ₮0.04
+cec82e0e: posts small blind ₮0.10
+HeroDemo: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to cec82e0e
+Dealt to HeroDemo [Kh 8h 2h Ts]
+Dealt to b094b1a9
+Dealt to ba5d6393
+Dealt to f6d5add1
+b094b1a9: folds
+ba5d6393: folds
+f6d5add1: folds
+cec82e0e: raises ₮0.50 to ₮0.75
+HeroDemo: calls ₮0.50
+*** FLOP *** [9c 5s 2d]
+cec82e0e: checks
+HeroDemo: checks
+*** TURN *** [9c 5s 2d] [Jc]
+cec82e0e: checks
+HeroDemo: bets ₮1.70
+cec82e0e: folds
+HeroDemo: RETURN ₮1.70
+*** SHOWDOWN ***
+HeroDemo collected ₮1.60 from pot
+*** SUMMARY ***
+Total pot ₮1.70 | Rake ₮0.08 | Splash Fee ₮0.02
+Hand was run once
+Board [ 9c 5s 2d Jc ]
+Game ended: 2026/01/01 13:01:30 CEST
+Seat 1: cec82e0e folded on the Turn
+Seat 3: HeroDemo showed [Kh 8h 2h Ts] and won (₮1.60)
+Seat 4: b094b1a9 folded before Flop (didn&#x27;t bet)
+Seat 5: ba5d6393 folded before Flop (didn&#x27;t bet)
+Seat 6: f6d5add1 folded before Flop (didn&#x27;t bet)
+
+</pre></details></article><article id="hand-9000000021-turn"><h3>CoinPoker #9000000021 · Turn · SB · turn probe after a check-back</h3><span class="cards"><span class="card heart">9♥</span><span class="card heart">4♥</span><span class="card spade">9♠</span><span class="card diamond">4♦</span></span><p>Board <b>Kd 7s 2s 8s</b></p><p>Played check · Suggested check. No next card immediately makes a straight or flush for Hero. Using this suit for a flush requires two matching hole cards. Check with so few immediate ways to make a straight or flush. Taking the initiative alone offers little reason to bluff.</p><p>The flop checked through. SB holds one spade on a three-spade turn and needs two to make a flush. Probing depends on whether the opponent can fold enough better hands.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 21 · Line 34</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000021: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 12:42:00 CEST
+Table &#x27;800021&#x27; 6-max Seat #2 is the button
+Seat 1: 42161f38 (₮25.42 in chips)
+Seat 2: 00d78e5f (₮26.49 in chips)
+Seat 3: HeroDemo (₮25 in chips)
+Seat 4: 071aded3 (₮34.60 in chips)
+Seat 5: 7d20a942 (₮10 in chips)
+Seat 6: c47724de (₮29.28 in chips)
+42161f38: posts ante ₮0.04
+00d78e5f: posts ante ₮0.04
+HeroDemo: posts ante ₮0.04
+071aded3: posts ante ₮0.04
+7d20a942: posts ante ₮0.04
+c47724de: posts ante ₮0.04
+HeroDemo: posts small blind ₮0.10
+071aded3: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to 42161f38
+Dealt to 00d78e5f
+Dealt to HeroDemo [9h 4h 9s 4d]
+Dealt to 071aded3
+Dealt to 7d20a942
+Dealt to c47724de
+7d20a942: folds
+c47724de: raises ₮0.60 to ₮0.85
+42161f38: folds
+00d78e5f: folds
+HeroDemo: calls ₮0.75
+071aded3: folds
+*** FLOP *** [Kd 7s 2s]
+HeroDemo: checks
+c47724de: checks
+*** TURN *** [Kd 7s 2s] [8s]
+HeroDemo: checks
+c47724de: checks
+*** RIVER *** [Kd 7s 2s 8s] [4s]
+HeroDemo: checks
+c47724de: checks
+*** SHOWDOWN ***
+HeroDemo: shows [9h 4h 9s 4d] (Three Of A Kind)
+HeroDemo collected ₮2.06 from pot
+c47724de: mucks hand
+*** SUMMARY ***
+Total pot ₮2.19 | Rake ₮0.11 | Splash Fee ₮0.02
+Hand was run once
+Board [ Kd 7s 2s 8s 4s ]
+Game ended: 2026/01/01 12:43:30 CEST
+Seat 1: 42161f38 folded before Flop (didn&#x27;t bet)
+Seat 2: 00d78e5f folded before Flop (didn&#x27;t bet)
+Seat 3: HeroDemo showed [9h 4h 9s 4d] and won (₮2.06) with Three Of A Kind
+Seat 4: 071aded3 folded before Flop (didn&#x27;t bet)
+Seat 5: 7d20a942 folded before Flop (didn&#x27;t bet)
+Seat 6: c47724de didn&#x27;t show
+
+</pre></details></article><article id="hand-9000003988-turn"><h3>iPoker #9000003988 · Turn · HJ · delayed c-bet after a checked-through flop</h3><span class="cards"><span class="card heart">A♥</span><span class="card diamond">K♦</span><span class="card heart">3♥</span><span class="card spade">A♠</span></span><p>Board <b>9d 7c 5c Tc</b></p><p>Played check · Suggested check. No next card immediately makes a straight or flush for Hero. Using this suit for a flush requires two matching hole cards. Check with so few immediate ways to make a straight or flush. Taking the initiative alone offers little reason to bluff.</p><p>The flop checked through and a third club arrived on the turn. Hero has an overpair without a club. Checking avoids building a pot against made flushes and strong hands.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 92 · Action 11</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000003988&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,50/€1,00&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable189&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,50&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€1,00&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:46:46&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;117&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-04-28 23:04:31&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€436,31&lt;/bets&gt;&#13;
+  &lt;wins&gt;€398,00&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€99,00&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€194,89&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000003988&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-04-29 00:41:09&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€3,50&quot; chips=&quot;€291,27&quot; dealer=&quot;1&quot; name=&quot;viking_matrix&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€322,96&quot; dealer=&quot;0&quot; name=&quot;SuitedValue37&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€1,00&quot; chips=&quot;€100,00&quot; dealer=&quot;0&quot; name=&quot;RakeCobra808&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€110,42&quot; dealer=&quot;0&quot; name=&quot;beacon_stack&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,50&quot; chips=&quot;€191,95&quot; dealer=&quot;0&quot; name=&quot;HeroDemo&quot; rakeamount=&quot;€0,56&quot; seat=&quot;8&quot; win=&quot;€7,94&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€119,84&quot; dealer=&quot;0&quot; name=&quot;ViktorShoves&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;SuitedValue37&quot; sum=&quot;€0,50&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;RakeCobra808&quot; sum=&quot;€1,00&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;beacon_stack&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;beacon_stack&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;HA DK H3 SA&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;HeroDemo&quot; sum=&quot;€3,50&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;ViktorShoves&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;ViktorShoves&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;viking_matrix&quot; type=&quot;Pocket&quot;&gt;D4 CQ DJ SJ&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;viking_matrix&quot; sum=&quot;€3,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;SuitedValue37&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;SuitedValue37&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;RakeCobra808&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;RakeCobra808&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;D9 C7 C5&lt;/cards&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;viking_matrix&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;C10&lt;/cards&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;viking_matrix&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;D10&lt;/cards&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;viking_matrix&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></article><article id="hand-9000012001-turn"><h3>iPoker #9000012001 · Turn · CO · facing a raise</h3><span class="cards"><span class="card heart">6♥</span><span class="card spade">8♠</span><span class="card spade">K♠</span><span class="card diamond">J♦</span></span><p>Board <b>Qc 7h 8h 8c</b></p><p>Played fold · Suggested manual review. Calling costs 33% of the pot after calling, before rake. After prior aggression, weigh the opponent&#x27;s value hands and semibluffs again before raising. You currently hold trips. No next card immediately makes a straight or flush for Hero. In addition, 10 cards can make a full house or quads. Some of those hands can still be beaten.</p><p>Hero has trip eights and faces a reraise at about a 33% price. Another card can make a full house or quads, and a full house can still lose. Check which stronger hands already raise and how much an improvement can earn.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 250 · Action 23</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000012001&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable002&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;02:13:44&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;151&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-21 15:53:31&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€317,96&lt;/bets&gt;&#13;
+  &lt;wins&gt;€250,00&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€49,50&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€147,46&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000012001&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-21 17:12:37&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€2,75&quot; chips=&quot;€76,37&quot; dealer=&quot;0&quot; name=&quot;BeaconDriver93&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€33,75&quot; chips=&quot;€71,81&quot; dealer=&quot;0&quot; name=&quot;EnzoReraises&quot; rakeamount=&quot;€1,63&quot; seat=&quot;3&quot; win=&quot;€22,87&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€60,53&quot; dealer=&quot;0&quot; name=&quot;MaxCalls&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,25&quot; chips=&quot;€106,21&quot; dealer=&quot;0&quot; name=&quot;OddVillain&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€9,25&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;HeroDemo&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€85,26&quot; dealer=&quot;1&quot; name=&quot;TigerCity&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;EnzoReraises&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;BeaconDriver93&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;EnzoReraises&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;MaxCalls&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;OddVillain&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;H6 S8 SK DJ&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;TigerCity&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;MaxCalls&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;OddVillain&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;HeroDemo&quot; sum=&quot;€2,25&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;TigerCity&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€2,00&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;EnzoReraises&quot; sum=&quot;€1,75&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;OddVillain&quot; sum=&quot;€1,75&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;EnzoReraises&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;OddVillain&quot; sum=&quot;€0,50&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;EnzoReraises&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;CQ H7 H8&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;17&quot; player=&quot;EnzoReraises&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;18&quot; player=&quot;OddVillain&quot; sum=&quot;€0,50&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;19&quot; player=&quot;HeroDemo&quot; sum=&quot;€6,50&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;20&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;21&quot; player=&quot;EnzoReraises&quot; sum=&quot;€31,00&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;22&quot; player=&quot;OddVillain&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;23&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;C8&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></article><article id="hand-9000000068-flop"><h3>iPoker #9000000068 · Flop · BB · opening bet</h3><span class="cards"><span class="card club">K♣</span><span class="card club">5♣</span><span class="card spade">7♠</span><span class="card heart">6♥</span></span><p>Board <b>4c Jc 5s</b></p><p>Played bet 100% pot (4 BB) · Suggested check or bet about 50% pot (2.00 BB). Of 45 unseen cards, 15 can make a straight or flush on the next street. At least 7 make the verified current nuts or a tie. The count is based on the unseen deck before weighting the opponent&#x27;s range. Number of cards that complete both draws 2. Each counts once. The river can still change the result. A bet can fold out some better pairs and retain equity when called. The effective stack limits the semibluff size. Checking keeps the pot smaller.</p><p>Fifteen cards immediately make a straight or flush. Two make both, and seven make the verified current nuts or a tie. Around half pot is a possible semibluff. Checking is reasonable if the line gets too many calls or raises.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 14 · Action 5</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000000068&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable069&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;00:01:06&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;4&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-04-14 14:11:50&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€6,50&lt;/bets&gt;&#13;
+  &lt;wins&gt;€2,87&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€50,87&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€50,50&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000000068&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-04-14 14:11:50&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€1,00&quot; chips=&quot;€50,00&quot; dealer=&quot;1&quot; name=&quot;HappyMatrix33&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,00&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;HeroDemo&quot; rakeamount=&quot;€0,13&quot; seat=&quot;5&quot; win=&quot;€1,87&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;HappyMatrix33&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;HappyMatrix33&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;HappyMatrix33&quot; sum=&quot;€1,00&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;CK C5 S7 H6&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;C4 CJ S5&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;HeroDemo&quot; sum=&quot;€2,00&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;HappyMatrix33&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></article><article id="hand-9000005623-flop"><h3>CoinPoker #9000005623 · Flop · BTN</h3><span class="cards"><span class="card spade">J♠</span><span class="card heart">J♥</span><span class="card club">10♣</span><span class="card club">4♣</span></span><p>Board <b>Jc Jd Qh</b></p><p>Played check · Suggested check or bet about 25% pot (2.55 BB). SB and BB checked. Preflop you raised to 3.4 BB. SB and BB called. You hold all the off-board cards of rank J, removing Jx from the opponents&#x27; ranges. Target value calls from full house (QQ) or some Qx with another playable card or some overpairs (AA, KK). A small bet gives weaker hands a price to call. Checking gives the opponent a chance to improve or take the lead next street.</p><p>Both blinds called a BTN open to 3.4 BB and checked. QQ can call a bet, and rare Qx and high pairs may continue against a small size. Checking is a reasonable starting point. Hero checked, then a small turn bet got one call.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 177 · Line 27</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000005623: PLO 4 (₮0.10/₮0.25) 2026/01/09 07:26:00 CEST
+Table &#x27;800023&#x27; 6-max Seat #3 is the button
+Seat 1: b881ffc2 (₮26.59 in chips)
+Seat 2: fb63b843 (₮97.24 in chips)
+Seat 3: HeroDemo (₮27.85 in chips)
+Seat 4: 8e8788cf (₮17.94 in chips)
+Seat 5: 02840267 (₮25.39 in chips)
+Seat 6: 0a7f59b6 (₮25.43 in chips)
+8e8788cf: posts small blind ₮0.10
+02840267: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to b881ffc2
+Dealt to fb63b843
+Dealt to HeroDemo [Js Jh Tc 4c]
+Dealt to 8e8788cf
+Dealt to 02840267
+Dealt to 0a7f59b6
+0a7f59b6: folds
+b881ffc2: folds
+fb63b843: folds
+HeroDemo: raises ₮0.60 to ₮0.85
+8e8788cf: calls ₮0.75
+02840267: calls ₮0.60
+*** FLOP *** [Jc Jd Qh]
+8e8788cf: checks
+02840267: checks
+HeroDemo: checks
+*** TURN *** [Jc Jd Qh] [5d]
+8e8788cf: checks
+02840267: checks
+HeroDemo: bets ₮0.84
+8e8788cf: calls ₮0.84
+02840267: folds
+*** RIVER *** [Jc Jd Qh 5d] [6h]
+8e8788cf: checks
+HeroDemo: bets ₮3.17
+8e8788cf: folds
+HeroDemo: RETURN ₮3.17
+*** SHOWDOWN ***
+HeroDemo collected ₮4 from pot
+*** SUMMARY ***
+Total pot ₮4.23 | Rake ₮0.21 | Splash Fee ₮0.02
+Hand was run once
+Board [ Jc Jd Qh 5d 6h ]
+Game ended: 2026/01/09 07:27:30 CEST
+Seat 1: b881ffc2 folded before Flop (didn&#x27;t bet)
+Seat 2: fb63b843 folded before Flop (didn&#x27;t bet)
+Seat 3: HeroDemo showed [Js Jh Tc 4c] and won (₮4)
+Seat 4: 8e8788cf folded on the River
+Seat 5: 02840267 folded on the Turn
+Seat 6: 0a7f59b6 folded before Flop (didn&#x27;t bet)
+
+</pre></details></article><article id="hand-9000005623-turn"><h3>CoinPoker #9000005623 · Turn · BTN</h3><span class="cards"><span class="card spade">J♠</span><span class="card heart">J♥</span><span class="card club">10♣</span><span class="card club">4♣</span></span><p>Board <b>Jc Jd Qh 5d</b></p><p>Played bet 33% pot (3.36 BB) · Suggested bet about 33% pot (3.37 BB) or check. SB and BB checked. Flop checked through. You hold all the off-board cards of rank J, removing Jx from the opponents&#x27; ranges. Target value calls from full house (QQ, 55) or some Qx with another playable card or some overpairs (AA, KK). A small bet gives weaker hands a price to call. Checking gives the opponent a chance to improve or take the lead next street.</p><p>The 5♦ makes 55 a possible full house and gives some weaker pairs a new diamond draw. After three flop checks and two turn checks, the played small bet is reasonable. SB called and BB folded.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 177 · Line 31</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000005623: PLO 4 (₮0.10/₮0.25) 2026/01/09 07:26:00 CEST
+Table &#x27;800023&#x27; 6-max Seat #3 is the button
+Seat 1: b881ffc2 (₮26.59 in chips)
+Seat 2: fb63b843 (₮97.24 in chips)
+Seat 3: HeroDemo (₮27.85 in chips)
+Seat 4: 8e8788cf (₮17.94 in chips)
+Seat 5: 02840267 (₮25.39 in chips)
+Seat 6: 0a7f59b6 (₮25.43 in chips)
+8e8788cf: posts small blind ₮0.10
+02840267: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to b881ffc2
+Dealt to fb63b843
+Dealt to HeroDemo [Js Jh Tc 4c]
+Dealt to 8e8788cf
+Dealt to 02840267
+Dealt to 0a7f59b6
+0a7f59b6: folds
+b881ffc2: folds
+fb63b843: folds
+HeroDemo: raises ₮0.60 to ₮0.85
+8e8788cf: calls ₮0.75
+02840267: calls ₮0.60
+*** FLOP *** [Jc Jd Qh]
+8e8788cf: checks
+02840267: checks
+HeroDemo: checks
+*** TURN *** [Jc Jd Qh] [5d]
+8e8788cf: checks
+02840267: checks
+HeroDemo: bets ₮0.84
+8e8788cf: calls ₮0.84
+02840267: folds
+*** RIVER *** [Jc Jd Qh 5d] [6h]
+8e8788cf: checks
+HeroDemo: bets ₮3.17
+8e8788cf: folds
+HeroDemo: RETURN ₮3.17
+*** SHOWDOWN ***
+HeroDemo collected ₮4 from pot
+*** SUMMARY ***
+Total pot ₮4.23 | Rake ₮0.21 | Splash Fee ₮0.02
+Hand was run once
+Board [ Jc Jd Qh 5d 6h ]
+Game ended: 2026/01/09 07:27:30 CEST
+Seat 1: b881ffc2 folded before Flop (didn&#x27;t bet)
+Seat 2: fb63b843 folded before Flop (didn&#x27;t bet)
+Seat 3: HeroDemo showed [Js Jh Tc 4c] and won (₮4)
+Seat 4: 8e8788cf folded on the River
+Seat 5: 02840267 folded on the Turn
+Seat 6: 0a7f59b6 folded before Flop (didn&#x27;t bet)
+
+</pre></details></article><article id="hand-9000005623-river"><h3>CoinPoker #9000005623 · River · BTN</h3><span class="cards"><span class="card spade">J♠</span><span class="card heart">J♥</span><span class="card club">10♣</span><span class="card club">4♣</span></span><p>Board <b>Jc Jd Qh 5d 6h</b></p><p>Played bet 75% pot (12.68 BB) · Suggested bet about 35% pot (5.92 BB). SB checked. On the turn you bet 3.36 BB. SB called. You hold all the off-board cards of rank J, removing Jx from the opponents&#x27; ranges. Target value calls from full house (QQ, 66, 55) or some Qx with another playable card or some overpairs (AA, KK). Use a smaller value bet because the weaker part of the opponent&#x27;s line struggles to call a large bet. A bigger size makes sense if they call large bets with full houses often enough.</p><p>Around 35% pot is a reasonable size after a call on the small turn bet. A larger bet needs enough full-house calls. SB folded to the played 75% bet, with cards hidden.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 177 · Line 36</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000005623: PLO 4 (₮0.10/₮0.25) 2026/01/09 07:26:00 CEST
+Table &#x27;800023&#x27; 6-max Seat #3 is the button
+Seat 1: b881ffc2 (₮26.59 in chips)
+Seat 2: fb63b843 (₮97.24 in chips)
+Seat 3: HeroDemo (₮27.85 in chips)
+Seat 4: 8e8788cf (₮17.94 in chips)
+Seat 5: 02840267 (₮25.39 in chips)
+Seat 6: 0a7f59b6 (₮25.43 in chips)
+8e8788cf: posts small blind ₮0.10
+02840267: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to b881ffc2
+Dealt to fb63b843
+Dealt to HeroDemo [Js Jh Tc 4c]
+Dealt to 8e8788cf
+Dealt to 02840267
+Dealt to 0a7f59b6
+0a7f59b6: folds
+b881ffc2: folds
+fb63b843: folds
+HeroDemo: raises ₮0.60 to ₮0.85
+8e8788cf: calls ₮0.75
+02840267: calls ₮0.60
+*** FLOP *** [Jc Jd Qh]
+8e8788cf: checks
+02840267: checks
+HeroDemo: checks
+*** TURN *** [Jc Jd Qh] [5d]
+8e8788cf: checks
+02840267: checks
+HeroDemo: bets ₮0.84
+8e8788cf: calls ₮0.84
+02840267: folds
+*** RIVER *** [Jc Jd Qh 5d] [6h]
+8e8788cf: checks
+HeroDemo: bets ₮3.17
+8e8788cf: folds
+HeroDemo: RETURN ₮3.17
+*** SHOWDOWN ***
+HeroDemo collected ₮4 from pot
+*** SUMMARY ***
+Total pot ₮4.23 | Rake ₮0.21 | Splash Fee ₮0.02
+Hand was run once
+Board [ Jc Jd Qh 5d 6h ]
+Game ended: 2026/01/09 07:27:30 CEST
+Seat 1: b881ffc2 folded before Flop (didn&#x27;t bet)
+Seat 2: fb63b843 folded before Flop (didn&#x27;t bet)
+Seat 3: HeroDemo showed [Js Jh Tc 4c] and won (₮4)
+Seat 4: 8e8788cf folded on the River
+Seat 5: 02840267 folded on the Turn
+Seat 6: 0a7f59b6 folded before Flop (didn&#x27;t bet)
+
+</pre></details></article><article id="hand-9000002855-flop"><h3>CoinPoker #9000002855 · Flop · SB · c-bet opportunity</h3><span class="cards"><span class="card spade">K♠</span><span class="card spade">4♠</span><span class="card diamond">K♦</span><span class="card diamond">Q♦</span></span><p>Board <b>Kc 2s 4d</b></p><p>Played bet 33% pot (8.08 BB) · Suggested bet about 40% pot (9.79 BB) or check. Preflop you raised to 11.5 BB. BTN called. Target value calls from lower sets (22, 44) and two pair, and with a small bet some Kx with backup. On a dry board, a smaller bet gives weaker hands more room to call or raise.</p><p>SB 3-bet preflop and BTN called. A small bet on the dry K♣ 2♠ 4♦ can keep weaker Kx in the hand. BTN actually raised the 33% pot bet with K♥ J♥ T♦ 9♣. This shows one response to the small size.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 92 · Line 20</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000002855: PLO 4 (₮0.25/₮0.50/₮0.08) 2026/01/05 11:10:00 CEST
+Table &#x27;800055&#x27; 6-max Seat #2 is the button
+Seat 2: 42e9ba71 (₮20.69 in chips)
+Seat 3: HeroDemo (₮78.80 in chips)
+Seat 4: 11efd3b1 (₮50 in chips)
+42e9ba71: posts ante ₮0.08
+HeroDemo: posts ante ₮0.08
+11efd3b1: posts ante ₮0.08
+HeroDemo: posts small blind ₮0.25
+11efd3b1: posts big blind ₮0.50
+*** HOLE CARDS ***
+Dealt to 42e9ba71
+Dealt to HeroDemo [Ks 4s Kd Qd]
+Dealt to 11efd3b1
+42e9ba71: raises ₮1.25 to ₮1.75
+HeroDemo: raises ₮4 to ₮5.75
+11efd3b1: folds
+42e9ba71: calls ₮4
+*** FLOP *** [Kc 2s 4d]
+HeroDemo: bets ₮4.04
+42e9ba71: ALLIN ₮14.86
+HeroDemo: calls ₮10.82
+*** TURN *** [Kc 2s 4d] [6h]
+*** RIVER *** [Kc 2s 4d 6h] [7s]
+*** SHOWDOWN ***
+HeroDemo: shows [Ks 4s Kd Qd] (Three Of A Kind)
+HeroDemo collected ₮39.81 from pot
+42e9ba71: shows [Jh Td Kh 9c] (One Pair)
+*** SUMMARY ***
+Total pot ₮41.96 | Rake ₮2.10 | Splash Fee ₮0.05
+Hand was run once
+Board [ Kc 2s 4d 6h 7s ]
+Game ended: 2026/01/05 11:11:30 CEST
+Seat 2: 42e9ba71 showed [Jh Td Kh 9c] and lost with One Pair
+Seat 3: HeroDemo showed [Ks 4s Kd Qd] and won (₮39.81) with Three Of A Kind
+Seat 4: 11efd3b1 folded before Flop (didn&#x27;t bet)
+
+</pre></details></article><article id="hand-9000005632-turn"><h3>CoinPoker #9000005632 · Turn · CO · barrel opportunity</h3><span class="cards"><span class="card diamond">A♦</span><span class="card heart">9♥</span><span class="card diamond">5♦</span><span class="card heart">3♥</span></span><p>Board <b>Qs 9d Td Js</b></p><p>Played check · Suggested check. SB checked. On the flop you bet 7.8 BB. SB called. The turn allows straights that can call or raise. Check the nut flush draw to try to see the river for free.</p><p>SB called a pot-sized bet on Q♠ 9♦ T♦. The J♠ allows more straights. Checking keeps the nut diamond draw in play. The pot-sized flop bet warrants separate review. Both players checked the turn.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 184 · Line 27</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000005632: PLO 4 (₮0.10/₮0.25) 2026/01/09 07:44:00 CEST
+Table &#x27;800032&#x27; 6-max Seat #2 is the button
+Seat 1: HeroDemo (₮25 in chips)
+Seat 2: d1c6beca (₮48.88 in chips)
+Seat 3: 87d77d7b (₮97.38 in chips)
+Seat 4: b6bd8bd8 (₮29.58 in chips)
+Seat 6: 3ecdd221 (₮19.26 in chips)
+87d77d7b: posts small blind ₮0.10
+b6bd8bd8: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to HeroDemo [Ad 9h 5d 3h]
+Dealt to d1c6beca
+Dealt to 87d77d7b
+Dealt to b6bd8bd8
+Dealt to 3ecdd221
+3ecdd221: folds
+HeroDemo: raises ₮0.60 to ₮0.85
+d1c6beca: folds
+87d77d7b: calls ₮0.75
+b6bd8bd8: folds
+*** FLOP *** [Qs 9d Td]
+87d77d7b: checks
+HeroDemo: bets ₮1.95
+87d77d7b: calls ₮1.95
+*** TURN *** [Qs 9d Td] [Js]
+87d77d7b: checks
+HeroDemo: checks
+*** RIVER *** [Qs 9d Td Js] [8c]
+87d77d7b: checks
+HeroDemo: bets ₮2.92
+87d77d7b: calls ₮2.92
+*** SHOWDOWN ***
+87d77d7b: shows [Ts 8s Kd Qc] (Straight)
+87d77d7b collected ₮11.09 from pot
+HeroDemo: shows [Ad 9h 5d 3h] (One Pair)
+*** SUMMARY ***
+Total pot ₮11.69 | Rake ₮0.58 | Splash Fee ₮0.02
+Hand was run once
+Board [ Qs 9d Td Js 8c ]
+Game ended: 2026/01/09 07:45:30 CEST
+Seat 1: HeroDemo showed [Ad 9h 5d 3h] and lost with One Pair
+Seat 2: d1c6beca folded before Flop (didn&#x27;t bet)
+Seat 3: 87d77d7b showed [Ts 8s Kd Qc] and won (₮11.09) with Straight
+Seat 4: b6bd8bd8 folded before Flop (didn&#x27;t bet)
+Seat 6: 3ecdd221 folded before Flop (didn&#x27;t bet)
+
+</pre></details></article><article id="hand-9000005973-turn"><h3>iPoker #9000005973 · Turn · BTN · double barrel after a called c-bet</h3><span class="cards"><span class="card diamond">3♦</span><span class="card heart">5♥</span><span class="card diamond">10♦</span><span class="card heart">A♥</span></span><p>Board <b>2h Ks Tc 7h</b></p><p>Played bet 100% pot (17.4 BB) · Suggested manual review. Of 44 unseen cards, 9 can make a straight or flush on the next street. At least 7 make the verified current nuts or a tie. The count is based on the unseen deck before weighting the opponent&#x27;s range. A semibluff bet depends on which hands the opponent folds. Checking preserves the price of the next card. Sizing depends on an estimate of that range.</p><p>BB called 66% pot on the flop. The 7♥ leaves Hero with a pair of tens and the nut flush draw. Check behind by default, or use around one-third pot as a semibluff. BB folded to the played pot-sized bet.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 127 · Action 13</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000005973&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,50/€1,00&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable174&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,50&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€1,00&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:39:42&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;100&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-04 22:33:41&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€483,71&lt;/bets&gt;&#13;
+  &lt;wins&gt;€361,56&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€59,00&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€186,05&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000005973&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-04 23:06:44&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€8,45&quot; chips=&quot;€666,40&quot; dealer=&quot;0&quot; name=&quot;CalmGrinder88&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€144,24&quot; dealer=&quot;0&quot; name=&quot;FlatRoad99&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€140,22&quot; dealer=&quot;0&quot; name=&quot;QuietPilot505&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€159,61&quot; dealer=&quot;0&quot; name=&quot;QueenHero&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€25,85&quot; chips=&quot;€60,00&quot; dealer=&quot;1&quot; name=&quot;HeroDemo&quot; rakeamount=&quot;€1,16&quot; seat=&quot;8&quot; win=&quot;€16,24&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€258,90&quot; dealer=&quot;0&quot; name=&quot;NeonB0l7&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,50&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€1,00&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;FlatRoad99&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;FlatRoad99&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;QuietPilot505&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;QuietPilot505&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;QueenHero&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;QueenHero&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;D3 H5 D10 HA&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;HeroDemo&quot; sum=&quot;€3,50&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;NeonB0l7&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;CalmGrinder88&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€2,50&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;H2 SK C10&lt;/cards&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;HeroDemo&quot; sum=&quot;€4,95&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€4,95&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;H7&lt;/cards&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;HeroDemo&quot; sum=&quot;€17,40&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></article><article id="hand-9000005983-river"><h3>iPoker #9000005983 · River · BB</h3><span class="cards"><span class="card club">Q♣</span><span class="card heart">9♥</span><span class="card heart">K♥</span><span class="card spade">9♠</span></span><p>Board <b>8c 5s Jh 3d Tc</b></p><p>Played bet 100% pot (4.5 BB) · Suggested bet about 40% pot (1.80 BB) or check. Turn checked through. Target value calls from weaker straights (97) and occasional sets. Give weaker made hands a price to call. Checking is reasonable against a tight line.</p><p>UTG opened preflop and checked back the flop and turn. Hero has the nut straight with Q9. A small bet gives a weaker straight such as 97 a price to call. UTG folded to a pot-sized bet with cards hidden.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 137 · Action 13</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000005983&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,50/€1,00&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable184&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,50&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€1,00&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:39:42&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;100&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-04 22:33:41&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€483,71&lt;/bets&gt;&#13;
+  &lt;wins&gt;€361,56&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€59,00&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€186,05&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000005983&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-04 23:17:00&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€517,82&quot; dealer=&quot;0&quot; name=&quot;CalmGrinder88&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€141,24&quot; dealer=&quot;0&quot; name=&quot;FlatRoad99&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€171,11&quot; dealer=&quot;1&quot; name=&quot;QuietPilot505&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€154,61&quot; dealer=&quot;0&quot; name=&quot;QueenHero&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€6,50&quot; chips=&quot;€68,54&quot; dealer=&quot;0&quot; name=&quot;HeroDemo&quot; rakeamount=&quot;€0,30&quot; seat=&quot;8&quot; win=&quot;€4,20&quot;/&gt;&#13;
+    &lt;player bet=&quot;€2,00&quot; chips=&quot;€366,78&quot; dealer=&quot;0&quot; name=&quot;NeonB0l7&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;QueenHero&quot; sum=&quot;€0,50&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;HeroDemo&quot; sum=&quot;€1,00&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;NeonB0l7&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;NeonB0l7&quot; sum=&quot;€2,00&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;CalmGrinder88&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;FlatRoad99&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;FlatRoad99&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;QuietPilot505&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;QuietPilot505&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;QueenHero&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;QueenHero&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;CQ H9 HK S9&lt;/cards&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;HeroDemo&quot; sum=&quot;€1,00&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;C8 S5 HJ&lt;/cards&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;D3&lt;/cards&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;C10&lt;/cards&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;HeroDemo&quot; sum=&quot;€4,50&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></article><article id="hand-9000011994-flop"><h3>iPoker #9000011994 · Flop · BTN</h3><span class="cards"><span class="card diamond">Q♦</span><span class="card diamond">8♦</span><span class="card club">Q♣</span><span class="card diamond">4♦</span></span><p>Board <b>7d 2h 5d</b></p><p>Played bet 51% pot (12.74 BB) · Suggested check. SB and BB and UTG checked. Preflop SB raised to 6 BB. BB and UTG called. You called. You hold one pair in a multiway pot. Your weaker flush draw can be dominated. Sets, two pair and strong draws can continue. Checking preserves equity and avoids building a pot against these hands.</p><p>SB raised over a limper. Three players checked to BTN. With QQ and a queen-high diamond draw, checking is reasonable. Sets, two pair and higher diamond draws can continue. SB and BB called the played bet.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 243 · Action 14</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000011994&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable195&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;02:13:44&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;151&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-21 15:53:31&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€317,96&lt;/bets&gt;&#13;
+  &lt;wins&gt;€250,00&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€49,50&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€147,46&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000011994&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-21 17:03:01&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€9,37&quot; chips=&quot;€46,17&quot; dealer=&quot;0&quot; name=&quot;BeaconDriver93&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,00&quot; chips=&quot;€47,93&quot; dealer=&quot;0&quot; name=&quot;MaxCalls&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€108,86&quot; dealer=&quot;0&quot; name=&quot;OddVillain&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€9,37&quot; chips=&quot;€50,00&quot; dealer=&quot;1&quot; name=&quot;HeroDemo&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€40,98&quot; chips=&quot;€119,62&quot; dealer=&quot;0&quot; name=&quot;TigerCity&quot; rakeamount=&quot;€2,10&quot; seat=&quot;10&quot; win=&quot;€29,51&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;TigerCity&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;BeaconDriver93&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;MaxCalls&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;OddVillain&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;DQ D8 CQ D4&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;TigerCity&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;MaxCalls&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;OddVillain&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;TigerCity&quot; sum=&quot;€3,00&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€2,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;MaxCalls&quot; sum=&quot;€2,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;OddVillain&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;HeroDemo&quot; sum=&quot;€2,50&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;TigerCity&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;MaxCalls&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;HeroDemo&quot; sum=&quot;€6,37&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;TigerCity&quot; sum=&quot;€6,37&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€6,37&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;17&quot; player=&quot;MaxCalls&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;D7 H2 D5&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;action no=&quot;18&quot; player=&quot;TigerCity&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;19&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;20&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;HJ&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;action no=&quot;21&quot; player=&quot;TigerCity&quot; sum=&quot;€31,61&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;22&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;23&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;SK&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></article><h2>Preflop examples from HeroDemo</h2><article id="hand-9000006998-preflop"><h3>CoinPoker #9000006998 · Facing an open · BTN vs UTG</h3><span class="cards"><span class="card spade">A♠</span><span class="card heart">K♥</span><span class="card club">K♣</span><span class="card spade">4♠</span></span><p>Played 3-bet (12 BB) · Suggested fold or call. A suited ace and at least three high cards give you more ways to continue on high boards. A CO or BTN open generally allows wider defense than an early-position open. Calling here requires about 41% raw equity before rake and future betting.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 213 · Line 18</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000006998: PLO 4 (₮0.25/₮0.50) 2026/01/11 05:16:00 CEST
+Table &#x27;800098&#x27; 6-max Seat #5 is the button
+Seat 1: 4e37735a (₮142.98 in chips)
+Seat 3: 458b786b (₮82.25 in chips)
+Seat 4: 69ee9110 (₮84.16 in chips)
+Seat 5: HeroDemo (₮50 in chips)
+Seat 6: 62a933fa (₮50 in chips)
+62a933fa: posts small blind ₮0.25
+4e37735a: posts big blind ₮0.50
+*** HOLE CARDS ***
+Dealt to 4e37735a
+Dealt to 458b786b
+Dealt to 69ee9110
+Dealt to HeroDemo [As Kh Kc 4s]
+Dealt to 62a933fa
+458b786b: raises ₮1.25 to ₮1.75
+69ee9110: folds
+HeroDemo: raises ₮4.25 to ₮6
+62a933fa: folds
+4e37735a: folds
+458b786b: calls ₮4.25
+*** FLOP *** [2s 3s 2d]
+458b786b: checks
+HeroDemo: bets ₮6.50
+458b786b: folds
+HeroDemo: RETURN ₮6.50
+*** SHOWDOWN ***
+HeroDemo collected ₮12.06 from pot
+*** SUMMARY ***
+Total pot ₮12.75 | Rake ₮0.64 | Splash Fee ₮0.05
+Hand was run once
+Board [ 2s 3s 2d ]
+Game ended: 2026/01/11 05:17:30 CEST
+Seat 1: 4e37735a folded before Flop (didn&#x27;t bet)
+Seat 3: 458b786b folded on the Flop
+Seat 4: 69ee9110 folded before Flop (didn&#x27;t bet)
+Seat 5: HeroDemo showed [As Kh Kc 4s] and won (₮12.06)
+Seat 6: 62a933fa folded before Flop (didn&#x27;t bet)
+
+</pre></details></article><article id="hand-9000012027-preflop"><h3>iPoker #9000012027 · Facing limpers · SB</h3><span class="cards"><span class="card club">10♣</span><span class="card heart">A♥</span><span class="card diamond">A♦</span><span class="card spade">3♠</span></span><p>Played call (0.5 BB) · Suggested raise. Aces are the highest starting pair. Weak side cards reduce flexibility as the pot grows. Raise for value against weaker hands that can call.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 275 · Action 7</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000012027&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable028&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;02:13:44&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;151&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-21 15:53:31&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;HeroDemo&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€317,96&lt;/bets&gt;&#13;
+  &lt;wins&gt;€250,00&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€49,50&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€147,46&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000012027&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-21 17:38:50&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€3,00&quot; chips=&quot;€61,17&quot; dealer=&quot;0&quot; name=&quot;AlexScoops&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€103,64&quot; dealer=&quot;0&quot; name=&quot;EnzoReraises&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€48,50&quot; dealer=&quot;0&quot; name=&quot;DealerGhost&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,00&quot; chips=&quot;€130,20&quot; dealer=&quot;1&quot; name=&quot;OddVillain&quot; rakeamount=&quot;€0,63&quot; seat=&quot;6&quot; win=&quot;€8,87&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€53,55&quot; dealer=&quot;0&quot; name=&quot;HeroDemo&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,00&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;HunterOracle&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;HunterOracle&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;AlexScoops&quot; type=&quot;Pocket&quot;&gt;HK C4 C7 H6&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;EnzoReraises&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;DealerGhost&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;OddVillain&quot; type=&quot;Pocket&quot;&gt;SK DK S4 C8&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;HeroDemo&quot; type=&quot;Pocket&quot;&gt;C10 HA DA S3&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;HunterOracle&quot; type=&quot;Pocket&quot;&gt;DJ H5 D9 S10&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;AlexScoops&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;EnzoReraises&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;DealerGhost&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;OddVillain&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,25&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;HunterOracle&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;HunterOracle&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;AlexScoops&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;OddVillain&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;H4 H10 CQ&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;HunterOracle&quot; sum=&quot;€1,00&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;AlexScoops&quot; sum=&quot;€2,50&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;OddVillain&quot; sum=&quot;€2,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;17&quot; player=&quot;HeroDemo&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;18&quot; player=&quot;HunterOracle&quot; sum=&quot;€1,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;S7&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;action no=&quot;19&quot; player=&quot;HunterOracle&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;20&quot; player=&quot;AlexScoops&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;21&quot; player=&quot;OddVillain&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;SQ&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></article></main></html>

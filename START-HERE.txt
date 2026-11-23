@@ -1,0 +1,122 @@
+PLO Hero Leak Finder for Windows x64
+
+Getting started
+
+1. Extract the entire ZIP and open the PLO Hero Leak Finder folder.
+2. Run PLO Hero Leak Finder.exe. The package includes Python and the
+   desktop runtime. Keep the extracted files together.
+3. Select Library > HeroDemo to try the public sample from both networks.
+
+Importing completed hands
+
+Use Import > Import files to select individual files. Use Import > Import
+folder to select an archive root. Folder import includes all subfolders.
+The status bar displays the current file and total file count.
+Importing from HeroDemo opens your personal library.
+
+CoinPoker uses native text. iPoker uses XML with one or more hands or
+an HM2 .pghembk or .sql export containing native iPoker histories.
+HUD summaries lack the original actions required for analysis.
+
+Use Player > Personal Hero aliases to enter your exact screen names,
+one per line and under the correct network. The app analyzes hands
+with a single matching Hero.
+
+Hands to review opens after import. Latest import shows up to twelve
+example hands from the selected files. Reimporting an identical file
+makes those hands available without counting them twice. All hands
+shows the full library. Use Room and Street to narrow the view.
+Import > Import history shows duplicates and exclusion reasons.
+
+Reviewing a decision
+
+Open a hand to see the table just before the selected decision. It shows
+the board, pot, call price, and preceding actions. An orange panel marks
+Hero. Known dealt cards are visible. Reveal played action shows what
+Hero did. Previous decision and Next decision navigate the same hand.
+Full hand history opens the original record at the selected action.
+On the river, Reveal action & outcome shows pot awards, later river
+actions and opponent cards recorded in the source. Verified Hero results
+show net big blinds. Hidden cards are labeled as unrecorded.
+
+Guide differences only lists decisions where the guide's recommendation
+differs from the played action. A bet size difference of at least 25
+percentage points of the pot may qualify. The guide gives study
+recommendations and questions for manual review.
+Why review this first? explains the priority. Open Related hands to see
+more examples of the same pattern. Previous and Next move between pages.
+The review index is saved locally. New imports or Hero alias changes
+trigger a rebuild, with progress shown in the status bar.
+
+Range and History
+
+Open a flop, turn, or river decision and select Range and History. The
+display shows how observed actions change the weights of possible PLO4
+holdings. The estimates use Hero's cards and the board visible at the
+decision. On the flop and turn they also sample or enumerate later cards.
+
+After a heads-up check to Hero, the flop and turn views compare checking
+with multiple bet sizes. Model recommendation and recommendation with
+history appear side by side. The history comparison uses earlier folds,
+calls, and raises against Hero in comparable contexts. Changing a
+recommendation requires at least 30 matched responses per size group
+across three dates and a clear estimate gap. Smaller samples remain
+visible for review. The model assumes Hero folds to a raise and no
+further betting after a call. River comparisons also require at least
+30 comparable decisions across three dates. Hidden cards widen the
+range of plausible outcomes. Use Open source to inspect earlier hands.
+
+Reports
+
+Reports include breakdowns by position, street, bet size, hand class,
+stack depth, stake, room, opponent, time period, and session. Each
+frequency shows an action count and an eligible opportunity count.
+Hand classes can overlap. A hand can be AAxx and double-suited.
+Hover over a statistic or report cell for a short explanation. The 95%
+interval describes sampling uncertainty around the displayed estimate.
+
+Population review uses matched opponent decisions in your local library.
+Supported difference flags a frequency difference in similar situations.
+Exploratory also displays small samples and spots without a matched
+comparison. A frequency difference or a negative result can guide hand
+review. Assessing a strategic mistake requires additional evidence.
+
+Fourteen of 42 metrics have local matched comparisons. Two predefined
+nodes qualify for the Supported label: a three-bet against one open
+with no callers, and a flop bet in position after the preflop aggressor
+checks. The reference is weighted to Hero's opportunities. Matching
+uses network, currency, blinds, antes, player count, positions,
+effective stack, prior action, and flop texture where applicable.
+
+A supported finding requires at least 50 matched Hero decisions, 200
+population decisions, 20 days on each side, and 80% coverage of Hero's
+opportunities by cells with at least 20 population decisions. The
+ranking interval accounts for six predefined comparisons and must lie
+more than five percentage points from zero. The combined report requires
+both networks and matching directions.
+
+The PLO4 guide and the flop, turn, and opponent-history audits include
+public source hands. Reports > BTN vs CO opens the qualitative guide or
+the CPU pilot. Run BTN-CO pilot.cmd reruns the public pilot locally.
+
+Local data and supported games
+
+Personal hands, aliases, and source paths are stored in
+%LOCALAPPDATA%\PLO Hero Leak Finder\library.sqlite3. Close the app before
+backing up its folder. The local database is unencrypted.
+
+Analysis covers regular single-board PLO4 cash. Straddles, bomb pots,
+multiple runouts, tournaments, and incomplete or inconsistent records
+can be excluded. Most postflop frequencies use heads-up spots. Fold
+versus flop c-bet remains descriptive while its definition is under
+review. Recommendations use qualitative rules and modeled assumptions.
+Solver verification and five-card Omaha are outside this release's scope.
+
+Testing
+
+Run the suite from the extracted folder with the bundled Python.
+
+    .\runtime\python.exe -B -m unittest discover -s tests -v
+
+Feature-coverage.html documents the metrics. SOURCES.txt lists the code
+and public sample provenance.

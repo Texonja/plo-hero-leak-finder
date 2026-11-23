@@ -1,0 +1,680 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="color-scheme" content="light"><title>BTN vs CO · PLO4 Hero Leak Finder</title>
+<style>
+*{box-sizing:border-box}html{background:#c1d0df;color:#162d42;font:15px/1.45 "Segoe UI",Arial,sans-serif}body{margin:0}
+main{max-width:1420px;margin:auto;padding:20px}h1,h2,p,dl,dd,figure{margin:0}a{color:#194e75}
+.mast,aside,.hand,.method,.empty{background:#fff;border:1px solid #9dB0c2;border-radius:7px;overflow:hidden}
+.brand{padding:8px 20px;background:#edaa66;color:#182c40;font-size:22px;font-weight:750;border-bottom:1px solid #bb8e61}
+.brand span{font-size:15px;vertical-align:2px;margin-left:6px}.intro{background:#f0f5fa;padding:19px 21px;display:flex;align-items:center;justify-content:space-between;gap:24px}.intro h1{font-size:clamp(26px,3vw,38px);line-height:1.15;margin-bottom:5px}
+.intro p,.hint,.quantity,.method p,.source p,.unknown{color:#40576a}.metrics,.run{display:flex;flex-wrap:wrap;gap:10px 25px}
+.methodlink{font-size:13px}.selection{margin:14px 16px;max-width:750px}
+.validation{margin:10px 0;background:#ffe5cc;color:#202d38;border:1px solid #dfad7d;border-radius:6px;padding:9px 15px}.validation summary{cursor:pointer;font-weight:700}.validation p{margin:4px 0 0}
+.metrics dt,.run dt,.facts dt{font-size:12px;font-weight:600;color:#435b70}.metrics dd{font-size:19px;font-weight:700}.metrics{flex-shrink:0}
+.workspace{display:grid;grid-template-columns:minmax(235px,29%) minmax(0,1fr);gap:14px;margin:14px 0}
+aside{align-self:start;background:#f3f7fb}.content{min-width:0}.controls{display:none;padding:11px 13px 0;gap:8px;grid-template-columns:1fr 1fr}.interactive .controls{display:grid}
+aside h2,.method h2{font-size:19px;background:#dbe6f0;padding:11px 15px;border-bottom:1px solid #a4b6c5}
+label{font-size:12px;font-weight:650;min-width:0}label:last-child{grid-column:1/-1}select{display:block;width:100%;font:inherit;font-weight:400;font-size:14px;background:#fff;color:#162d42;border:1px solid #8ca1b5;border-radius:4px;padding:5px 4px}
+.quantity{padding:7px 14px;font-size:12px}.quantity:empty{display:none}.handlist{padding:0;list-style:none;margin:0}.interactive .handlist{max-height:max(420px,77vh);overflow:auto}
+.handlist li+li{border-top:1px solid #c5d2dc}.handlink{display:block;text-decoration:none;color:#172f45;border-left:5px solid transparent;padding:8px 10px 9px;overflow-wrap:anywhere}
+.handlink:hover{background:#e4edf6}.handlink[aria-current="true"]{background:#f9d5ab;border-left-color:#a65013}.navline{display:flex;gap:6px;justify-content:space-between;font-size:13px}.navline>span{white-space:nowrap}.handlink small{display:block;color:#354a5c;font-size:12px}
+.cards{display:inline-flex;gap:4px;white-space:nowrap}.card{display:inline-block;background:#fff;border:1px solid #aab9c4;border-radius:3px;padding:0 4px;font-weight:750;line-height:1.35;font-size:16px;color:#192c41}
+.navcards{display:block;margin:4px 0}.navcards .card{font-size:13px}.card.heart{color:#962c3c}.card.diamond{color:#245388}.card.club{color:#186456}
+.hand{scroll-margin:10px}.hand+.hand{margin-top:15px}.interactive .hand+.hand{margin-top:0}.handhead{background:#e9f0f6;border-bottom:1px solid #b6c6d2;padding:11px 16px;display:flex;align-items:center;justify-content:space-between;gap:10px}
+.handhead p{font-size:12px;color:#3b5368}.handhead h2{font-size:22px}.permalink{font-size:13px;white-space:nowrap}.handbody{padding:13px 16px}
+.felt{background:#243e53;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:auto 42px auto;gap:4px 10px;padding:11px 15px;border-radius:10px;position:relative;isolation:isolate}
+.felt:before{content:"";position:absolute;z-index:-1;inset:12% 5%;border-radius:90px;background:#8ab9af;border:4px solid #5c8c86}
+.seat{display:flex;align-items:center;flex-wrap:wrap;justify-content:center;align-content:center;gap:1px 6px;justify-self:center;width:100%;max-width:175px;background:#e0eaf1;color:#193447;padding:4px 7px;border:1px solid #869dab;border-radius:6px;font-size:13px;text-align:center}
+.seat b{font-size:14px}.seat small{font-size:12px}.seat.hero{background:#f4ac69;border:2px solid #bd6b23;padding:3px}.seat.hero .cards{flex-basis:100%;justify-content:center}.seat.folded{background:#d4dce1;color:#4d6070}
+.pos-BB{grid-area:1/1}.pos-UTG{grid-area:1/2}.pos-HJ{grid-area:1/3}.pos-SB{grid-area:3/1}.pos-BTN{grid-area:3/2}.pos-CO{grid-area:3/3}
+.pot{grid-area:2/1/3/4;align-self:center;justify-self:center;display:flex;align-items:center;gap:9px;color:#142e3d;background:#d9eae3;padding:3px 11px;border-radius:4px}.pot span{font-size:12px}.pot b{font-size:17px}
+.hint{font-size:12px;line-height:1.4;margin-top:5px}.facts{display:flex;flex-wrap:wrap;gap:8px 22px;padding:10px 0}.facts dd,.run dd{font-size:14px;font-weight:650}
+.finding{background:#fff1df;border:1px solid #eac59b;border-radius:5px;padding:8px 11px;margin-bottom:9px}.finding p{font-size:14px;margin-top:2px}
+.scroll{overflow-x:auto}.ev{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}caption{text-align:left;font-weight:700;font-size:16px;padding:2px 0 5px}
+.ev th,.ev td{padding:5px 8px;text-align:right;border-bottom:1px solid #d2dde5}.ev thead{background:#e4edf4;font-size:13px}.ev th:first-child{text-align:left}.ev tbody th{font-size:14px}.ev td small{display:block;font-size:11px;color:#4c6273;white-space:nowrap}
+.source{margin-top:12px;border:1px solid #b6c7d4;border-radius:5px}.source summary{padding:8px 11px;background:#eaf0f5;cursor:pointer;font-weight:650}.source p,.source pre{margin:8px 11px}.source p{font-size:12px}.source pre{white-space:pre-wrap;overflow-wrap:anywhere;background:#f5f8fa;padding:8px;font:12px/1.5 Consolas,monospace;color:#162d42}
+.method>p,.method>ul,.method>.run{margin:12px 16px}.method ul{padding-left:22px}.method li+li{margin-top:5px}.run{padding-top:10px;border-top:1px solid #cedae4}
+.missing,.empty{padding:12px;background:#f3f7fa;color:#40566a}.handlink:focus-visible,summary:focus-visible,select:focus-visible,a:focus-visible{outline:3px solid #245e92;outline-offset:-3px}
+[hidden]{display:none!important}
+@media(max-width:900px){.intro{align-items:start;flex-direction:column;gap:10px}.metrics{gap:12px 22px}.metrics dd{font-size:16px}main{padding:10px}.workspace{gap:8px}}
+@media(max-width:680px){main{padding:7px}.workspace{grid-template-columns:1fr}.interactive .handlist{max-height:185px}.handbody{padding:10px}.felt{padding:8px;gap:3px}.seat{padding:3px 2px;gap:0 3px}.seat .card{font-size:13px;padding:0 2px}.seat.hero .cards{gap:2px}.ev td,.ev th{padding:4px}.intro{padding:12px}.handhead{padding:8px 10px}}
+@media print{html{background:white}main{padding:0}.workspace{display:block}aside,.permalink{display:none}.hand[hidden]{display:block!important}article.hand{margin-bottom:12px;break-inside:avoid}.mast,.hand,.method{border-radius:0}.method{break-before:page}}
+</style></head><body><main>
+<header class="mast"><div class="brand">♠ <span>PLO4 Hero Leak Finder</span></div>
+<div class="intro"><div><h1>BTN vs CO</h1><p>After CO opens, BTN can fold, call or 3-bet.
+Both blinds can still act.</p><a class="methodlink" href="#method">Model and sample selection</a></div><dl class="metrics"><div><dt>Hands in report</dt><dd>10</dd></div><div><dt>Consistent reason to review</dt><dd>1</dd></div><div><dt>Scenario-dependent choice</dt><dd>6</dd></div></dl></div></header><details class="validation" open><summary>How well does the model match the observed hands?</summary><p>After a BTN call, at least three players saw the flop in 22/37 hands (59.5%, model 42.8%). On iPoker this happened in 10/11 hands (90.9%, model 41.7%). A pot-sized 3-bet won immediately in 1/6 hands without antes (16.7%, model 38.4%). This holdout checks forecasts of later actions. Action EV requires a separate validation.</p></details>
+<div class="workspace"><aside><h2>Hands to review</h2><div class="controls"><label>Poker room<select data-filter="room"><option value="">All</option><option value="CoinPoker">CoinPoker</option><option value="iPoker">iPoker</option></select></label><label>Hero action<select data-filter="action"><option value="">All</option><option value="call">Call</option><option value="fold">Fold</option><option value="raise">3-bet</option></select></label><label>Review category<select data-filter="category"><option value="">All</option><option value="Consistent reason to review">Consistent reason to review</option><option value="No clear difference">No clear difference</option><option value="Scenario-dependent choice">Scenario-dependent choice</option></select></label></div>
+<p class="quantity" role="status" aria-live="polite"></p><ol class="handlist"><li><a class="handlink" data-room="iPoker" data-action="call" data-category="Consistent reason to review" href="#hand-iPoker-9000006911"><span class="navline"><b>iPoker #9000006911</b><span>Call</span></span><span class="navcards"><span class="cards"><span class="card heart">J♥</span><span class="card diamond">9♦</span><span class="card club">A♣</span><span class="card club">3♣</span></span></span><small>Consistent reason to review</small></a></li><li><a class="handlink" data-room="CoinPoker" data-action="fold" data-category="Scenario-dependent choice" href="#hand-CoinPoker-9000004955"><span class="navline"><b>CoinPoker #9000004955</b><span>Fold</span></span><span class="navcards"><span class="cards"><span class="card club">A♣</span><span class="card club">9♣</span><span class="card diamond">8♦</span><span class="card spade">3♠</span></span></span><small>Scenario-dependent choice</small></a></li><li><a class="handlink" data-room="CoinPoker" data-action="call" data-category="Scenario-dependent choice" href="#hand-CoinPoker-9000006096"><span class="navline"><b>CoinPoker #9000006096</b><span>Call</span></span><span class="navcards"><span class="cards"><span class="card heart">K♥</span><span class="card club">K♣</span><span class="card club">7♣</span><span class="card spade">5♠</span></span></span><small>Scenario-dependent choice</small></a></li><li><a class="handlink" data-room="iPoker" data-action="fold" data-category="Scenario-dependent choice" href="#hand-iPoker-9000008520"><span class="navline"><b>iPoker #9000008520</b><span>Fold</span></span><span class="navcards"><span class="cards"><span class="card diamond">4♦</span><span class="card diamond">6♦</span><span class="card heart">A♥</span><span class="card club">Q♣</span></span></span><small>Scenario-dependent choice</small></a></li><li><a class="handlink" data-room="CoinPoker" data-action="raise" data-category="Scenario-dependent choice" href="#hand-CoinPoker-9000002519"><span class="navline"><b>CoinPoker #9000002519</b><span>3-bet</span></span><span class="navcards"><span class="cards"><span class="card club">A♣</span><span class="card club">7♣</span><span class="card heart">K♥</span><span class="card heart">8♥</span></span></span><small>Scenario-dependent choice</small></a></li><li><a class="handlink" data-room="iPoker" data-action="fold" data-category="Scenario-dependent choice" href="#hand-iPoker-9000012000"><span class="navline"><b>iPoker #9000012000</b><span>Fold</span></span><span class="navcards"><span class="cards"><span class="card spade">K♠</span><span class="card club">J♣</span><span class="card club">Q♣</span><span class="card heart">3♥</span></span></span><small>Scenario-dependent choice</small></a></li><li><a class="handlink" data-room="iPoker" data-action="call" data-category="Scenario-dependent choice" href="#hand-iPoker-9000002888"><span class="navline"><b>iPoker #9000002888</b><span>Call</span></span><span class="navcards"><span class="cards"><span class="card club">K♣</span><span class="card club">9♣</span><span class="card heart">10♥</span><span class="card diamond">9♦</span></span></span><small>Scenario-dependent choice</small></a></li><li><a class="handlink" data-room="CoinPoker" data-action="raise" data-category="No clear difference" href="#hand-CoinPoker-9000002679"><span class="navline"><b>CoinPoker #9000002679</b><span>3-bet</span></span><span class="navcards"><span class="cards"><span class="card heart">A♥</span><span class="card heart">Q♥</span><span class="card spade">Q♠</span><span class="card spade">9♠</span></span></span><small>No clear difference</small></a></li><li><a class="handlink" data-room="CoinPoker" data-action="fold" data-category="No clear difference" href="#hand-CoinPoker-9000004808"><span class="navline"><b>CoinPoker #9000004808</b><span>Fold</span></span><span class="navcards"><span class="cards"><span class="card diamond">Q♦</span><span class="card heart">7♥</span><span class="card spade">6♠</span><span class="card club">4♣</span></span></span><small>No clear difference</small></a></li><li><a class="handlink" data-room="iPoker" data-action="fold" data-category="No clear difference" href="#hand-iPoker-9000010639"><span class="navline"><b>iPoker #9000010639</b><span>Fold</span></span><span class="navcards"><span class="cards"><span class="card diamond">2♦</span><span class="card diamond">4♦</span><span class="card club">10♣</span><span class="card diamond">Q♦</span></span></span><small>No clear difference</small></a></li></ol></aside>
+<section class="content" aria-label="Hand details"><p id="empty" class="empty" hidden>No hands match the filters.</p>
+<article class="hand" id="hand-iPoker-9000006911" aria-labelledby="heading-0"><header class="handhead"><div><p>iPoker · PLO4</p><h2 id="heading-0">Hand #9000006911</h2></div><a href="#hand-iPoker-9000006911" class="permalink" aria-label="Permanent link to this hand"># Link to hand</a></header><div class="handbody"><figure class="felt" aria-label="Table before Hero acts"><div class="seat pos-BB"><b>BB</b><span>99 bb</span></div><div class="seat pos-UTG folded"><b>UTG</b><small>Fold</small></div><div class="seat pos-HJ folded"><b>HJ</b><small>Fold</small></div><div class="seat pos-SB"><b>SB</b><span>210.95 bb</span></div><div class="seat pos-BTN hero"><b>BTN · Hero</b><span>125.3 bb</span><span class="cards"><span class="card heart">J♥</span><span class="card diamond">9♦</span><span class="card club">A♣</span><span class="card club">3♣</span></span></div><div class="seat pos-CO"><b>CO</b><span>73 bb</span></div><div class="pot"><span>Preflop · pot</span><b>5 bb</b></div></figure><p class="hint">Stacks are chips behind immediately before BTN acts. The flop has yet to be dealt.</p><dl class="facts"><div><dt>CO opens to</dt><dd>3.5 bb</dd></div><div><dt>Modeled 3-bet to</dt><dd>12 bb</dd></div><div><dt>Hero action</dt><dd>Call to 3.5 bb</dd></div><div><dt>Already committed, excluding antes</dt><dd>CO 3.5 bb · BTN 0 bb · SB 0.5 bb · BB 1 bb</dd></div><div><dt>Ante per player</dt><dd>0 bb</dd></div></dl><div class="finding"><b>Consistent reason to review</b><p>Hero chose call. Fold leads in all 8 scenarios. The modeled gap ranges from 0.26 to 1.54 BB.</p></div><div class="scroll"><table class="ev"><caption>Modeled decision EV in BB</caption><thead><tr><th scope="col">Scenario</th><th scope="col">Call</th><th scope="col">3-bet</th><th scope="col">3-bet − call</th></tr></thead><tbody><tr><th scope="row">Base model</th><td><strong>−1.404</strong><small>[−1.485, −1.322]</small></td><td><strong>−1.09</strong><small>[−1.204, −0.975]</small></td><td><strong>+0.314</strong><small>[0.21, 0.418]</small></td></tr><tr><th scope="row">Tighter CO open · 24%</th><td><strong>−1.541</strong><small>[−1.623, −1.459]</small></td><td><strong>−2.744</strong><small>[−2.872, −2.616]</small></td><td><strong>−1.203</strong><small>[−1.31, −1.096]</small></td></tr><tr><th scope="row">Wider CO open · 42%</th><td><strong>−1.185</strong><small>[−1.268, −1.103]</small></td><td><strong>+0.06</strong><small>[−0.045, 0.165]</small></td><td><strong>+1.246</strong><small>[1.143, 1.348]</small></td></tr><tr><th scope="row">Tighter CO response to a 3-bet · 12%</th><td><strong>−1.404</strong><small>[−1.485, −1.322]</small></td><td><strong>+0.063</strong><small>[−0.037, 0.162]</small></td><td><strong>+1.466</strong><small>[1.366, 1.566]</small></td></tr><tr><th scope="row">Wider CO response to a 3-bet · 25%</th><td><strong>−1.404</strong><small>[−1.485, −1.322]</small></td><td><strong>−2.673</strong><small>[−2.807, −2.538]</small></td><td><strong>−1.269</strong><small>[−1.379, −1.159]</small></td></tr><tr><th scope="row">Wider blind defense</th><td><strong>−1.479</strong><small>[−1.57, −1.388]</small></td><td><strong>−1.458</strong><small>[−1.579, −1.337]</small></td><td><strong>+0.021</strong><small>[−0.093, 0.134]</small></td></tr><tr><th scope="row">No rake</th><td><strong>−0.912</strong><small>[−0.996, −0.828]</small></td><td><strong>−0.612</strong><small>[−0.729, −0.495]</small></td><td><strong>+0.3</strong><small>[0.194, 0.406]</small></td></tr><tr><th scope="row">Postflop checkdown</th><td><strong>−0.261</strong><small>[−0.276, −0.246]</small></td><td><strong>+0.225</strong><small>[0.189, 0.262]</small></td><td><strong>+0.486</strong><small>[0.456, 0.516]</small></td></tr></tbody></table></div><p class="hint">Fold is worth 0 BB from the decision point. Brackets show an approximate 95% Monte Carlo interval (estimate ± 1.96 standard errors). Differences use paired standard errors. The interval covers sampling noise within the scenario. Different opponent or postflop assumptions can shift EV beyond it.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 6911 · Action 6</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000006911&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,50/€1,00&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable112&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,50&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€1,00&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;02:32:20&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;159&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-06 23:19:36&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€1.071,45&lt;/bets&gt;&#13;
+  &lt;wins&gt;€1.042,46&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€99,00&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€439,99&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000006911&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-06 23:57:48&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€299,98&quot; dealer=&quot;0&quot; name=&quot;storm_pirate&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€318,34&quot; dealer=&quot;0&quot; name=&quot;CalmGrinder88&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€17,50&quot; chips=&quot;€76,50&quot; dealer=&quot;0&quot; name=&quot;Dinar5a1lor8&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€37,50&quot; chips=&quot;€125,30&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; rakeamount=&quot;€3,50&quot; seat=&quot;6&quot; win=&quot;€52,50&quot;/&gt;&#13;
+    &lt;player bet=&quot;€17,50&quot; chips=&quot;€211,45&quot; dealer=&quot;0&quot; name=&quot;QuietPilot505&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,50&quot; chips=&quot;€100,00&quot; dealer=&quot;0&quot; name=&quot;RakeCobra808&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;QuietPilot505&quot; sum=&quot;€0,50&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;RakeCobra808&quot; sum=&quot;€1,00&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;storm_pirate&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;CalmGrinder88&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;Dinar5a1lor8&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;HJ D9 CA C3&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;QuietPilot505&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;RakeCobra808&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;storm_pirate&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;CalmGrinder88&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;Dinar5a1lor8&quot; sum=&quot;€3,50&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BigNeonMax&quot; sum=&quot;€3,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;QuietPilot505&quot; sum=&quot;€3,00&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;RakeCobra808&quot; sum=&quot;€2,50&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;QuietPilot505&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;RakeCobra808&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;Dinar5a1lor8&quot; sum=&quot;€14,00&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;BigNeonMax&quot; sum=&quot;€14,00&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;QuietPilot505&quot; sum=&quot;€14,00&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;RakeCobra808&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;C9 S6 C2&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;QuietPilot505&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;Dinar5a1lor8&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;17&quot; player=&quot;BigNeonMax&quot; sum=&quot;€20,00&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;18&quot; player=&quot;QuietPilot505&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;19&quot; player=&quot;Dinar5a1lor8&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;S9&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></div></article><article class="hand" id="hand-CoinPoker-9000004955" aria-labelledby="heading-1"><header class="handhead"><div><p>CoinPoker · PLO4</p><h2 id="heading-1">Hand #9000004955</h2></div><a href="#hand-CoinPoker-9000004955" class="permalink" aria-label="Permanent link to this hand"># Link to hand</a></header><div class="handbody"><figure class="felt" aria-label="Table before Hero acts"><div class="seat pos-BB"><b>BB</b><span>110.6 bb</span></div><div class="seat pos-UTG folded"><b>UTG</b><small>Fold</small></div><div class="seat pos-HJ folded"><b>HJ</b><small>Fold</small></div><div class="seat pos-SB"><b>SB</b><span>148.48 bb</span></div><div class="seat pos-BTN hero"><b>BTN · Hero</b><span>99.84 bb</span><span class="cards"><span class="card club">A♣</span><span class="card club">9♣</span><span class="card diamond">8♦</span><span class="card spade">3♠</span></span></div><div class="seat pos-CO"><b>CO</b><span>96.44 bb</span></div><div class="pot"><span>Preflop · pot</span><b>5.76 bb</b></div></figure><p class="hint">Stacks are chips behind immediately before BTN acts. The flop has yet to be dealt.</p><dl class="facts"><div><dt>CO opens to</dt><dd>3.4 bb</dd></div><div><dt>Modeled 3-bet to</dt><dd>12.56 bb</dd></div><div><dt>Hero action</dt><dd>Fold</dd></div><div><dt>Already committed, excluding antes</dt><dd>CO 3.4 bb · BTN 0 bb · SB 0.4 bb · BB 1 bb</dd></div><div><dt>Ante per player</dt><dd>0.16 bb</dd></div></dl><div class="finding"><b>Scenario-dependent choice</b><p>Hero chose fold. Relative to that action, pot 3-bet leads in the Postflop checkdown scenario (+0.41 BB) and trails in the Wider CO response to a 3-bet · 25% scenario (-3.10 BB). The alternative has a clear edge only in the checkdown scenario.</p></div><div class="scroll"><table class="ev"><caption>Modeled decision EV in BB</caption><thead><tr><th scope="col">Scenario</th><th scope="col">Call</th><th scope="col">3-bet</th><th scope="col">3-bet − call</th></tr></thead><tbody><tr><th scope="row">Base model</th><td><strong>−1.489</strong><small>[−1.578, −1.4]</small></td><td><strong>−1.241</strong><small>[−1.376, −1.106]</small></td><td><strong>+0.248</strong><small>[0.129, 0.368]</small></td></tr><tr><th scope="row">Tighter CO open · 24%</th><td><strong>−1.656</strong><small>[−1.744, −1.567]</small></td><td><strong>−2.972</strong><small>[−3.123, −2.821]</small></td><td><strong>−1.316</strong><small>[−1.441, −1.191]</small></td></tr><tr><th scope="row">Wider CO open · 42%</th><td><strong>−1.352</strong><small>[−1.441, −1.264]</small></td><td><strong>+0.024</strong><small>[−0.099, 0.146]</small></td><td><strong>+1.376</strong><small>[1.261, 1.491]</small></td></tr><tr><th scope="row">Tighter CO response to a 3-bet · 12%</th><td><strong>−1.489</strong><small>[−1.578, −1.4]</small></td><td><strong>+0.1</strong><small>[−0.016, 0.217]</small></td><td><strong>+1.589</strong><small>[1.476, 1.702]</small></td></tr><tr><th scope="row">Wider CO response to a 3-bet · 25%</th><td><strong>−1.489</strong><small>[−1.578, −1.4]</small></td><td><strong>−3.098</strong><small>[−3.256, −2.94]</small></td><td><strong>−1.609</strong><small>[−1.737, −1.481]</small></td></tr><tr><th scope="row">Wider blind defense</th><td><strong>−1.619</strong><small>[−1.717, −1.52]</small></td><td><strong>−1.558</strong><small>[−1.699, −1.416]</small></td><td><strong>+0.061</strong><small>[−0.068, 0.191]</small></td></tr><tr><th scope="row">No rake</th><td><strong>−0.985</strong><small>[−1.077, −0.893]</small></td><td><strong>−0.736</strong><small>[−0.874, −0.599]</small></td><td><strong>+0.249</strong><small>[0.128, 0.37]</small></td></tr><tr><th scope="row">Postflop checkdown</th><td><strong>−0.059</strong><small>[−0.076, −0.043]</small></td><td><strong>+0.413</strong><small>[0.373, 0.453]</small></td><td><strong>+0.472</strong><small>[0.439, 0.505]</small></td></tr></tbody></table></div><p class="hint">Fold is worth 0 BB from the decision point. Brackets show an approximate 95% Monte Carlo interval (estimate ± 1.96 standard errors). Differences use paired standard errors. The interval covers sampling noise within the scenario. Different opponent or postflop assumptions can shift EV beyond it.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 4955 · Line 27</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000004955: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/08 09:10:00 CEST
+Table &#x27;800055&#x27; 6-max Seat #4 is the button
+Seat 1: 42503a5c (₮37.96 in chips)
+Seat 2: 11b3ef95 (₮50.44 in chips)
+Seat 3: d40c7482 (₮25 in chips)
+Seat 4: Hero (₮25 in chips)
+Seat 5: 9f862e37 (₮37.26 in chips)
+Seat 6: 5d5d8fdc (₮27.94 in chips)
+42503a5c: posts ante ₮0.04
+11b3ef95: posts ante ₮0.04
+d40c7482: posts ante ₮0.04
+Hero: posts ante ₮0.04
+9f862e37: posts ante ₮0.04
+5d5d8fdc: posts ante ₮0.04
+9f862e37: posts small blind ₮0.10
+5d5d8fdc: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to 42503a5c
+Dealt to 11b3ef95
+Dealt to d40c7482
+Dealt to Hero [Ac 9c 8d 3s]
+Dealt to 9f862e37
+Dealt to 5d5d8fdc
+42503a5c: folds
+11b3ef95: folds
+d40c7482: raises ₮0.60 to ₮0.85
+Hero: folds
+9f862e37: folds
+5d5d8fdc: folds
+d40c7482: RETURN ₮0.60
+*** SHOWDOWN ***
+d40c7482 collected ₮0.82 from pot
+*** SUMMARY ***
+Total pot ₮0.84 | Rake ₮0 | Splash Fee ₮0.02
+Hand was run once
+Board [  ]
+Game ended: 2026/01/08 09:11:30 CEST
+Seat 1: 42503a5c folded before Flop (didn&#x27;t bet)
+Seat 2: 11b3ef95 folded before Flop (didn&#x27;t bet)
+Seat 3: d40c7482 won (₮0.82)
+Seat 4: Hero folded before Flop (didn&#x27;t bet)
+Seat 5: 9f862e37 folded before Flop (didn&#x27;t bet)
+Seat 6: 5d5d8fdc folded before Flop (didn&#x27;t bet)
+</pre></details></div></article><article class="hand" id="hand-CoinPoker-9000006096" aria-labelledby="heading-2"><header class="handhead"><div><p>CoinPoker · PLO4</p><h2 id="heading-2">Hand #9000006096</h2></div><a href="#hand-CoinPoker-9000006096" class="permalink" aria-label="Permanent link to this hand"># Link to hand</a></header><div class="handbody"><figure class="felt" aria-label="Table before Hero acts"><div class="seat pos-BB"><b>BB</b><span>142.78 bb</span></div><div class="seat pos-UTG folded"><b>UTG</b><small>Fold</small></div><div class="seat pos-HJ folded"><b>HJ</b><small>Fold</small></div><div class="seat pos-SB"><b>SB</b><span>99.34 bb</span></div><div class="seat pos-BTN hero"><b>BTN · Hero</b><span>211.7 bb</span><span class="cards"><span class="card heart">K♥</span><span class="card club">K♣</span><span class="card club">7♣</span><span class="card spade">5♠</span></span></div><div class="seat pos-CO"><b>CO</b><span>122.64 bb</span></div><div class="pot"><span>Preflop · pot</span><b>5.96 bb</b></div></figure><p class="hint">Stacks are chips behind immediately before BTN acts. The flop has yet to be dealt.</p><dl class="facts"><div><dt>CO opens to</dt><dd>3.5 bb</dd></div><div><dt>Modeled 3-bet to</dt><dd>12.96 bb</dd></div><div><dt>Hero action</dt><dd>Call to 3.5 bb</dd></div><div><dt>Already committed, excluding antes</dt><dd>CO 3.5 bb · BTN 0 bb · SB 0.5 bb · BB 1 bb</dd></div><div><dt>Ante per player</dt><dd>0.16 bb</dd></div></dl><div class="finding"><b>Scenario-dependent choice</b><p>Hero chose call. Relative to that action, pot 3-bet leads in the Postflop checkdown scenario (+0.88 BB) and trails in the Tighter CO open · 24% scenario (-0.43 BB).</p></div><div class="scroll"><table class="ev"><caption>Modeled decision EV in BB</caption><thead><tr><th scope="col">Scenario</th><th scope="col">Call</th><th scope="col">3-bet</th><th scope="col">3-bet − call</th></tr></thead><tbody><tr><th scope="row">Base model</th><td><strong>+2.043</strong><small>[1.915, 2.171]</small></td><td><strong>+2.246</strong><small>[2.056, 2.435]</small></td><td><strong>+0.203</strong><small>[0.048, 0.357]</small></td></tr><tr><th scope="row">Tighter CO open · 24%</th><td><strong>+1.837</strong><small>[1.707, 1.966]</small></td><td><strong>+1.403</strong><small>[1.191, 1.616]</small></td><td><strong>−0.433</strong><small>[−0.599, −0.267]</small></td></tr><tr><th scope="row">Wider CO open · 42%</th><td><strong>+2.141</strong><small>[2.016, 2.267]</small></td><td><strong>+2.867</strong><small>[2.696, 3.037]</small></td><td><strong>+0.725</strong><small>[0.581, 0.869]</small></td></tr><tr><th scope="row">Tighter CO response to a 3-bet · 12%</th><td><strong>+1.992</strong><small>[1.867, 2.116]</small></td><td><strong>+2.183</strong><small>[2.013, 2.354]</small></td><td><strong>+0.192</strong><small>[0.044, 0.339]</small></td></tr><tr><th scope="row">Wider CO response to a 3-bet · 25%</th><td><strong>+2.095</strong><small>[1.963, 2.228]</small></td><td><strong>+2.232</strong><small>[2.018, 2.446]</small></td><td><strong>+0.137</strong><small>[−0.027, 0.3]</small></td></tr><tr><th scope="row">Wider blind defense</th><td><strong>+2.454</strong><small>[2.308, 2.6]</small></td><td><strong>+2.441</strong><small>[2.24, 2.642]</small></td><td><strong>−0.013</strong><small>[−0.178, 0.152]</small></td></tr><tr><th scope="row">No rake</th><td><strong>+2.759</strong><small>[2.629, 2.89]</small></td><td><strong>+2.943</strong><small>[2.751, 3.136]</small></td><td><strong>+0.184</strong><small>[0.028, 0.341]</small></td></tr><tr><th scope="row">Postflop checkdown</th><td><strong>+1.243</strong><small>[1.216, 1.269]</small></td><td><strong>+2.121</strong><small>[2.054, 2.188]</small></td><td><strong>+0.878</strong><small>[0.823, 0.933]</small></td></tr></tbody></table></div><p class="hint">Fold is worth 0 BB from the decision point. Brackets show an approximate 95% Monte Carlo interval (estimate ± 1.96 standard errors). Differences use paired standard errors. The interval covers sampling noise within the scenario. Different opponent or postflop assumptions can shift EV beyond it.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 6096 · Line 27</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000006096: PLO 4 (₮0.25/₮0.50/₮0.08) 2026/01/09 23:12:00 CEST
+Table &#x27;800096&#x27; 6-max Seat #5 is the button
+Seat 1: 7e4b6b73 (₮71.97 in chips)
+Seat 2: 12d4b7c2 (₮132.98 in chips)
+Seat 3: fa98818d (₮60.33 in chips)
+Seat 4: d6c03f10 (₮63.15 in chips)
+Seat 5: Hero (₮105.93 in chips)
+Seat 6: b06c8c10 (₮50 in chips)
+7e4b6b73: posts ante ₮0.08
+12d4b7c2: posts ante ₮0.08
+fa98818d: posts ante ₮0.08
+d6c03f10: posts ante ₮0.08
+Hero: posts ante ₮0.08
+b06c8c10: posts ante ₮0.08
+b06c8c10: posts small blind ₮0.25
+7e4b6b73: posts big blind ₮0.50
+*** HOLE CARDS ***
+Dealt to 7e4b6b73
+Dealt to 12d4b7c2
+Dealt to fa98818d
+Dealt to d6c03f10
+Dealt to Hero [Kh Kc 7c 5s]
+Dealt to b06c8c10
+12d4b7c2: folds
+fa98818d: folds
+d6c03f10: raises ₮1.25 to ₮1.75
+Hero: calls ₮1.75
+b06c8c10: folds
+7e4b6b73: calls ₮1.25
+*** FLOP *** [Th Jc 5c]
+7e4b6b73: checks
+d6c03f10: bets ₮4.01
+Hero: calls ₮4.01
+7e4b6b73: calls ₮4.01
+*** TURN *** [Th Jc 5c] [9d]
+7e4b6b73: checks
+d6c03f10: checks
+Hero: checks
+*** RIVER *** [Th Jc 5c 9d] [8d]
+7e4b6b73: bets ₮5.94
+d6c03f10: folds
+Hero: folds
+7e4b6b73: RETURN ₮5.94
+*** SHOWDOWN ***
+7e4b6b73 collected ₮17.06 from pot
+*** SUMMARY ***
+Total pot ₮18.01 | Rake ₮0.90 | Splash Fee ₮0.05
+Hand was run once
+Board [ Th Jc 5c 9d 8d ]
+Game ended: 2026/01/09 23:13:30 CEST
+Seat 1: 7e4b6b73 won (₮17.06)
+Seat 2: 12d4b7c2 folded before Flop (didn&#x27;t bet)
+Seat 3: fa98818d folded before Flop (didn&#x27;t bet)
+Seat 4: d6c03f10 folded on the River
+Seat 5: Hero folded on the River
+Seat 6: b06c8c10 folded before Flop (didn&#x27;t bet)
+</pre></details></div></article><article class="hand" id="hand-iPoker-9000008520" aria-labelledby="heading-3"><header class="handhead"><div><p>iPoker · PLO4</p><h2 id="heading-3">Hand #9000008520</h2></div><a href="#hand-iPoker-9000008520" class="permalink" aria-label="Permanent link to this hand"># Link to hand</a></header><div class="handbody"><figure class="felt" aria-label="Table before Hero acts"><div class="seat pos-BB"><b>BB</b><span>264.2 bb</span></div><div class="seat pos-UTG folded"><b>UTG</b><small>Fold</small></div><div class="seat pos-HJ folded"><b>HJ</b><small>Fold</small></div><div class="seat pos-SB"><b>SB</b><span>63.58 bb</span></div><div class="seat pos-BTN hero"><b>BTN · Hero</b><span>111.68 bb</span><span class="cards"><span class="card diamond">4♦</span><span class="card diamond">6♦</span><span class="card heart">A♥</span><span class="card club">Q♣</span></span></div><div class="seat pos-CO"><b>CO</b><span>188.88 bb</span></div><div class="pot"><span>Preflop · pot</span><b>5 bb</b></div></figure><p class="hint">Stacks are chips behind immediately before BTN acts. The flop has yet to be dealt.</p><dl class="facts"><div><dt>CO opens to</dt><dd>3.5 bb</dd></div><div><dt>Modeled 3-bet to</dt><dd>12 bb</dd></div><div><dt>Hero action</dt><dd>Fold</dd></div><div><dt>Already committed, excluding antes</dt><dd>CO 3.5 bb · BTN 0 bb · SB 0.5 bb · BB 1 bb</dd></div><div><dt>Ante per player</dt><dd>0 bb</dd></div></dl><div class="finding"><b>Scenario-dependent choice</b><p>Hero chose fold. Relative to that action, pot 3-bet leads in the Postflop checkdown scenario (+0.19 BB) and trails in the Wider CO response to a 3-bet · 25% scenario (-3.51 BB). The alternative has a clear edge only in the checkdown scenario.</p></div><div class="scroll"><table class="ev"><caption>Modeled decision EV in BB</caption><thead><tr><th scope="col">Scenario</th><th scope="col">Call</th><th scope="col">3-bet</th><th scope="col">3-bet − call</th></tr></thead><tbody><tr><th scope="row">Base model</th><td><strong>−1.97</strong><small>[−2.049, −1.89]</small></td><td><strong>−1.667</strong><small>[−1.792, −1.541]</small></td><td><strong>+0.303</strong><small>[0.192, 0.414]</small></td></tr><tr><th scope="row">Tighter CO open · 24%</th><td><strong>−2.1</strong><small>[−2.18, −2.02]</small></td><td><strong>−3.427</strong><small>[−3.569, −3.285]</small></td><td><strong>−1.327</strong><small>[−1.444, −1.209]</small></td></tr><tr><th scope="row">Wider CO open · 42%</th><td><strong>−1.761</strong><small>[−1.841, −1.681]</small></td><td><strong>−0.394</strong><small>[−0.507, −0.282]</small></td><td><strong>+1.367</strong><small>[1.261, 1.473]</small></td></tr><tr><th scope="row">Tighter CO response to a 3-bet · 12%</th><td><strong>−1.97</strong><small>[−2.049, −1.89]</small></td><td><strong>−0.315</strong><small>[−0.422, −0.209]</small></td><td><strong>+1.654</strong><small>[1.55, 1.759]</small></td></tr><tr><th scope="row">Wider CO response to a 3-bet · 25%</th><td><strong>−1.97</strong><small>[−2.049, −1.89]</small></td><td><strong>−3.511</strong><small>[−3.66, −3.362]</small></td><td><strong>−1.541</strong><small>[−1.661, −1.421]</small></td></tr><tr><th scope="row">Wider blind defense</th><td><strong>−2.174</strong><small>[−2.262, −2.085]</small></td><td><strong>−2.006</strong><small>[−2.137, −1.875]</small></td><td><strong>+0.168</strong><small>[0.048, 0.288]</small></td></tr><tr><th scope="row">No rake</th><td><strong>−1.496</strong><small>[−1.578, −1.414]</small></td><td><strong>−1.204</strong><small>[−1.332, −1.077]</small></td><td><strong>+0.291</strong><small>[0.179, 0.404]</small></td></tr><tr><th scope="row">Postflop checkdown</th><td><strong>−0.364</strong><small>[−0.38, −0.349]</small></td><td><strong>+0.194</strong><small>[0.158, 0.231]</small></td><td><strong>+0.559</strong><small>[0.528, 0.589]</small></td></tr></tbody></table></div><p class="hint">Fold is worth 0 BB from the decision point. Brackets show an approximate 95% Monte Carlo interval (estimate ± 1.96 standard errors). Differences use paired standard errors. The interval covers sampling noise within the scenario. Different opponent or postflop assumptions can shift EV beyond it.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 8520 · Action 6</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000008520&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable121&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:00:05&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;70&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-10 22:11:51&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€227,98&lt;/bets&gt;&#13;
+  &lt;wins&gt;€335,67&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€49,50&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€212,36&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000008520&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-10 22:43:59&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€41,29&quot; dealer=&quot;0&quot; name=&quot;HiddenDust64&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€12,56&quot; chips=&quot;€96,19&quot; dealer=&quot;0&quot; name=&quot;RoccoReraises&quot; rakeamount=&quot;€0,62&quot; seat=&quot;3&quot; win=&quot;€8,75&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€55,84&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,25&quot; chips=&quot;€32,04&quot; dealer=&quot;0&quot; name=&quot;DragonLambda23&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€4,56&quot; chips=&quot;€132,60&quot; dealer=&quot;0&quot; name=&quot;VikingBlind&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;frost_bluff&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;DragonLambda23&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;VikingBlind&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;HiddenDust64&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;RoccoReraises&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;D4 D6 HA CQ&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;DragonLambda23&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;VikingBlind&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;frost_bluff&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;frost_bluff&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;HiddenDust64&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;RoccoReraises&quot; sum=&quot;€1,75&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;DragonLambda23&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;VikingBlind&quot; sum=&quot;€1,25&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;VikingBlind&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;RoccoReraises&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;D7 C4 CK&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;VikingBlind&quot; sum=&quot;€2,81&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;RoccoReraises&quot; sum=&quot;€2,81&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;C3&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;VikingBlind&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;RoccoReraises&quot; sum=&quot;€8,00&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;VikingBlind&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;SK&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></div></article><article class="hand" id="hand-CoinPoker-9000002519" aria-labelledby="heading-4"><header class="handhead"><div><p>CoinPoker · PLO4</p><h2 id="heading-4">Hand #9000002519</h2></div><a href="#hand-CoinPoker-9000002519" class="permalink" aria-label="Permanent link to this hand"># Link to hand</a></header><div class="handbody"><figure class="felt" aria-label="Table before Hero acts"><div class="seat pos-BB"><b>BB</b><span>123.96 bb</span></div><div class="seat pos-UTG folded"><b>UTG</b><small>Fold</small></div><div class="seat pos-HJ folded"><b>HJ</b><small>Fold</small></div><div class="seat pos-SB"><b>SB</b><span>105.76 bb</span></div><div class="seat pos-BTN hero"><b>BTN · Hero</b><span>160.16 bb</span><span class="cards"><span class="card club">A♣</span><span class="card club">7♣</span><span class="card heart">K♥</span><span class="card heart">8♥</span></span></div><div class="seat pos-CO"><b>CO</b><span>61.44 bb</span></div><div class="pot"><span>Preflop · pot</span><b>4.8 bb</b></div></figure><p class="hint">Stacks are chips behind immediately before BTN acts. The flop has yet to be dealt.</p><dl class="facts"><div><dt>CO opens to</dt><dd>3.4 bb</dd></div><div><dt>Modeled 3-bet to</dt><dd>11.6 bb</dd></div><div><dt>Hero action</dt><dd>3-bet to 11.6 bb</dd></div><div><dt>Already committed, excluding antes</dt><dd>CO 3.4 bb · BTN 0 bb · SB 0.4 bb · BB 1 bb</dd></div><div><dt>Ante per player</dt><dd>0 bb</dd></div></dl><div class="finding"><b>Scenario-dependent choice</b><p>Hero chose pot 3-bet. Relative to that action, call leads in the Tighter CO open · 24% scenario (+0.25 BB) and trails in the Postflop checkdown scenario (-1.04 BB).</p></div><div class="scroll"><table class="ev"><caption>Modeled decision EV in BB</caption><thead><tr><th scope="col">Scenario</th><th scope="col">Call</th><th scope="col">3-bet</th><th scope="col">3-bet − call</th></tr></thead><tbody><tr><th scope="row">Base model</th><td><strong>+0.507</strong><small>[0.407, 0.608]</small></td><td><strong>+1.081</strong><small>[0.954, 1.208]</small></td><td><strong>+0.573</strong><small>[0.468, 0.679]</small></td></tr><tr><th scope="row">Tighter CO open · 24%</th><td><strong>+0.314</strong><small>[0.213, 0.415]</small></td><td><strong>+0.065</strong><small>[−0.077, 0.206]</small></td><td><strong>−0.25</strong><small>[−0.359, −0.14]</small></td></tr><tr><th scope="row">Wider CO open · 42%</th><td><strong>+0.695</strong><small>[0.595, 0.795]</small></td><td><strong>+1.789</strong><small>[1.672, 1.906]</small></td><td><strong>+1.094</strong><small>[0.992, 1.196]</small></td></tr><tr><th scope="row">Tighter CO response to a 3-bet · 12%</th><td><strong>+0.511</strong><small>[0.412, 0.61]</small></td><td><strong>+1.625</strong><small>[1.511, 1.74]</small></td><td><strong>+1.114</strong><small>[1.011, 1.218]</small></td></tr><tr><th scope="row">Wider CO response to a 3-bet · 25%</th><td><strong>+0.508</strong><small>[0.405, 0.611]</small></td><td><strong>+0.513</strong><small>[0.369, 0.656]</small></td><td><strong>+0.005</strong><small>[−0.104, 0.113]</small></td></tr><tr><th scope="row">Wider blind defense</th><td><strong>+0.737</strong><small>[0.621, 0.853]</small></td><td><strong>+1.015</strong><small>[0.877, 1.153]</small></td><td><strong>+0.278</strong><small>[0.162, 0.394]</small></td></tr><tr><th scope="row">No rake</th><td><strong>+1.148</strong><small>[1.044, 1.251]</small></td><td><strong>+1.701</strong><small>[1.571, 1.831]</small></td><td><strong>+0.554</strong><small>[0.446, 0.661]</small></td></tr><tr><th scope="row">Postflop checkdown</th><td><strong>+0.56</strong><small>[0.539, 0.582]</small></td><td><strong>+1.6</strong><small>[1.55, 1.65]</small></td><td><strong>+1.04</strong><small>[0.999, 1.08]</small></td></tr></tbody></table></div><p class="hint">Fold is worth 0 BB from the decision point. Brackets show an approximate 95% Monte Carlo interval (estimate ± 1.96 standard errors). Differences use paired standard errors. The interval covers sampling noise within the scenario. Different opponent or postflop assumptions can shift EV beyond it.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 2519 · Line 21</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000002519: PLO 4 (₮0.10/₮0.25) 2026/01/04 23:58:00 CEST
+Table &#x27;800019&#x27; 6-max Seat #1 is the button
+Seat 1: Hero (₮40.04 in chips)
+Seat 2: 6df57319 (₮26.54 in chips)
+Seat 3: a1262c09 (₮31.24 in chips)
+Seat 4: 36b3549b (₮25 in chips)
+Seat 5: 91980893 (₮24.36 in chips)
+Seat 6: 5142eae3 (₮16.21 in chips)
+6df57319: posts small blind ₮0.10
+a1262c09: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to Hero [Ac 7c Kh 8h]
+Dealt to 6df57319
+Dealt to a1262c09
+Dealt to 36b3549b
+Dealt to 91980893
+Dealt to 5142eae3
+36b3549b: folds
+91980893: folds
+5142eae3: raises ₮0.60 to ₮0.85
+Hero: raises ₮2.05 to ₮2.90
+6df57319: folds
+a1262c09: folds
+5142eae3: calls ₮2.05
+*** FLOP *** [Ad Jd 6d]
+5142eae3: checks
+Hero: checks
+*** TURN *** [Ad Jd 6d] [5s]
+5142eae3: bets ₮6.15
+Hero: folds
+5142eae3: RETURN ₮6.15
+*** SHOWDOWN ***
+5142eae3 collected ₮5.82 from pot
+*** SUMMARY ***
+Total pot ₮6.15 | Rake ₮0.31 | Splash Fee ₮0.02
+Hand was run once
+Board [ Ad Jd 6d 5s ]
+Game ended: 2026/01/04 23:59:30 CEST
+Seat 1: Hero folded on the Turn
+Seat 2: 6df57319 folded before Flop (didn&#x27;t bet)
+Seat 3: a1262c09 folded before Flop (didn&#x27;t bet)
+Seat 4: 36b3549b folded before Flop (didn&#x27;t bet)
+Seat 5: 91980893 folded before Flop (didn&#x27;t bet)
+Seat 6: 5142eae3 won (₮5.82)
+</pre></details></div></article><article class="hand" id="hand-iPoker-9000012000" aria-labelledby="heading-5"><header class="handhead"><div><p>iPoker · PLO4</p><h2 id="heading-5">Hand #9000012000</h2></div><a href="#hand-iPoker-9000012000" class="permalink" aria-label="Permanent link to this hand"># Link to hand</a></header><div class="handbody"><figure class="felt" aria-label="Table before Hero acts"><div class="seat pos-BB"><b>BB</b><span>67 bb</span></div><div class="seat pos-UTG folded"><b>UTG</b><small>Fold</small></div><div class="seat pos-HJ folded"><b>HJ</b><small>Fold</small></div><div class="seat pos-SB"><b>SB</b><span>238.02 bb</span></div><div class="seat pos-BTN hero"><b>BTN · Hero</b><span>100 bb</span><span class="cards"><span class="card spade">K♠</span><span class="card club">J♣</span><span class="card club">Q♣</span><span class="card heart">3♥</span></span></div><div class="seat pos-CO"><b>CO</b><span>233.16 bb</span></div><div class="pot"><span>Preflop · pot</span><b>3.5 bb</b></div></figure><p class="hint">Stacks are chips behind immediately before BTN acts. The flop has yet to be dealt.</p><dl class="facts"><div><dt>CO opens to</dt><dd>2 bb</dd></div><div><dt>Modeled 3-bet to</dt><dd>7.5 bb</dd></div><div><dt>Hero action</dt><dd>Fold</dd></div><div><dt>Already committed, excluding antes</dt><dd>CO 2 bb · BTN 0 bb · SB 0.5 bb · BB 1 bb</dd></div><div><dt>Ante per player</dt><dd>0 bb</dd></div></dl><div class="finding"><b>Scenario-dependent choice</b><p>Hero chose fold. Relative to that action, pot 3-bet leads in the Wider CO open · 42% scenario (+0.13 BB) and trails in the Tighter CO open · 24% scenario (-1.80 BB).</p></div><div class="scroll"><table class="ev"><caption>Modeled decision EV in BB</caption><thead><tr><th scope="col">Scenario</th><th scope="col">Call</th><th scope="col">3-bet</th><th scope="col">3-bet − call</th></tr></thead><tbody><tr><th scope="row">Base model</th><td><strong>−0.492</strong><small>[−0.54, −0.444]</small></td><td><strong>−0.709</strong><small>[−0.787, −0.632]</small></td><td><strong>−0.217</strong><small>[−0.286, −0.148]</small></td></tr><tr><th scope="row">Tighter CO open · 24%</th><td><strong>−0.654</strong><small>[−0.702, −0.607]</small></td><td><strong>−1.796</strong><small>[−1.884, −1.709]</small></td><td><strong>−1.142</strong><small>[−1.216, −1.069]</small></td></tr><tr><th scope="row">Wider CO open · 42%</th><td><strong>−0.349</strong><small>[−0.397, −0.301]</small></td><td><strong>+0.125</strong><small>[0.056, 0.194]</small></td><td><strong>+0.474</strong><small>[0.408, 0.54]</small></td></tr><tr><th scope="row">Tighter CO response to a 3-bet · 12%</th><td><strong>−0.492</strong><small>[−0.54, −0.444]</small></td><td><strong>−0.024</strong><small>[−0.089, 0.041]</small></td><td><strong>+0.468</strong><small>[0.404, 0.532]</small></td></tr><tr><th scope="row">Wider CO response to a 3-bet · 25%</th><td><strong>−0.492</strong><small>[−0.54, −0.444]</small></td><td><strong>−1.666</strong><small>[−1.76, −1.572]</small></td><td><strong>−1.174</strong><small>[−1.25, −1.098]</small></td></tr><tr><th scope="row">Wider blind defense</th><td><strong>−0.495</strong><small>[−0.548, −0.441]</small></td><td><strong>−0.86</strong><small>[−0.941, −0.779]</small></td><td><strong>−0.365</strong><small>[−0.44, −0.29]</small></td></tr><tr><th scope="row">No rake</th><td><strong>−0.142</strong><small>[−0.192, −0.092]</small></td><td><strong>−0.372</strong><small>[−0.451, −0.292]</small></td><td><strong>−0.23</strong><small>[−0.301, −0.159]</small></td></tr><tr><th scope="row">Postflop checkdown</th><td><strong>−0.027</strong><small>[−0.037, −0.018]</small></td><td><strong>+0.038</strong><small>[0.015, 0.061]</small></td><td><strong>+0.065</strong><small>[0.045, 0.084]</small></td></tr></tbody></table></div><p class="hint">Fold is worth 0 BB from the decision point. Brackets show an approximate 95% Monte Carlo interval (estimate ± 1.96 standard errors). Differences use paired standard errors. The interval covers sampling noise within the scenario. Different opponent or postflop assumptions can shift EV beyond it.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 12000 · Action 6</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000012000&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable001&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;02:13:44&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;151&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-21 15:53:31&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€317,96&lt;/bets&gt;&#13;
+  &lt;wins&gt;€250,00&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€49,50&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€147,46&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000012000&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-21 17:11:37&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€34,00&quot; chips=&quot;€34,00&quot; dealer=&quot;0&quot; name=&quot;BeaconDriver93&quot; rakeamount=&quot;€3,00&quot; seat=&quot;1&quot; win=&quot;€76,37&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€71,81&quot; dealer=&quot;0&quot; name=&quot;EnzoReraises&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€60,53&quot; dealer=&quot;0&quot; name=&quot;MaxCalls&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€11,37&quot; chips=&quot;€117,58&quot; dealer=&quot;0&quot; name=&quot;OddVillain&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€50,00&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€45,48&quot; chips=&quot;€119,26&quot; dealer=&quot;0&quot; name=&quot;TigerCity&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;TigerCity&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;BeaconDriver93&quot; type=&quot;Pocket&quot;&gt;DK C5 C4 D8&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;EnzoReraises&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;MaxCalls&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;OddVillain&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;SK CJ CQ H3&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;TigerCity&quot; type=&quot;Pocket&quot;&gt;S6 DA D10 SA&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;EnzoReraises&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;MaxCalls&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;OddVillain&quot; sum=&quot;€1,00&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;TigerCity&quot; sum=&quot;€3,50&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€3,00&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;OddVillain&quot; sum=&quot;€2,50&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;TigerCity&quot; sum=&quot;€7,87&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€7,87&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;OddVillain&quot; sum=&quot;€7,87&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;H2 D3 HA&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;TigerCity&quot; sum=&quot;€34,11&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€22,63&quot; type=&quot;7&quot;/&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;OddVillain&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;C9&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;C6&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></div></article><article class="hand" id="hand-iPoker-9000002888" aria-labelledby="heading-6"><header class="handhead"><div><p>iPoker · PLO4</p><h2 id="heading-6">Hand #9000002888</h2></div><a href="#hand-iPoker-9000002888" class="permalink" aria-label="Permanent link to this hand"># Link to hand</a></header><div class="handbody"><figure class="felt" aria-label="Table before Hero acts"><div class="seat pos-BB"><b>BB</b><span>98.1 bb</span></div><div class="seat pos-UTG folded"><b>UTG</b><small>Fold</small></div><div class="seat pos-HJ folded"><b>HJ</b><small>Fold</small></div><div class="seat pos-SB"><b>SB</b><span>250.3 bb</span></div><div class="seat pos-BTN hero"><b>BTN · Hero</b><span>194.12 bb</span><span class="cards"><span class="card club">K♣</span><span class="card club">9♣</span><span class="card heart">10♥</span><span class="card diamond">9♦</span></span></div><div class="seat pos-CO"><b>CO</b><span>136.8 bb</span></div><div class="pot"><span>Preflop · pot</span><b>5 bb</b></div></figure><p class="hint">Stacks are chips behind immediately before BTN acts. The flop has yet to be dealt.</p><dl class="facts"><div><dt>CO opens to</dt><dd>3.5 bb</dd></div><div><dt>Modeled 3-bet to</dt><dd>12 bb</dd></div><div><dt>Hero action</dt><dd>Call to 3.5 bb</dd></div><div><dt>Already committed, excluding antes</dt><dd>CO 3.5 bb · BTN 0 bb · SB 0.5 bb · BB 1 bb</dd></div><div><dt>Ante per player</dt><dd>0 bb</dd></div></dl><div class="finding"><b>Scenario-dependent choice</b><p>Hero chose call. Relative to that action, fold leads in the Tighter CO open · 24% scenario (+1.26 BB) and trails in the Postflop checkdown scenario (-0.05 BB). The played action has a clear edge only in the checkdown scenario.</p></div><div class="scroll"><table class="ev"><caption>Modeled decision EV in BB</caption><thead><tr><th scope="col">Scenario</th><th scope="col">Call</th><th scope="col">3-bet</th><th scope="col">3-bet − call</th></tr></thead><tbody><tr><th scope="row">Base model</th><td><strong>−0.822</strong><small>[−0.944, −0.7]</small></td><td><strong>−2.112</strong><small>[−2.307, −1.918]</small></td><td><strong>−1.29</strong><small>[−1.446, −1.134]</small></td></tr><tr><th scope="row">Tighter CO open · 24%</th><td><strong>−1.26</strong><small>[−1.385, −1.136]</small></td><td><strong>−3.976</strong><small>[−4.193, −3.758]</small></td><td><strong>−2.715</strong><small>[−2.884, −2.546]</small></td></tr><tr><th scope="row">Wider CO open · 42%</th><td><strong>−0.484</strong><small>[−0.605, −0.363]</small></td><td><strong>−0.839</strong><small>[−1.015, −0.662]</small></td><td><strong>−0.354</strong><small>[−0.5, −0.209]</small></td></tr><tr><th scope="row">Tighter CO response to a 3-bet · 12%</th><td><strong>−0.809</strong><small>[−0.927, −0.691]</small></td><td><strong>−1.448</strong><small>[−1.627, −1.269]</small></td><td><strong>−0.639</strong><small>[−0.789, −0.489]</small></td></tr><tr><th scope="row">Wider CO response to a 3-bet · 25%</th><td><strong>−0.801</strong><small>[−0.929, −0.672]</small></td><td><strong>−2.693</strong><small>[−2.908, −2.477]</small></td><td><strong>−1.892</strong><small>[−2.057, −1.727]</small></td></tr><tr><th scope="row">Wider blind defense</th><td><strong>−0.668</strong><small>[−0.807, −0.528]</small></td><td><strong>−2.328</strong><small>[−2.534, −2.122]</small></td><td><strong>−1.66</strong><small>[−1.826, −1.494]</small></td></tr><tr><th scope="row">No rake</th><td><strong>−0.168</strong><small>[−0.293, −0.043]</small></td><td><strong>−1.478</strong><small>[−1.676, −1.281]</small></td><td><strong>−1.31</strong><small>[−1.468, −1.152]</small></td></tr><tr><th scope="row">Postflop checkdown</th><td><strong>+0.052</strong><small>[0.029, 0.075]</small></td><td><strong>+0.037</strong><small>[−0.024, 0.099]</small></td><td><strong>−0.014</strong><small>[−0.065, 0.037]</small></td></tr></tbody></table></div><p class="hint">Fold is worth 0 BB from the decision point. Brackets show an approximate 95% Monte Carlo interval (estimate ± 1.96 standard errors). Differences use paired standard errors. The interval covers sampling noise within the scenario. Different opponent or postflop assumptions can shift EV beyond it.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 2888 · Action 6</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000002888&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable089&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:03:22&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;86&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-04-27 19:45:18&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€213,86&lt;/bets&gt;&#13;
+  &lt;wins&gt;€210,50&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€54,29&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€102,75&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000002888&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-04-27 20:07:45&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€1,75&quot; chips=&quot;€97,06&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€7,35&quot; chips=&quot;€125,40&quot; dealer=&quot;0&quot; name=&quot;NeonB0l7&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€1,75&quot; chips=&quot;€49,55&quot; dealer=&quot;0&quot; name=&quot;UrbanWallet&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€103,43&quot; dealer=&quot;0&quot; name=&quot;MicroSailor&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€19,09&quot; dealer=&quot;0&quot; name=&quot;L0udH3art&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€16,45&quot; chips=&quot;€70,15&quot; dealer=&quot;0&quot; name=&quot;HunterOracle&quot; rakeamount=&quot;€1,21&quot; seat=&quot;10&quot; win=&quot;€16,99&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;UrbanWallet&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;MicroSailor&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;MicroSailor&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;L0udH3art&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;L0udH3art&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;HunterOracle&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;HunterOracle&quot; sum=&quot;€1,75&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;CK C9 H10 D9&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,75&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;NeonB0l7&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;NeonB0l7&quot; sum=&quot;€1,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;UrbanWallet&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;UrbanWallet&quot; sum=&quot;€1,25&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;D4 H2 D10&lt;/cards&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;UrbanWallet&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;HunterOracle&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;CJ&lt;/cards&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;UrbanWallet&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;HunterOracle&quot; sum=&quot;€5,60&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;17&quot; player=&quot;NeonB0l7&quot; sum=&quot;€5,60&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;18&quot; player=&quot;UrbanWallet&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;C2&lt;/cards&gt;&#13;
+   &lt;action no=&quot;19&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;20&quot; player=&quot;HunterOracle&quot; sum=&quot;€9,10&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;21&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></div></article><article class="hand" id="hand-CoinPoker-9000002679" aria-labelledby="heading-7"><header class="handhead"><div><p>CoinPoker · PLO4</p><h2 id="heading-7">Hand #9000002679</h2></div><a href="#hand-CoinPoker-9000002679" class="permalink" aria-label="Permanent link to this hand"># Link to hand</a></header><div class="handbody"><figure class="felt" aria-label="Table before Hero acts"><div class="seat pos-BB"><b>BB</b><span>362.5 bb</span></div><div class="seat pos-UTG folded"><b>UTG</b><small>Fold</small></div><div class="seat pos-HJ folded"><b>HJ</b><small>Fold</small></div><div class="seat pos-SB"><b>SB</b><span>137.22 bb</span></div><div class="seat pos-BTN hero"><b>BTN · Hero</b><span>100 bb</span><span class="cards"><span class="card heart">A♥</span><span class="card heart">Q♥</span><span class="card spade">Q♠</span><span class="card spade">9♠</span></span></div><div class="seat pos-CO"><b>CO</b><span>150.2 bb</span></div><div class="pot"><span>Preflop · pot</span><b>5 bb</b></div></figure><p class="hint">Stacks are chips behind immediately before BTN acts. The flop has yet to be dealt.</p><dl class="facts"><div><dt>CO opens to</dt><dd>3.5 bb</dd></div><div><dt>Modeled 3-bet to</dt><dd>12 bb</dd></div><div><dt>Hero action</dt><dd>3-bet to 12 bb</dd></div><div><dt>Already committed, excluding antes</dt><dd>CO 3.5 bb · BTN 0 bb · SB 0.5 bb · BB 1 bb</dd></div><div><dt>Ante per player</dt><dd>0 bb</dd></div></dl><div class="finding"><b>No clear difference</b><p>The modeled comparisons show no clear advantage over the played pot 3-bet.</p></div><div class="scroll"><table class="ev"><caption>Modeled decision EV in BB</caption><thead><tr><th scope="col">Scenario</th><th scope="col">Call</th><th scope="col">3-bet</th><th scope="col">3-bet − call</th></tr></thead><tbody><tr><th scope="row">Base model</th><td><strong>+2.17</strong><small>[2.049, 2.29]</small></td><td><strong>+2.915</strong><small>[2.761, 3.07]</small></td><td><strong>+0.746</strong><small>[0.614, 0.877]</small></td></tr><tr><th scope="row">Tighter CO open · 24%</th><td><strong>+1.822</strong><small>[1.7, 1.945]</small></td><td><strong>+2.192</strong><small>[2.015, 2.369]</small></td><td><strong>+0.37</strong><small>[0.229, 0.511]</small></td></tr><tr><th scope="row">Wider CO open · 42%</th><td><strong>+2.344</strong><small>[2.225, 2.464]</small></td><td><strong>+3.194</strong><small>[3.056, 3.333]</small></td><td><strong>+0.85</strong><small>[0.726, 0.975]</small></td></tr><tr><th scope="row">Tighter CO response to a 3-bet · 12%</th><td><strong>+2.12</strong><small>[2.001, 2.238]</small></td><td><strong>+2.536</strong><small>[2.399, 2.673]</small></td><td><strong>+0.416</strong><small>[0.291, 0.541]</small></td></tr><tr><th scope="row">Wider CO response to a 3-bet · 25%</th><td><strong>+2.233</strong><small>[2.11, 2.355]</small></td><td><strong>+3.678</strong><small>[3.498, 3.857]</small></td><td><strong>+1.445</strong><small>[1.304, 1.586]</small></td></tr><tr><th scope="row">Wider blind defense</th><td><strong>+2.763</strong><small>[2.622, 2.905]</small></td><td><strong>+3.008</strong><small>[2.845, 3.171]</small></td><td><strong>+0.245</strong><small>[0.102, 0.387]</small></td></tr><tr><th scope="row">No rake</th><td><strong>+2.925</strong><small>[2.802, 3.048]</small></td><td><strong>+3.573</strong><small>[3.416, 3.731]</small></td><td><strong>+0.648</strong><small>[0.515, 0.782]</small></td></tr><tr><th scope="row">Postflop checkdown</th><td><strong>+0.913</strong><small>[0.863, 0.963]</small></td><td><strong>+2.338</strong><small>[2.286, 2.39]</small></td><td><strong>+1.426</strong><small>[1.375, 1.476]</small></td></tr></tbody></table></div><p class="hint">Fold is worth 0 BB from the decision point. Brackets show an approximate 95% Monte Carlo interval (estimate ± 1.96 standard errors). Differences use paired standard errors. The interval covers sampling noise within the scenario. Different opponent or postflop assumptions can shift EV beyond it.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 2679 · Line 21</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000002679: PLO 4 (₮0.25/₮0.50) 2026/01/05 05:18:00 CEST
+Table &#x27;800079&#x27; 6-max Seat #4 is the button
+Seat 1: fcaa12c5 (₮50.37 in chips)
+Seat 2: f9f363e3 (₮50.65 in chips)
+Seat 3: 4cf6fbc0 (₮76.85 in chips)
+Seat 4: Hero (₮50 in chips)
+Seat 5: 921bbb89 (₮68.86 in chips)
+Seat 6: a500f2da (₮181.75 in chips)
+921bbb89: posts small blind ₮0.25
+a500f2da: posts big blind ₮0.50
+*** HOLE CARDS ***
+Dealt to fcaa12c5
+Dealt to f9f363e3
+Dealt to 4cf6fbc0
+Dealt to Hero [Ah Qh Qs 9s]
+Dealt to 921bbb89
+Dealt to a500f2da
+fcaa12c5: folds
+f9f363e3: folds
+4cf6fbc0: raises ₮1.25 to ₮1.75
+Hero: raises ₮4.25 to ₮6
+921bbb89: folds
+a500f2da: folds
+4cf6fbc0: calls ₮4.25
+*** FLOP *** [Kc 6c Tc]
+4cf6fbc0: checks
+Hero: checks
+*** TURN *** [Kc 6c Tc] [8d]
+4cf6fbc0: bets ₮8.50
+Hero: folds
+4cf6fbc0: RETURN ₮8.50
+*** SHOWDOWN ***
+4cf6fbc0 collected ₮12.06 from pot
+*** SUMMARY ***
+Total pot ₮12.75 | Rake ₮0.64 | Splash Fee ₮0.05
+Hand was run once
+Board [ Kc 6c Tc 8d ]
+Game ended: 2026/01/05 05:19:30 CEST
+Seat 1: fcaa12c5 folded before Flop (didn&#x27;t bet)
+Seat 2: f9f363e3 folded before Flop (didn&#x27;t bet)
+Seat 3: 4cf6fbc0 won (₮12.06)
+Seat 4: Hero folded on the Turn
+Seat 5: 921bbb89 folded before Flop (didn&#x27;t bet)
+Seat 6: a500f2da folded before Flop (didn&#x27;t bet)
+</pre></details></div></article><article class="hand" id="hand-CoinPoker-9000004808" aria-labelledby="heading-8"><header class="handhead"><div><p>CoinPoker · PLO4</p><h2 id="heading-8">Hand #9000004808</h2></div><a href="#hand-CoinPoker-9000004808" class="permalink" aria-label="Permanent link to this hand"># Link to hand</a></header><div class="handbody"><figure class="felt" aria-label="Table before Hero acts"><div class="seat pos-BB"><b>BB</b><span>91.58 bb</span></div><div class="seat pos-UTG folded"><b>UTG</b><small>Fold</small></div><div class="seat pos-HJ folded"><b>HJ</b><small>Fold</small></div><div class="seat pos-SB"><b>SB</b><span>100.98 bb</span></div><div class="seat pos-BTN hero"><b>BTN · Hero</b><span>239.7 bb</span><span class="cards"><span class="card diamond">Q♦</span><span class="card heart">7♥</span><span class="card spade">6♠</span><span class="card club">4♣</span></span></div><div class="seat pos-CO"><b>CO</b><span>134.88 bb</span></div><div class="pot"><span>Preflop · pot</span><b>5.46 bb</b></div></figure><p class="hint">Stacks are chips behind immediately before BTN acts. The flop has yet to be dealt.</p><dl class="facts"><div><dt>CO opens to</dt><dd>3 bb</dd></div><div><dt>Modeled 3-bet to</dt><dd>11.46 bb</dd></div><div><dt>Hero action</dt><dd>Fold</dd></div><div><dt>Already committed, excluding antes</dt><dd>CO 3 bb · BTN 0 bb · SB 0.5 bb · BB 1 bb</dd></div><div><dt>Ante per player</dt><dd>0.16 bb</dd></div></dl><div class="finding"><b>No clear difference</b><p>The modeled comparisons show no clear advantage over the played fold.</p></div><div class="scroll"><table class="ev"><caption>Modeled decision EV in BB</caption><thead><tr><th scope="col">Scenario</th><th scope="col">Call</th><th scope="col">3-bet</th><th scope="col">3-bet − call</th></tr></thead><tbody><tr><th scope="row">Base model</th><td><strong>−2.345</strong><small>[−2.421, −2.269]</small></td><td><strong>−2.869</strong><small>[−2.994, −2.744]</small></td><td><strong>−0.524</strong><small>[−0.635, −0.413]</small></td></tr><tr><th scope="row">Tighter CO open · 24%</th><td><strong>−2.418</strong><small>[−2.494, −2.342]</small></td><td><strong>−4.913</strong><small>[−5.052, −4.775]</small></td><td><strong>−2.495</strong><small>[−2.612, −2.378]</small></td></tr><tr><th scope="row">Wider CO open · 42%</th><td><strong>−2.243</strong><small>[−2.319, −2.166]</small></td><td><strong>−1.456</strong><small>[−1.57, −1.342]</small></td><td><strong>+0.787</strong><small>[0.68, 0.893]</small></td></tr><tr><th scope="row">Tighter CO response to a 3-bet · 12%</th><td><strong>−2.345</strong><small>[−2.421, −2.269]</small></td><td><strong>−1.224</strong><small>[−1.331, −1.117]</small></td><td><strong>+1.121</strong><small>[1.017, 1.226]</small></td></tr><tr><th scope="row">Wider CO response to a 3-bet · 25%</th><td><strong>−2.345</strong><small>[−2.421, −2.269]</small></td><td><strong>−5.152</strong><small>[−5.298, −5.006]</small></td><td><strong>−2.807</strong><small>[−2.927, −2.687]</small></td></tr><tr><th scope="row">Wider blind defense</th><td><strong>−2.566</strong><small>[−2.65, −2.482]</small></td><td><strong>−3.315</strong><small>[−3.445, −3.184]</small></td><td><strong>−0.749</strong><small>[−0.868, −0.629]</small></td></tr><tr><th scope="row">No rake</th><td><strong>−1.943</strong><small>[−2.021, −1.865]</small></td><td><strong>−2.456</strong><small>[−2.583, −2.329]</small></td><td><strong>−0.513</strong><small>[−0.626, −0.4]</small></td></tr><tr><th scope="row">Postflop checkdown</th><td><strong>−0.507</strong><small>[−0.522, −0.493]</small></td><td><strong>−0.852</strong><small>[−0.889, −0.815]</small></td><td><strong>−0.345</strong><small>[−0.376, −0.313]</small></td></tr></tbody></table></div><p class="hint">Fold is worth 0 BB from the decision point. Brackets show an approximate 95% Monte Carlo interval (estimate ± 1.96 standard errors). Differences use paired standard errors. The interval covers sampling noise within the scenario. Different opponent or postflop assumptions can shift EV beyond it.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 4808 · Line 27</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000004808: PLO 4 (₮0.25/₮0.50/₮0.08) 2026/01/08 04:16:00 CEST
+Table &#x27;800008&#x27; 6-max Seat #2 is the button
+Seat 1: c3721a9e (₮69.02 in chips)
+Seat 2: Hero (₮119.93 in chips)
+Seat 3: c41d23ff (₮50.82 in chips)
+Seat 4: a7a23b4c (₮46.37 in chips)
+Seat 5: ff8b8bf8 (₮50 in chips)
+Seat 6: b32856be (₮68.58 in chips)
+c3721a9e: posts ante ₮0.08
+Hero: posts ante ₮0.08
+c41d23ff: posts ante ₮0.08
+a7a23b4c: posts ante ₮0.08
+ff8b8bf8: posts ante ₮0.08
+b32856be: posts ante ₮0.08
+c41d23ff: posts small blind ₮0.25
+a7a23b4c: posts big blind ₮0.50
+*** HOLE CARDS ***
+Dealt to c3721a9e
+Dealt to Hero [Qd 7h 6s 4c]
+Dealt to c41d23ff
+Dealt to a7a23b4c
+Dealt to ff8b8bf8
+Dealt to b32856be
+ff8b8bf8: folds
+b32856be: folds
+c3721a9e: raises ₮1 to ₮1.50
+Hero: folds
+c41d23ff: folds
+a7a23b4c: raises ₮3.25 to ₮4.75
+c3721a9e: calls ₮3.25
+*** FLOP *** [Kh 9d Tc]
+a7a23b4c: bets ₮3.38
+c3721a9e: folds
+a7a23b4c: RETURN ₮3.38
+*** SHOWDOWN ***
+a7a23b4c collected ₮9.67 from pot
+*** SUMMARY ***
+Total pot ₮10.23 | Rake ₮0.51 | Splash Fee ₮0.05
+Hand was run once
+Board [ Kh 9d Tc ]
+Game ended: 2026/01/08 04:17:30 CEST
+Seat 1: c3721a9e folded on the Flop
+Seat 2: Hero folded before Flop (didn&#x27;t bet)
+Seat 3: c41d23ff folded before Flop (didn&#x27;t bet)
+Seat 4: a7a23b4c won (₮9.67)
+Seat 5: ff8b8bf8 folded before Flop (didn&#x27;t bet)
+Seat 6: b32856be folded before Flop (didn&#x27;t bet)
+</pre></details></div></article><article class="hand" id="hand-iPoker-9000010639" aria-labelledby="heading-9"><header class="handhead"><div><p>iPoker · PLO4</p><h2 id="heading-9">Hand #9000010639</h2></div><a href="#hand-iPoker-9000010639" class="permalink" aria-label="Permanent link to this hand"># Link to hand</a></header><div class="handbody"><figure class="felt" aria-label="Table before Hero acts"><div class="seat pos-BB"><b>BB</b><span>103.36 bb</span></div><div class="seat pos-UTG folded"><b>UTG</b><small>Fold</small></div><div class="seat pos-HJ folded"><b>HJ</b><small>Fold</small></div><div class="seat pos-SB"><b>SB</b><span>99.6 bb</span></div><div class="seat pos-BTN hero"><b>BTN · Hero</b><span>117.92 bb</span><span class="cards"><span class="card diamond">2♦</span><span class="card diamond">4♦</span><span class="card club">10♣</span><span class="card diamond">Q♦</span></span></div><div class="seat pos-CO"><b>CO</b><span>157.2 bb</span></div><div class="pot"><span>Preflop · pot</span><b>4.8 bb</b></div></figure><p class="hint">Stacks are chips behind immediately before BTN acts. The flop has yet to be dealt.</p><dl class="facts"><div><dt>CO opens to</dt><dd>3.4 bb</dd></div><div><dt>Modeled 3-bet to</dt><dd>11.6 bb</dd></div><div><dt>Hero action</dt><dd>Fold</dd></div><div><dt>Already committed, excluding antes</dt><dd>CO 3.4 bb · BTN 0 bb · SB 0.4 bb · BB 1 bb</dd></div><div><dt>Ante per player</dt><dd>0 bb</dd></div></dl><div class="finding"><b>No clear difference</b><p>The modeled comparisons show no clear advantage over the played fold.</p></div><div class="scroll"><table class="ev"><caption>Modeled decision EV in BB</caption><thead><tr><th scope="col">Scenario</th><th scope="col">Call</th><th scope="col">3-bet</th><th scope="col">3-bet − call</th></tr></thead><tbody><tr><th scope="row">Base model</th><td><strong>−2.719</strong><small>[−2.799, −2.638]</small></td><td><strong>−3.261</strong><small>[−3.385, −3.137]</small></td><td><strong>−0.542</strong><small>[−0.654, −0.43]</small></td></tr><tr><th scope="row">Tighter CO open · 24%</th><td><strong>−2.857</strong><small>[−2.938, −2.777]</small></td><td><strong>−5.342</strong><small>[−5.479, −5.204]</small></td><td><strong>−2.484</strong><small>[−2.601, −2.368]</small></td></tr><tr><th scope="row">Wider CO open · 42%</th><td><strong>−2.617</strong><small>[−2.698, −2.536]</small></td><td><strong>−2.002</strong><small>[−2.115, −1.888]</small></td><td><strong>+0.616</strong><small>[0.507, 0.724]</small></td></tr><tr><th scope="row">Tighter CO response to a 3-bet · 12%</th><td><strong>−2.719</strong><small>[−2.799, −2.638]</small></td><td><strong>−1.752</strong><small>[−1.858, −1.645]</small></td><td><strong>+0.967</strong><small>[0.861, 1.073]</small></td></tr><tr><th scope="row">Wider CO response to a 3-bet · 25%</th><td><strong>−2.719</strong><small>[−2.799, −2.638]</small></td><td><strong>−5.315</strong><small>[−5.461, −5.169]</small></td><td><strong>−2.596</strong><small>[−2.716, −2.476]</small></td></tr><tr><th scope="row">Wider blind defense</th><td><strong>−2.92</strong><small>[−3.011, −2.829]</small></td><td><strong>−3.665</strong><small>[−3.795, −3.536]</small></td><td><strong>−0.746</strong><small>[−0.867, −0.624]</small></td></tr><tr><th scope="row">No rake</th><td><strong>−2.288</strong><small>[−2.371, −2.205]</small></td><td><strong>−2.848</strong><small>[−2.974, −2.722]</small></td><td><strong>−0.56</strong><small>[−0.674, −0.447]</small></td></tr><tr><th scope="row">Postflop checkdown</th><td><strong>−0.769</strong><small>[−0.783, −0.754]</small></td><td><strong>−1.035</strong><small>[−1.071, −1]</small></td><td><strong>−0.267</strong><small>[−0.297, −0.236]</small></td></tr></tbody></table></div><p class="hint">Fold is worth 0 BB from the decision point. Brackets show an approximate 95% Monte Carlo interval (estimate ± 1.96 standard errors). Differences use paired standard errors. The interval covers sampling noise within the scenario. Different opponent or postflop assumptions can shift EV beyond it.</p><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 10639 · Action 6</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000010639&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,10/€0,25&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable040&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,10&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,25&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:46:46&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;91&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-18 16:15:08&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€56,14&lt;/bets&gt;&#13;
+  &lt;wins&gt;€34,46&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€24,75&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€32,01&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000010639&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-18 17:40:49&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€0,85&quot; chips=&quot;€40,15&quot; dealer=&quot;0&quot; name=&quot;CopperStorm247&quot; seat=&quot;1&quot; win=&quot;€0,60&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€29,48&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,10&quot; chips=&quot;€25,00&quot; dealer=&quot;0&quot; name=&quot;x7hund3rProxyx3&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,25&quot; chips=&quot;€26,09&quot; dealer=&quot;0&quot; name=&quot;frost_bluff&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€34,13&quot; dealer=&quot;0&quot; name=&quot;AndreRaises19&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€55,87&quot; dealer=&quot;0&quot; name=&quot;IronPulse&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;x7hund3rProxyx3&quot; sum=&quot;€0,10&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;frost_bluff&quot; sum=&quot;€0,25&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;CopperStorm247&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;D2 D4 C10 DQ&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;x7hund3rProxyx3&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;frost_bluff&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;AndreRaises19&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;IronPulse&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;AndreRaises19&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;IronPulse&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;CopperStorm247&quot; sum=&quot;€0,85&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;x7hund3rProxyx3&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;frost_bluff&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></div></article></section></div>
+<section class="method" id="method"><h2>How to read the results</h2>
+<p>Hands are ordered by review priority. The pilot compares actions under its modeling assumptions.
+A larger difference can warrant a closer look. Assessing a strategic mistake requires additional evidence.</p>
+<ul><li>The deterministic SHA-256 order selects three public anonymized CoinPoker hands with antes, two without antes and five iPoker hands without antes. The selection uses the state before BTN acts and requires at least 30 BB behind for all four active players. Measuring error frequency would require a different sample.</li><li>Each trial deals new opponent cards and a new board. Call and pot-sized 3-bet use the same deal within a trial. Fold has zero EV from the decision point. The inputs include Hero&#x27;s cards, the pot, commitments and stacks. The source view can show the observed result and showdown cards.</li><li>Ranges and policies are modeling assumptions. CO percentages are cutoffs on the model&#x27;s PLO4 ordering before conditioning on action. The base cutoffs are 32% to open and 18% to continue. Each variant changes one assumption.</li><li>The simulator accounts for Hero&#x27;s four card blockers and the CO open. The observed UTG and HJ folds select the spot. Remaining cards are dealt independently of those folding ranges. The hand ordering uses rank, pairs, suits and connectivity.</li><li>Both blinds can call or reraise. Preflop allows pot-sized raises through the 4-bet, followed by call or fold. The simple postflop policy allows up to one half-pot bet per street with calls or folds. Frequencies depend on the hand, board, initiative and remaining players. Every player follows these preset postflop rules.</li><li>The base rake assumption is 5% capped at 3 BB when a flop is dealt. A separate scenario omits rake. The actual schedules for these specific hands are unverified.</li><li>Each scenario combines 3 independent runs of 100,000 accepted deals. EV intervals represent approximately 95% simulation uncertainty. The 3-bet versus call difference uses paired trials.</li><li>The review order uses Bonferroni-adjusted lower bounds across the three action pairs and all scenarios for each hand. It prioritizes alternatives that lead in every scenario, clear reversals and then advantages limited to some scenarios. Within each group, larger lower bounds come first. All hands remain available. This adjustment covers simulation noise. Strategic accuracy requires separate evidence.</li></ul><div class="selection scroll"><table class="ev"><caption>Source hand selection</caption><thead><tr><th scope="col">Room</th><th scope="col">Ante per player</th><th scope="col">Eligible</th><th scope="col">Selected</th></tr></thead><tbody><tr><th scope="row">CoinPoker</th><td>0.16 bb</td><td>115</td><td>3</td></tr><tr><th scope="row">CoinPoker</th><td>0 bb</td><td>12</td><td>2</td></tr><tr><th scope="row">iPoker</th><td>0 bb</td><td>83</td><td>5</td></tr></tbody></table><p class="hint">The sample is stratified by room and ante. The played action and result did not affect selection. Estimating error frequency requires a different sample.</p></div><dl class="run"><div><dt>Deals per hand and scenario</dt><dd>300 000</dd></div><div><dt>Runtime</dt><dd>27.51 s</dd></div><div><dt>Workers</dt><dd>4</dd></div><div><dt>Processor</dt><dd>13th Gen Intel(R) Core(TM) i5-13400F</dd></div><div><dt>Simulation seeds</dt><dd>48371, 83219, 260003</dd></div></dl></section></main>
+<script>
+(() => {
+  const links = Array.from(document.querySelectorAll('.handlink'));
+  if (!links.length) return;
+  const filters = Array.from(document.querySelectorAll('[data-filter]'));
+  const empty = document.getElementById('empty');
+  const quantity = document.querySelector('.quantity');
+  const rows = links.map(link => ({link, body: document.getElementById(decodeURIComponent(link.hash.slice(1)))}));
+  let current = null;
+  document.documentElement.classList.add('interactive');
+  function show(requested, updateAddress) {
+    const eligible = [];
+    for (const row of rows) {
+      const visible = filters.every(el => !el.value || row.link.dataset[el.dataset.filter] === el.value);
+      row.link.parentElement.hidden = !visible;
+      if (visible) eligible.push(row);
+    }
+    current = eligible.find(row => row.link.hash === requested) || eligible[0] || null;
+    for (const row of rows) {
+      row.body.hidden = row !== current;
+      if (row === current) row.link.setAttribute('aria-current', 'true');
+      else row.link.removeAttribute('aria-current');
+    }
+    empty.hidden = !!current;
+    quantity.textContent = 'Showing ' + eligible.length + ' / ' + rows.length;
+    if (updateAddress && current && current.link.hash !== location.hash) {
+      history.replaceState(null, '', current.link.hash);
+    }
+  }
+  function followHash() {
+    if (location.hash === '#method' && current) return;
+    if (rows.some(row => row.link.hash === location.hash && row.link.parentElement.hidden)) {
+      filters.forEach(el => { el.value = ''; });
+    }
+    show(location.hash, false);
+  }
+  links.forEach(link => link.addEventListener('click', event => {
+    if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey || event.button !== 0) return;
+    event.preventDefault();
+    if (location.hash !== link.hash) history.pushState(null, '', link.hash);
+    show(link.hash, false);
+  }));
+  filters.forEach(el => el.addEventListener('change', () => show(current ? current.link.hash : '', true)));
+  window.addEventListener('hashchange', followHash);
+  followHash();
+})();
+</script></body></html>

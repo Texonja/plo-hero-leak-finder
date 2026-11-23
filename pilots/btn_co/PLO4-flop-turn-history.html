@@ -1,0 +1,1414 @@
+<!doctype html><html lang="en"><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1"><title>Flop and turn opponent history audit</title>
+<style>*{box-sizing:border-box}body{margin:0;background:#edf2f6;color:#192f43;font:16px/1.45 'Segoe UI',Arial,sans-serif}main{max-width:1080px;margin:auto;padding:24px 16px}header{background:#ffc88e;border-radius:8px;padding:20px}article{margin:15px 0;background:white;border:1px solid #cbd7e0;border-radius:8px;padding:16px}h1,h2,p{margin:5px 0 12px}pre{white-space:pre-wrap;overflow-wrap:anywhere;font-size:14px;background:#f1f5f8;padding:10px}.source pre{max-height:320px;overflow:auto}table{border-collapse:collapse;width:100%;text-align:left;background:white}th,td{border:1px solid #cbd7e0;padding:8px}thead{background:#dde7ef}.scroll{overflow:auto}summary{cursor:pointer}li{margin-bottom:7px}.card{display:inline-block;padding:2px 6px;background:#edf2f6;border-radius:3px;margin-right:3px}.heart,.diamond{color:#8b3745}</style>
+<main><header><h1>Flop and turn opponent history audit</h1><p>Recorded responses, matched samples, and recommendation changes in controlled tests.</p></header>
+<h2>Real public hands</h2>
+<p>The library contains 22,250 accepted Hero hands. We checked each heads-up decision after an opponent checked, using available sizes and only earlier completed hands or sessions. Observed folds, calls, and raises are direct responses to Hero's first regular bet after a check. The totals cover all opponents. A personal recommendation uses only comparable earlier responses from the same opponent.</p>
+<div class="scroll"><table><thead><tr><th>Network</th><th>Street</th><th>Hero decisions</th><th>Observed fold / call / raise</th><th>Largest earlier sample in one size group</th><th>Decisions with at least 30 responses across three dates</th></tr></thead><tbody><tr><td>CoinPoker</td><td>Flop</td><td>515</td><td>128 / 93 / 15</td><td>0</td><td>0</td></tr><tr><td>CoinPoker</td><td>Turn</td><td>349</td><td>66 / 70 / 12</td><td>0</td><td>0</td></tr><tr><td>iPoker</td><td>Flop</td><td>554</td><td>116 / 101 / 24</td><td>2</td><td>0</td></tr><tr><td>iPoker</td><td>Turn</td><td>352</td><td>70 / 59 / 14</td><td>1</td><td>0</td></tr></tbody></table></div>
+<article><h2>CoinPoker · Flop · #9000000003 · Line 32</h2>
+    <p>Opponent <b>308fb637</b> · size group around 33% pot</p>
+    <span class="cards"><span class="card heart">A♥</span><span class="card diamond">8♦</span><span class="card diamond">6♦</span><span class="card spade">8♠</span></span><p>Board As 6h 7c</p>
+    <pre>Model recommendation → recommendation with history · bet 85% → bet 85%
+Too few comparable responses to change the recommendation.
+Around 33% pot · 0/0 past opportunities · 0 dates · fold 0 · call 0 · raise 0.
+Around 50% pot · 0/0 past opportunities · 0 dates · fold 0 · call 0 · raise 0.
+Around 67% pot · 0/0 past opportunities · 0 dates · fold 0 · call 0 · raise 0.
+Around 85% pot · 0/0 past opportunities · 0 dates · fold 0 · call 0 · raise 0.</pre><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 3 · Line 32</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000003: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 12:06:00 CEST
+Table &#x27;800003&#x27; 6-max Seat #3 is the button
+Seat 1: 8bcb3eef (₮37.79 in chips)
+Seat 2: 90e88efc (₮25.51 in chips)
+Seat 3: Hero (₮25.35 in chips)
+Seat 4: 308fb637 (₮17.75 in chips)
+Seat 5: 70953883 (₮26 in chips)
+Seat 6: 6a8f23d3 (₮38.60 in chips)
+8bcb3eef: posts ante ₮0.04
+90e88efc: posts ante ₮0.04
+Hero: posts ante ₮0.04
+308fb637: posts ante ₮0.04
+70953883: posts ante ₮0.04
+6a8f23d3: posts ante ₮0.04
+308fb637: posts small blind ₮0.10
+70953883: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to 8bcb3eef
+Dealt to 90e88efc
+Dealt to Hero [Ah 8d 6d 8s]
+Dealt to 308fb637
+Dealt to 70953883
+Dealt to 6a8f23d3
+6a8f23d3: folds
+8bcb3eef: folds
+90e88efc: folds
+Hero: raises ₮0.37 to ₮0.62
+308fb637: calls ₮0.52
+70953883: folds
+*** FLOP *** [As 6h 7c]
+308fb637: checks
+Hero: bets ₮1.30
+308fb637: calls ₮1.30
+*** TURN *** [As 6h 7c] [4d]
+308fb637: checks
+Hero: checks
+*** RIVER *** [As 6h 7c 4d] [9c]
+308fb637: bets ₮2.75
+Hero: calls ₮2.75
+*** SHOWDOWN ***
+Hero: shows [Ah 8d 6d 8s] (Two Pair)
+Hero collected ₮9.32 from pot
+308fb637: shows [Jh 9h Jc 3d] (One Pair)
+*** SUMMARY ***
+Total pot ₮9.83 | Rake ₮0.49 | Splash Fee ₮0.02
+Hand was run once
+Board [ As 6h 7c 4d 9c ]
+Game ended: 2026/01/01 12:07:30 CEST
+Seat 1: 8bcb3eef folded before Flop (didn&#x27;t bet)
+Seat 2: 90e88efc folded before Flop (didn&#x27;t bet)
+Seat 3: Hero showed [Ah 8d 6d 8s] and won (₮9.32) with Two Pair
+Seat 4: 308fb637 showed [Jh 9h Jc 3d] and lost with One Pair
+Seat 5: 70953883 folded before Flop (didn&#x27;t bet)
+Seat 6: 6a8f23d3 folded before Flop (didn&#x27;t bet)
+</pre></details>
+    <h3>Comparable earlier responses in this group</h3><ul><li>No comparable earlier responses were available at the decision.</li></ul>
+    <h3>Actual responses in the library</h3>
+    <p>Each source example shows a response on this network and street, with its own opponent and context.</p><ul><li>fold · #9000000010 · Line 29<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 10 · Line 29</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000010: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 12:20:00 CEST
+Table &#x27;800010&#x27; 6-max Seat #3 is the button
+Seat 2: 62b405c1 (₮25.02 in chips)
+Seat 3: Hero (₮23.82 in chips)
+Seat 4: b7f7f999 (₮38.04 in chips)
+Seat 5: 97a0c401 (₮10 in chips)
+Seat 6: ec25d877 (₮26.94 in chips)
+62b405c1: posts ante ₮0.04
+Hero: posts ante ₮0.04
+b7f7f999: posts ante ₮0.04
+97a0c401: posts ante ₮0.04
+ec25d877: posts ante ₮0.04
+b7f7f999: posts small blind ₮0.10
+97a0c401: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to 62b405c1
+Dealt to Hero [Ah 8h Tc 7c]
+Dealt to b7f7f999
+Dealt to 97a0c401
+Dealt to ec25d877
+ec25d877: folds
+62b405c1: folds
+Hero: raises ₮0.60 to ₮0.85
+b7f7f999: calls ₮0.75
+97a0c401: folds
+*** FLOP *** [8s 6h Jc]
+b7f7f999: checks
+Hero: bets ₮1.08
+b7f7f999: folds
+Hero: RETURN ₮1.08
+*** SHOWDOWN ***
+Hero collected ₮2.02 from pot
+*** SUMMARY ***
+Total pot ₮2.15 | Rake ₮0.11 | Splash Fee ₮0.02
+Hand was run once
+Board [ 8s 6h Jc ]
+Game ended: 2026/01/01 12:21:30 CEST
+Seat 2: 62b405c1 folded before Flop (didn&#x27;t bet)
+Seat 3: Hero showed [Ah 8h Tc 7c] and won (₮2.02)
+Seat 4: b7f7f999 folded on the Flop
+Seat 5: 97a0c401 folded before Flop (didn&#x27;t bet)
+Seat 6: ec25d877 folded before Flop (didn&#x27;t bet)
+</pre></details></li><li>call · #9000000003 · Line 33<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 3 · Line 33</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000003: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 12:06:00 CEST
+Table &#x27;800003&#x27; 6-max Seat #3 is the button
+Seat 1: 8bcb3eef (₮37.79 in chips)
+Seat 2: 90e88efc (₮25.51 in chips)
+Seat 3: Hero (₮25.35 in chips)
+Seat 4: 308fb637 (₮17.75 in chips)
+Seat 5: 70953883 (₮26 in chips)
+Seat 6: 6a8f23d3 (₮38.60 in chips)
+8bcb3eef: posts ante ₮0.04
+90e88efc: posts ante ₮0.04
+Hero: posts ante ₮0.04
+308fb637: posts ante ₮0.04
+70953883: posts ante ₮0.04
+6a8f23d3: posts ante ₮0.04
+308fb637: posts small blind ₮0.10
+70953883: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to 8bcb3eef
+Dealt to 90e88efc
+Dealt to Hero [Ah 8d 6d 8s]
+Dealt to 308fb637
+Dealt to 70953883
+Dealt to 6a8f23d3
+6a8f23d3: folds
+8bcb3eef: folds
+90e88efc: folds
+Hero: raises ₮0.37 to ₮0.62
+308fb637: calls ₮0.52
+70953883: folds
+*** FLOP *** [As 6h 7c]
+308fb637: checks
+Hero: bets ₮1.30
+308fb637: calls ₮1.30
+*** TURN *** [As 6h 7c] [4d]
+308fb637: checks
+Hero: checks
+*** RIVER *** [As 6h 7c 4d] [9c]
+308fb637: bets ₮2.75
+Hero: calls ₮2.75
+*** SHOWDOWN ***
+Hero: shows [Ah 8d 6d 8s] (Two Pair)
+Hero collected ₮9.32 from pot
+308fb637: shows [Jh 9h Jc 3d] (One Pair)
+*** SUMMARY ***
+Total pot ₮9.83 | Rake ₮0.49 | Splash Fee ₮0.02
+Hand was run once
+Board [ As 6h 7c 4d 9c ]
+Game ended: 2026/01/01 12:07:30 CEST
+Seat 1: 8bcb3eef folded before Flop (didn&#x27;t bet)
+Seat 2: 90e88efc folded before Flop (didn&#x27;t bet)
+Seat 3: Hero showed [Ah 8d 6d 8s] and won (₮9.32) with Two Pair
+Seat 4: 308fb637 showed [Jh 9h Jc 3d] and lost with One Pair
+Seat 5: 70953883 folded before Flop (didn&#x27;t bet)
+Seat 6: 6a8f23d3 folded before Flop (didn&#x27;t bet)
+</pre></details></li><li>raise · #9000000132 · Line 30<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 132 · Line 30</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000132: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 16:24:00 CEST
+Table &#x27;800032&#x27; 6-max Seat #3 is the button
+Seat 1: 62dce6cb (₮25.63 in chips)
+Seat 2: 4f4f1a74 (₮12.50 in chips)
+Seat 3: Hero (₮30.47 in chips)
+Seat 4: 41b6922f (₮28.86 in chips)
+Seat 5: a004d1f9 (₮27.04 in chips)
+62dce6cb: posts ante ₮0.04
+4f4f1a74: posts ante ₮0.04
+Hero: posts ante ₮0.04
+41b6922f: posts ante ₮0.04
+a004d1f9: posts ante ₮0.04
+41b6922f: posts small blind ₮0.10
+a004d1f9: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to 62dce6cb
+Dealt to 4f4f1a74
+Dealt to Hero [7d 4d 6h 5h]
+Dealt to 41b6922f
+Dealt to a004d1f9
+62dce6cb: folds
+4f4f1a74: raises ₮0.60 to ₮0.85
+Hero: raises ₮2.05 to ₮2.90
+41b6922f: folds
+a004d1f9: folds
+4f4f1a74: calls ₮2.05
+*** FLOP *** [9h 2s 4c]
+4f4f1a74: checks
+Hero: bets ₮6.35
+4f4f1a74: ALLIN ₮9.56
+Hero: calls ₮3.21
+*** TURN *** [9h 2s 4c] [7c]
+*** RIVER *** [9h 2s 4c 7c] [Ad]
+*** SHOWDOWN ***
+Hero: shows [7d 4d 6h 5h] (Two Pair)
+Hero collected ₮24.18 from pot
+4f4f1a74: shows [Tc Js Qc Jd] (One Pair)
+*** SUMMARY ***
+Total pot ₮25.47 | Rake ₮1.27 | Splash Fee ₮0.02
+Hand was run once
+Board [ 9h 2s 4c 7c Ad ]
+Game ended: 2026/01/01 16:25:30 CEST
+Seat 1: 62dce6cb folded before Flop (didn&#x27;t bet)
+Seat 2: 4f4f1a74 showed [Tc Js Qc Jd] and lost with One Pair
+Seat 3: Hero showed [7d 4d 6h 5h] and won (₮24.18) with Two Pair
+Seat 4: 41b6922f folded before Flop (didn&#x27;t bet)
+Seat 5: a004d1f9 folded before Flop (didn&#x27;t bet)
+</pre></details></li></ul></article><article><h2>CoinPoker · Turn · #9000000003 · Line 36</h2>
+    <p>Opponent <b>308fb637</b> · size group around 33% pot</p>
+    <span class="cards"><span class="card heart">A♥</span><span class="card diamond">8♦</span><span class="card diamond">6♦</span><span class="card spade">8♠</span></span><p>Board As 6h 7c 4d</p>
+    <pre>Model recommendation → recommendation with history · bet 85% → bet 85%
+Too few comparable responses to change the recommendation.
+Around 33% pot · 0/0 past opportunities · 0 dates · fold 0 · call 0 · raise 0.
+Around 50% pot · 0/0 past opportunities · 0 dates · fold 0 · call 0 · raise 0.
+Around 67% pot · 0/0 past opportunities · 0 dates · fold 0 · call 0 · raise 0.
+Around 85% pot · 0/0 past opportunities · 0 dates · fold 0 · call 0 · raise 0.</pre><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 3 · Line 36</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000003: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 12:06:00 CEST
+Table &#x27;800003&#x27; 6-max Seat #3 is the button
+Seat 1: 8bcb3eef (₮37.79 in chips)
+Seat 2: 90e88efc (₮25.51 in chips)
+Seat 3: Hero (₮25.35 in chips)
+Seat 4: 308fb637 (₮17.75 in chips)
+Seat 5: 70953883 (₮26 in chips)
+Seat 6: 6a8f23d3 (₮38.60 in chips)
+8bcb3eef: posts ante ₮0.04
+90e88efc: posts ante ₮0.04
+Hero: posts ante ₮0.04
+308fb637: posts ante ₮0.04
+70953883: posts ante ₮0.04
+6a8f23d3: posts ante ₮0.04
+308fb637: posts small blind ₮0.10
+70953883: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to 8bcb3eef
+Dealt to 90e88efc
+Dealt to Hero [Ah 8d 6d 8s]
+Dealt to 308fb637
+Dealt to 70953883
+Dealt to 6a8f23d3
+6a8f23d3: folds
+8bcb3eef: folds
+90e88efc: folds
+Hero: raises ₮0.37 to ₮0.62
+308fb637: calls ₮0.52
+70953883: folds
+*** FLOP *** [As 6h 7c]
+308fb637: checks
+Hero: bets ₮1.30
+308fb637: calls ₮1.30
+*** TURN *** [As 6h 7c] [4d]
+308fb637: checks
+Hero: checks
+*** RIVER *** [As 6h 7c 4d] [9c]
+308fb637: bets ₮2.75
+Hero: calls ₮2.75
+*** SHOWDOWN ***
+Hero: shows [Ah 8d 6d 8s] (Two Pair)
+Hero collected ₮9.32 from pot
+308fb637: shows [Jh 9h Jc 3d] (One Pair)
+*** SUMMARY ***
+Total pot ₮9.83 | Rake ₮0.49 | Splash Fee ₮0.02
+Hand was run once
+Board [ As 6h 7c 4d 9c ]
+Game ended: 2026/01/01 12:07:30 CEST
+Seat 1: 8bcb3eef folded before Flop (didn&#x27;t bet)
+Seat 2: 90e88efc folded before Flop (didn&#x27;t bet)
+Seat 3: Hero showed [Ah 8d 6d 8s] and won (₮9.32) with Two Pair
+Seat 4: 308fb637 showed [Jh 9h Jc 3d] and lost with One Pair
+Seat 5: 70953883 folded before Flop (didn&#x27;t bet)
+Seat 6: 6a8f23d3 folded before Flop (didn&#x27;t bet)
+</pre></details>
+    <h3>Comparable earlier responses in this group</h3><ul><li>No comparable earlier responses were available at the decision.</li></ul>
+    <h3>Actual responses in the library</h3>
+    <p>Each source example shows a response on this network and street, with its own opponent and context.</p><ul><li>fold · #9000000030 · Line 32<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 30 · Line 32</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000030: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 13:00:00 CEST
+Table &#x27;800030&#x27; 6-max Seat #6 is the button
+Seat 1: cec82e0e (₮22.52 in chips)
+Seat 3: Hero (₮25.99 in chips)
+Seat 4: b094b1a9 (₮34.09 in chips)
+Seat 5: ba5d6393 (₮10 in chips)
+Seat 6: f6d5add1 (₮27.42 in chips)
+cec82e0e: posts ante ₮0.04
+Hero: posts ante ₮0.04
+b094b1a9: posts ante ₮0.04
+ba5d6393: posts ante ₮0.04
+f6d5add1: posts ante ₮0.04
+cec82e0e: posts small blind ₮0.10
+Hero: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to cec82e0e
+Dealt to Hero [Kh 8h 2h Ts]
+Dealt to b094b1a9
+Dealt to ba5d6393
+Dealt to f6d5add1
+b094b1a9: folds
+ba5d6393: folds
+f6d5add1: folds
+cec82e0e: raises ₮0.50 to ₮0.75
+Hero: calls ₮0.50
+*** FLOP *** [9c 5s 2d]
+cec82e0e: checks
+Hero: checks
+*** TURN *** [9c 5s 2d] [Jc]
+cec82e0e: checks
+Hero: bets ₮1.70
+cec82e0e: folds
+Hero: RETURN ₮1.70
+*** SHOWDOWN ***
+Hero collected ₮1.60 from pot
+*** SUMMARY ***
+Total pot ₮1.70 | Rake ₮0.08 | Splash Fee ₮0.02
+Hand was run once
+Board [ 9c 5s 2d Jc ]
+Game ended: 2026/01/01 13:01:30 CEST
+Seat 1: cec82e0e folded on the Turn
+Seat 3: Hero showed [Kh 8h 2h Ts] and won (₮1.60)
+Seat 4: b094b1a9 folded before Flop (didn&#x27;t bet)
+Seat 5: ba5d6393 folded before Flop (didn&#x27;t bet)
+Seat 6: f6d5add1 folded before Flop (didn&#x27;t bet)
+</pre></details></li><li>call · #9000000042 · Line 28<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 42 · Line 28</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000042: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 13:24:00 CEST
+Table &#x27;800042&#x27; 6-max Seat #3 is the button
+Seat 1: a5052524 (₮21.67 in chips)
+Seat 3: Hero (₮25.79 in chips)
+Seat 4: 187349d3 (₮34.23 in chips)
+Seat 5: 621c6af1 (₮11.26 in chips)
+a5052524: posts ante ₮0.04
+Hero: posts ante ₮0.04
+187349d3: posts ante ₮0.04
+621c6af1: posts ante ₮0.04
+187349d3: posts small blind ₮0.10
+621c6af1: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to a5052524
+Dealt to Hero [Ks Ts Jh 5c]
+Dealt to 187349d3
+Dealt to 621c6af1
+a5052524: raises ₮0.50 to ₮0.75
+Hero: calls ₮0.75
+187349d3: folds
+621c6af1: folds
+*** FLOP *** [8c 8s 6h]
+a5052524: checks
+Hero: checks
+*** TURN *** [8c 8s 6h] [4d]
+a5052524: checks
+Hero: bets ₮1
+a5052524: calls ₮1
+*** RIVER *** [8c 8s 6h 4d] [3s]
+a5052524: checks
+Hero: bets ₮2
+a5052524: calls ₮2
+*** SHOWDOWN ***
+a5052524: shows [Kd 9d 9s 7h] (Two Pair)
+a5052524 collected ₮7.59 from pot
+Hero: shows [Ks Ts Jh 5c] (One Pair)
+*** SUMMARY ***
+Total pot ₮8.01 | Rake ₮0.40 | Splash Fee ₮0.02
+Hand was run once
+Board [ 8c 8s 6h 4d 3s ]
+Game ended: 2026/01/01 13:25:30 CEST
+Seat 1: a5052524 showed [Kd 9d 9s 7h] and won (₮7.59) with Two Pair
+Seat 3: Hero showed [Ks Ts Jh 5c] and lost with One Pair
+Seat 4: 187349d3 folded before Flop (didn&#x27;t bet)
+Seat 5: 621c6af1 folded before Flop (didn&#x27;t bet)
+</pre></details></li><li>raise · #9000000439 · Line 30<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Text hand 439 · Line 30</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000439: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/02 02:38:00 CEST
+Table &#x27;800039&#x27; 6-max Seat #2 is the button
+Seat 1: c44f0c24 (₮51.73 in chips)
+Seat 2: d12acae0 (₮137.32 in chips)
+Seat 4: 13807099 (₮23.89 in chips)
+Seat 5: Hero (₮25.02 in chips)
+c44f0c24: posts ante ₮0.04
+d12acae0: posts ante ₮0.04
+13807099: posts ante ₮0.04
+Hero: posts ante ₮0.04
+13807099: posts small blind ₮0.10
+Hero: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to c44f0c24
+Dealt to d12acae0
+Dealt to 13807099
+Dealt to Hero [Qh Jh 9h Jd]
+c44f0c24: folds
+d12acae0: raises ₮0.60 to ₮0.85
+13807099: calls ₮0.75
+Hero: calls ₮0.60
+*** FLOP *** [8s 2c Td]
+13807099: checks
+Hero: bets ₮2.03
+d12acae0: folds
+13807099: calls ₮2.03
+*** TURN *** [8s 2c Td] [Qd]
+13807099: checks
+Hero: bets ₮6.77
+13807099: ALLIN ₮20.97
+Hero: calls ₮14.20
+*** RIVER *** [8s 2c Td Qd] [6h]
+*** SHOWDOWN ***
+13807099: shows [Js 9d Ts 3h] (Straight)
+13807099 collected ₮23.74 from pot
+Hero: shows [Qh Jh 9h Jd] (Straight)
+Hero collected ₮23.75 from pot
+*** SUMMARY ***
+Total pot ₮48.71 | Rake ₮1.20 | Splash Fee ₮0.02
+Hand was run once
+Board [ 8s 2c Td Qd 6h ]
+Game ended: 2026/01/02 02:39:30 CEST
+Seat 1: c44f0c24 folded before Flop (didn&#x27;t bet)
+Seat 2: d12acae0 folded on the Flop
+Seat 4: 13807099 showed [Js 9d Ts 3h] and won (₮23.74) with Straight
+Seat 5: Hero showed [Qh Jh 9h Jd] and won (₮23.75) with Straight
+</pre></details></li></ul></article><article><h2>iPoker · Flop · #9000013570 · Action 8</h2>
+    <p>Opponent <b>NeonB0l7</b> · size group around 85% pot</p>
+    <span class="cards"><span class="card diamond">9♦</span><span class="card spade">8♠</span><span class="card spade">7♠</span><span class="card heart">8♥</span></span><p>Board Ks Jd Ts</p>
+    <pre>Model recommendation → recommendation with history · check → check
+Too few comparable responses to change the recommendation.
+Around 33% pot · 0/8 past opportunities · 0 dates · fold 0 · call 0 · raise 0.
+Around 50% pot · 0/8 past opportunities · 0 dates · fold 0 · call 0 · raise 0.
+Around 67% pot · 0/8 past opportunities · 0 dates · fold 0 · call 0 · raise 0.
+Around 85% pot · 2/8 past opportunities · 2 dates · fold 0 · call 1 · raise 1 · fold interval 0%–66%.
+  Exploratory sample · vs check -8.94 BB · model range -15.76 to +2.79 BB.</pre><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 13570 · Action 8</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000013570&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable171&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;02:13:21&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;231&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-23 18:21:52&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€586,94&lt;/bets&gt;&#13;
+  &lt;wins&gt;€479,63&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€89,48&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€133,70&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000013570&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-23 20:20:55&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€313,37&quot; dealer=&quot;1&quot; name=&quot;HunterOracle&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,00&quot; chips=&quot;€43,28&quot; dealer=&quot;0&quot; name=&quot;NeonB0l7&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€9,00&quot; chips=&quot;€186,91&quot; dealer=&quot;0&quot; name=&quot;BigNeonMax&quot; rakeamount=&quot;€0,40&quot; seat=&quot;6&quot; win=&quot;€5,60&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;HunterOracle&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;NeonB0l7&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;D9 S8 S7 H8&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;HunterOracle&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;NeonB0l7&quot; sum=&quot;€1,00&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;BigNeonMax&quot; sum=&quot;€3,00&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;NeonB0l7&quot; sum=&quot;€2,00&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;BigNeonMax&quot; sum=&quot;€6,00&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;SK DJ S10&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details>
+    <h3>Comparable earlier responses in this group</h3><ul><li>call · #9000005665 · Action 12<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 5665 · Action 12</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;session sessioncode=&quot;S8000005665&quot;&gt;
+ &lt;general&gt;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;
+  &lt;mode&gt;real&lt;/mode&gt;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;
+  &lt;tablename&gt;SampleTable066&lt;/tablename&gt;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;
+  &lt;duration&gt;04:17:23&lt;/duration&gt;
+  &lt;gamecount&gt;256&lt;/gamecount&gt;
+  &lt;startdate&gt;2026-05-04 19:52:55&lt;/startdate&gt;
+  &lt;currency&gt;EUR&lt;/currency&gt;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;
+  &lt;bets&gt;€1.109,07&lt;/bets&gt;
+  &lt;wins&gt;€897,68&lt;/wins&gt;
+  &lt;chipsin&gt;€49,50&lt;/chipsin&gt;
+  &lt;chipsout&gt;€262,53&lt;/chipsout&gt;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;
+ &lt;/general&gt;
+  &lt;game gamecode=&quot;9000005665&quot;&gt;
+  &lt;general&gt;
+   &lt;startdate&gt;2026-05-05 00:05:54&lt;/startdate&gt;
+   &lt;players&gt;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€18,08&quot; dealer=&quot;0&quot; name=&quot;OnlyBishopX&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€146,77&quot; dealer=&quot;0&quot; name=&quot;viking_matrix&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;
+    &lt;player bet=&quot;€134,83&quot; chips=&quot;€134,83&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; rakeamount=&quot;€3,00&quot; seat=&quot;5&quot; win=&quot;€267,16&quot;/&gt;
+    &lt;player bet=&quot;€134,83&quot; chips=&quot;€157,56&quot; dealer=&quot;0&quot; name=&quot;NeonB0l7&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€97,25&quot; dealer=&quot;0&quot; name=&quot;CoinDriver21&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;
+   &lt;/players&gt;
+  &lt;/general&gt;
+  &lt;round no=&quot;0&quot;&gt;
+   &lt;action no=&quot;1&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;
+   &lt;action no=&quot;2&quot; player=&quot;CoinDriver21&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;1&quot;&gt;
+   &lt;cards player=&quot;OnlyBishopX&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;
+   &lt;action no=&quot;3&quot; player=&quot;OnlyBishopX&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;
+   &lt;cards player=&quot;viking_matrix&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;
+   &lt;action no=&quot;4&quot; player=&quot;viking_matrix&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;DQ SK DA HQ&lt;/cards&gt;
+   &lt;action no=&quot;5&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,75&quot; type=&quot;23&quot;/&gt;
+   &lt;cards player=&quot;NeonB0l7&quot; type=&quot;Pocket&quot;&gt;S6 H6 D7 H5&lt;/cards&gt;
+   &lt;action no=&quot;6&quot; player=&quot;NeonB0l7&quot; sum=&quot;€3,00&quot; type=&quot;23&quot;/&gt;
+   &lt;cards player=&quot;CoinDriver21&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;
+   &lt;action no=&quot;7&quot; player=&quot;CoinDriver21&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;
+   &lt;action no=&quot;8&quot; player=&quot;BigNeonMax&quot; sum=&quot;€9,50&quot; type=&quot;23&quot;/&gt;
+   &lt;action no=&quot;9&quot; player=&quot;NeonB0l7&quot; sum=&quot;€6,50&quot; type=&quot;3&quot;/&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;2&quot;&gt;
+   &lt;cards type=&quot;Flop&quot;&gt;SQ C6 SA&lt;/cards&gt;
+   &lt;action no=&quot;10&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;
+   &lt;action no=&quot;11&quot; player=&quot;BigNeonMax&quot; sum=&quot;€15,60&quot; type=&quot;5&quot;/&gt;
+   &lt;action no=&quot;12&quot; player=&quot;NeonB0l7&quot; sum=&quot;€15,60&quot; type=&quot;3&quot;/&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;3&quot;&gt;
+   &lt;cards type=&quot;Turn&quot;&gt;H9&lt;/cards&gt;
+   &lt;action no=&quot;13&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;
+   &lt;action no=&quot;14&quot; player=&quot;BigNeonMax&quot; sum=&quot;€50,70&quot; type=&quot;5&quot;/&gt;
+   &lt;action no=&quot;15&quot; player=&quot;NeonB0l7&quot; sum=&quot;€104,40&quot; type=&quot;23&quot;/&gt;
+   &lt;action no=&quot;16&quot; player=&quot;BigNeonMax&quot; sum=&quot;€59,03&quot; type=&quot;7&quot;/&gt;
+   &lt;action no=&quot;17&quot; player=&quot;NeonB0l7&quot; sum=&quot;€5,33&quot; type=&quot;3&quot;/&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;4&quot;&gt;
+   &lt;cards type=&quot;River&quot;&gt;C3&lt;/cards&gt;
+  &lt;/round&gt;
+ &lt;/game&gt;
+ </pre></details></li><li>raise · #9000005831 · Action 12<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 5831 · Action 12</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;session sessioncode=&quot;S8000005831&quot;&gt;
+ &lt;general&gt;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;
+  &lt;mode&gt;real&lt;/mode&gt;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;
+  &lt;tablename&gt;SampleTable032&lt;/tablename&gt;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;
+  &lt;duration&gt;04:18:27&lt;/duration&gt;
+  &lt;gamecount&gt;267&lt;/gamecount&gt;
+  &lt;startdate&gt;2026-05-04 19:52:13&lt;/startdate&gt;
+  &lt;currency&gt;EUR&lt;/currency&gt;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;
+  &lt;bets&gt;€1.193,53&lt;/bets&gt;
+  &lt;wins&gt;€707,79&lt;/wins&gt;
+  &lt;chipsin&gt;€49,50&lt;/chipsin&gt;
+  &lt;chipsout&gt;€91,86&lt;/chipsout&gt;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;
+ &lt;/general&gt;
+  &lt;game gamecode=&quot;9000005831&quot;&gt;
+  &lt;general&gt;
+   &lt;startdate&gt;2026-05-04 22:27:07&lt;/startdate&gt;
+   &lt;players&gt;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€143,73&quot; dealer=&quot;0&quot; name=&quot;viking_matrix&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€261,45&quot; dealer=&quot;0&quot; name=&quot;CoinDriver21&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;
+    &lt;player bet=&quot;€96,15&quot; chips=&quot;€129,80&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;
+    &lt;player bet=&quot;€0,25&quot; chips=&quot;€190,20&quot; dealer=&quot;0&quot; name=&quot;GrinderM1rror&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€59,23&quot; dealer=&quot;0&quot; name=&quot;PLOReg19&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;
+    &lt;player bet=&quot;€58,26&quot; chips=&quot;€58,26&quot; dealer=&quot;0&quot; name=&quot;NeonB0l7&quot; rakeamount=&quot;€3,00&quot; seat=&quot;10&quot; win=&quot;€114,27&quot;/&gt;
+   &lt;/players&gt;
+  &lt;/general&gt;
+  &lt;round no=&quot;0&quot;&gt;
+   &lt;action no=&quot;1&quot; player=&quot;GrinderM1rror&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;
+   &lt;action no=&quot;2&quot; player=&quot;PLOReg19&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;1&quot;&gt;
+   &lt;cards player=&quot;NeonB0l7&quot; type=&quot;Pocket&quot;&gt;C2 S8 SA H5&lt;/cards&gt;
+   &lt;action no=&quot;3&quot; player=&quot;NeonB0l7&quot; sum=&quot;€1,00&quot; type=&quot;23&quot;/&gt;
+   &lt;cards player=&quot;viking_matrix&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;
+   &lt;action no=&quot;4&quot; player=&quot;viking_matrix&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;
+   &lt;cards player=&quot;CoinDriver21&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;
+   &lt;action no=&quot;5&quot; player=&quot;CoinDriver21&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;D9 H8 DA S10&lt;/cards&gt;
+   &lt;action no=&quot;6&quot; player=&quot;BigNeonMax&quot; sum=&quot;€3,75&quot; type=&quot;23&quot;/&gt;
+   &lt;cards player=&quot;GrinderM1rror&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;
+   &lt;action no=&quot;7&quot; player=&quot;GrinderM1rror&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;
+   &lt;cards player=&quot;PLOReg19&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;
+   &lt;action no=&quot;8&quot; player=&quot;PLOReg19&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;
+   &lt;action no=&quot;9&quot; player=&quot;NeonB0l7&quot; sum=&quot;€2,75&quot; type=&quot;3&quot;/&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;2&quot;&gt;
+   &lt;cards type=&quot;Flop&quot;&gt;S3 D8 D5&lt;/cards&gt;
+   &lt;action no=&quot;10&quot; player=&quot;NeonB0l7&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;
+   &lt;action no=&quot;11&quot; player=&quot;BigNeonMax&quot; sum=&quot;€6,60&quot; type=&quot;5&quot;/&gt;
+   &lt;action no=&quot;12&quot; player=&quot;NeonB0l7&quot; sum=&quot;€28,05&quot; type=&quot;23&quot;/&gt;
+   &lt;action no=&quot;13&quot; player=&quot;BigNeonMax&quot; sum=&quot;€92,40&quot; type=&quot;23&quot;/&gt;
+   &lt;action no=&quot;14&quot; player=&quot;NeonB0l7&quot; sum=&quot;€26,46&quot; type=&quot;7&quot;/&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;3&quot;&gt;
+   &lt;cards type=&quot;Turn&quot;&gt;C3&lt;/cards&gt;
+  &lt;/round&gt;
+  &lt;round no=&quot;4&quot;&gt;
+   &lt;cards type=&quot;River&quot;&gt;HK&lt;/cards&gt;
+  &lt;/round&gt;
+ &lt;/game&gt;
+ </pre></details></li></ul>
+    <h3>Actual responses in the library</h3>
+    <p>Each source example shows a response on this network and street, with its own opponent and context.</p><ul><li>fold · #9000000117 · Action 10<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 117 · Action 10</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000000117&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable118&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;00:48:03&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;44&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-04-14 15:13:05&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€160,28&lt;/bets&gt;&#13;
+  &lt;wins&gt;€233,66&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€49,50&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€162,40&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000000117&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-04-14 15:52:12&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€174,13&quot; dealer=&quot;0&quot; name=&quot;EnzoReraises&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€4,70&quot; chips=&quot;€154,18&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; rakeamount=&quot;€0,22&quot; seat=&quot;3&quot; win=&quot;€3,08&quot;/&gt;&#13;
+    &lt;player bet=&quot;€1,40&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;BorisChecks&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€66,42&quot; dealer=&quot;0&quot; name=&quot;Seat5park&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€55,99&quot; dealer=&quot;0&quot; name=&quot;HijackTiger123&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;BorisChecks&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;Seat5park&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;HijackTiger123&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;HijackTiger123&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;EnzoReraises&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;EnzoReraises&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;C10 D7 S5 D9&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,40&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;BorisChecks&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BorisChecks&quot; sum=&quot;€1,15&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;Seat5park&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;Seat5park&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;D8 HJ DK&lt;/cards&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;BorisChecks&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;BigNeonMax&quot; sum=&quot;€3,30&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;BorisChecks&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></li><li>call · #9000000118 · Action 10<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 118 · Action 10</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000000118&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable119&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;00:48:03&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;44&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-04-14 15:13:05&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€160,28&lt;/bets&gt;&#13;
+  &lt;wins&gt;€233,66&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€49,50&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€162,40&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000000118&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-04-14 15:53:07&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€174,13&quot; dealer=&quot;0&quot; name=&quot;EnzoReraises&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€30,73&quot; chips=&quot;€155,86&quot; dealer=&quot;0&quot; name=&quot;BigNeonMax&quot; rakeamount=&quot;€1,37&quot; seat=&quot;3&quot; win=&quot;€19,20&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€50,00&quot; dealer=&quot;1&quot; name=&quot;BorisChecks&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,25&quot; chips=&quot;€65,92&quot; dealer=&quot;0&quot; name=&quot;Seat5park&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€10,16&quot; chips=&quot;€55,99&quot; dealer=&quot;0&quot; name=&quot;HijackTiger123&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;Seat5park&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;HijackTiger123&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;EnzoReraises&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;EnzoReraises&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;C7 H8 H5 H6&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,65&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;BorisChecks&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;BorisChecks&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;Seat5park&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;Seat5park&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;HijackTiger123&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;HijackTiger123&quot; sum=&quot;€1,15&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;DQ H7 H4&lt;/cards&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;HijackTiger123&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;BigNeonMax&quot; sum=&quot;€2,34&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;HijackTiger123&quot; sum=&quot;€2,34&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;S9&lt;/cards&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;HijackTiger123&quot; sum=&quot;€6,17&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;BigNeonMax&quot; sum=&quot;€26,74&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;HijackTiger123&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></li><li>raise · #9000000322 · Action 12<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 322 · Action 12</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000000322&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable123&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:53:34&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;134&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-04-16 15:13:53&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€407,05&lt;/bets&gt;&#13;
+  &lt;wins&gt;€148,41&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€48,25&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€53,88&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000000322&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-04-16 16:01:38&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€5,71&quot; chips=&quot;€205,42&quot; dealer=&quot;0&quot; name=&quot;BeaconDriver93&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€47,00&quot; dealer=&quot;0&quot; name=&quot;TinyFastMode&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€51,25&quot; dealer=&quot;0&quot; name=&quot;Seat5park&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€5,71&quot; chips=&quot;€71,30&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; rakeamount=&quot;€0,81&quot; seat=&quot;6&quot; win=&quot;€11,36&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,25&quot; chips=&quot;€141,78&quot; dealer=&quot;0&quot; name=&quot;TopPairMarket&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€68,25&quot; dealer=&quot;0&quot; name=&quot;sigma_drift&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;TopPairMarket&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;sigma_drift&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;BeaconDriver93&quot; type=&quot;Pocket&quot;&gt;S8 H9 DA SJ&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;TinyFastMode&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;TinyFastMode&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;Seat5park&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;Seat5park&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;H3 SQ HJ CA&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BigNeonMax&quot; sum=&quot;€2,25&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;TopPairMarket&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;TopPairMarket&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;sigma_drift&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;sigma_drift&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€1,75&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;SA DK C9&lt;/cards&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,73&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€3,46&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,73&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;CK&lt;/cards&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;S3&lt;/cards&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;17&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></li></ul></article><article><h2>iPoker · Turn · #9000008844 · Action 10</h2>
+    <p>Opponent <b>MainPotClub</b> · size group around 50% pot</p>
+    <span class="cards"><span class="card spade">A♠</span><span class="card diamond">K♦</span><span class="card spade">8♠</span><span class="card diamond">4♦</span></span><p>Board Ts 8h Qd 4h</p>
+    <pre>Model recommendation → recommendation with history · check → check
+Too few comparable responses to change the recommendation.
+Around 33% pot · 0/5 past opportunities · 0 dates · fold 0 · call 0 · raise 0.
+Around 50% pot · 1/5 past opportunities · 1 dates · fold 1 · call 0 · raise 0 · fold interval 21%–100%.
+  Exploratory sample · vs check +2.57 BB · model range -4.57 to +2.57 BB.
+Around 67% pot · 1/5 past opportunities · 1 dates · fold 1 · call 0 · raise 0 · fold interval 21%–100%.
+  Exploratory sample · vs check +2.57 BB · model range -5.38 to +2.57 BB.
+Around 85% pot · 1/5 past opportunities · 1 dates · fold 1 · call 0 · raise 0 · fold interval 21%–100%.
+  Exploratory sample · vs check +2.57 BB · model range -6.23 to +2.57 BB.</pre><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 8844 · Action 10</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000008844&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable045&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;00:58:17&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;112&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-13 00:03:09&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€336,20&lt;/bets&gt;&#13;
+  &lt;wins&gt;€125,19&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€90,53&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€69,08&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000008844&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-13 01:18:17&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€1,50&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;BigNeonMax&quot; rakeamount=&quot;€0,20&quot; seat=&quot;1&quot; win=&quot;€2,80&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€91,05&quot; dealer=&quot;1&quot; name=&quot;TigerCity&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€1,50&quot; chips=&quot;€137,46&quot; dealer=&quot;0&quot; name=&quot;MainPotClub&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;MainPotClub&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;SA DK S8 D4&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;TigerCity&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;MainPotClub&quot; type=&quot;Pocket&quot;&gt;CJ HA S7 DJ&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;TigerCity&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;MainPotClub&quot; sum=&quot;€0,25&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,50&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;MainPotClub&quot; sum=&quot;€1,00&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;MainPotClub&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;S10 H8 DQ&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;MainPotClub&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;H4&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;MainPotClub&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;D6&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details>
+    <h3>Comparable earlier responses in this group</h3><ul><li>fold · #9000008797 · Action 9<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 8797 · Action 9</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000008797&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;26.1.1.22&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable198&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;00:58:17&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;112&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-05-13 00:03:09&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€336,20&lt;/bets&gt;&#13;
+  &lt;wins&gt;€125,19&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€90,53&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€69,08&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000008797&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-05-13 00:58:16&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€3,48&quot; chips=&quot;€100,78&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; rakeamount=&quot;€0,20&quot; seat=&quot;1&quot; win=&quot;€2,80&quot;/&gt;&#13;
+    &lt;player bet=&quot;€1,50&quot; chips=&quot;€84,11&quot; dealer=&quot;0&quot; name=&quot;MainPotClub&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;MainPotClub&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;S3 DQ SA DJ&lt;/cards&gt;&#13;
+   &lt;cards player=&quot;MainPotClub&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,50&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;MainPotClub&quot; sum=&quot;€1,00&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;MainPotClub&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;S10 H5 S7&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;MainPotClub&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,98&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;MainPotClub&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;H2&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></li></ul>
+    <h3>Actual responses in the library</h3>
+    <p>Each source example shows a response on this network and street, with its own opponent and context.</p><ul><li>fold · #9000000271 · Action 14<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 271 · Action 14</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000000271&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable072&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:53:34&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;134&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-04-16 15:13:53&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€407,05&lt;/bets&gt;&#13;
+  &lt;wins&gt;€148,41&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€48,25&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€53,88&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000000271&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-04-16 15:20:31&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€5,75&quot; chips=&quot;€62,29&quot; dealer=&quot;0&quot; name=&quot;BeaconDriver93&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€100,00&quot; dealer=&quot;0&quot; name=&quot;Seat5park&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€9,25&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;BigNeonMax&quot; rakeamount=&quot;€0,95&quot; seat=&quot;6&quot; win=&quot;€13,30&quot;/&gt;&#13;
+    &lt;player bet=&quot;€2,25&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;SilverMaverick&quot; seat=&quot;8&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€152,10&quot; dealer=&quot;1&quot; name=&quot;sigma_drift&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;Seat5park&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;SK H8 S9 H9&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;SilverMaverick&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;SilverMaverick&quot; sum=&quot;€2,25&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;sigma_drift&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;sigma_drift&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;BeaconDriver93&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€2,00&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;Seat5park&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;Seat5park&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,75&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;S7 H5 S3&lt;/cards&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€3,50&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;BigNeonMax&quot; sum=&quot;€3,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;SilverMaverick&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;S5&lt;/cards&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;BigNeonMax&quot; sum=&quot;€3,50&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></li><li>call · #9000000144 · Action 16<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 144 · Action 16</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000000144&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable145&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;00:50:03&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;52&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-04-14 15:13:07&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€164,01&lt;/bets&gt;&#13;
+  &lt;wins&gt;€114,83&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€49,50&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€85,91&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000000144&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-04-14 15:32:33&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€61,72&quot; dealer=&quot;0&quot; name=&quot;JackShark&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€32,39&quot; dealer=&quot;0&quot; name=&quot;DustyScript&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€7,50&quot; chips=&quot;€61,21&quot; dealer=&quot;0&quot; name=&quot;RangeScribe3&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€62,01&quot; dealer=&quot;0&quot; name=&quot;BorisChecks&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€7,50&quot; chips=&quot;€50,00&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; rakeamount=&quot;€1,05&quot; seat=&quot;8&quot; win=&quot;€14,70&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,25&quot; chips=&quot;€58,84&quot; dealer=&quot;0&quot; name=&quot;Seat5park&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;Seat5park&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;JackShark&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;DustyScript&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;DustyScript&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;RangeScribe3&quot; type=&quot;Pocket&quot;&gt;CJ C10 S5 DK&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;RangeScribe3&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;BorisChecks&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;BorisChecks&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;C5 S6 H9 SA&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;Seat5park&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;Seat5park&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;JackShark&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;JackShark&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;D8 DA H7&lt;/cards&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;JackShark&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;RangeScribe3&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,75&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;JackShark&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;RangeScribe3&quot; sum=&quot;€1,75&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;CK&lt;/cards&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;RangeScribe3&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;BigNeonMax&quot; sum=&quot;€5,25&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;RangeScribe3&quot; sum=&quot;€5,25&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;S3&lt;/cards&gt;&#13;
+   &lt;action no=&quot;17&quot; player=&quot;RangeScribe3&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;18&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></li><li>raise · #9000000288 · Action 17<details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;HM2 row 288 · Action 17</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000000288&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable089&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;01:53:34&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;134&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-04-16 15:13:53&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€407,05&lt;/bets&gt;&#13;
+  &lt;wins&gt;€148,41&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€48,25&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€53,88&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000000288&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-04-16 15:33:53&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€53,27&quot; chips=&quot;€116,60&quot; dealer=&quot;0&quot; name=&quot;BeaconDriver93&quot; rakeamount=&quot;€3,00&quot; seat=&quot;1&quot; win=&quot;€99,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€2,00&quot; chips=&quot;€73,43&quot; dealer=&quot;0&quot; name=&quot;MidweekM4trix&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€97,75&quot; dealer=&quot;0&quot; name=&quot;Seat5park&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€50,00&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;BigNeonMax&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€56,53&quot; dealer=&quot;1&quot; name=&quot;sigma_drift&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;MidweekM4trix&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;Seat5park&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;Seat5park&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;D9 C9 H10 HA&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;sigma_drift&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;sigma_drift&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;BeaconDriver93&quot; type=&quot;Pocket&quot;&gt;C10 D8 S7 C8&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,25&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;MidweekM4trix&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;MidweekM4trix&quot; sum=&quot;€2,00&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,50&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€1,50&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;S10 CA H8&lt;/cards&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;MidweekM4trix&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;BigNeonMax&quot; sum=&quot;€3,96&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;13&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€3,96&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;action no=&quot;14&quot; player=&quot;MidweekM4trix&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;D2&lt;/cards&gt;&#13;
+   &lt;action no=&quot;15&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;16&quot; player=&quot;BigNeonMax&quot; sum=&quot;€11,13&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;17&quot; player=&quot;BeaconDriver93&quot; sum=&quot;€47,31&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;action no=&quot;18&quot; player=&quot;BigNeonMax&quot; sum=&quot;€32,91&quot; type=&quot;7&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;CJ&lt;/cards&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></li></ul></article>
+<h2>Controlled tests on four real Hero decisions</h2>
+<p>The cards, pot, positions, and earlier actions come from real hands. The tests simulate 120 earlier responses per size group across four dates. In the high-fold scenario the largest group has 100 folds, 15 calls, and five raises. Each smaller group has one fold, four calls, and 115 raises.</p>
+<div class="scroll"><table><thead><tr><th>Real decision</th><th>Simulated responses</th><th>Model → with history</th></tr></thead><tbody><tr><td><a href="#control-coin-9000000030-Flop">CoinPoker · Flop · #9000000030</a></td><td>Frequent calls in all three groups</td><td>bet 33% → <b>check</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -0.66 BB · model range -1.05 to -0.26 BB.
+Meets the sample threshold · vs check -0.99 BB · model range -1.45 to -0.54 BB.
+Meets the sample threshold · vs check -1.33 BB · model range -1.84 to -0.82 BB.
+Meets the sample threshold · vs check -1.68 BB · model range -2.26 to -1.12 BB.</pre></details></td></tr><tr><td><a href="#control-coin-9000000030-Flop">CoinPoker · Flop · #9000000030</a></td><td>Frequent raises in all three groups</td><td>bet 33% → <b>check</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -4.30 BB · model range -4.61 to -3.62 BB.
+Meets the sample threshold · vs check -5.37 BB · model range -5.73 to -4.60 BB.
+Meets the sample threshold · vs check -6.44 BB · model range -6.85 to -5.57 BB.
+Meets the sample threshold · vs check -7.58 BB · model range -8.03 to -6.60 BB.</pre></details></td></tr><tr><td><a href="#control-coin-9000000030-Flop">CoinPoker · Flop · #9000000030</a></td><td>Frequent raises against smaller bets and folds against the largest bet</td><td>bet 33% → <b>bet 85%</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -4.63 BB · model range -4.78 to -4.10 BB.
+Meets the sample threshold · vs check -5.75 BB · model range -5.92 to -5.13 BB.
+Meets the sample threshold · vs check -6.87 BB · model range -7.07 to -6.17 BB.
+Meets the sample threshold · vs check +2.94 BB · model range +2.00 to +3.48 BB.</pre></details></td></tr><tr><td><a href="#control-coin-9000000030-Turn">CoinPoker · Turn · #9000000030</a></td><td>Frequent calls in all three groups</td><td>bet 33% → <b>check</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -0.46 BB · model range -0.82 to -0.11 BB.
+Meets the sample threshold · vs check -0.74 BB · model range -1.16 to -0.35 BB.
+Meets the sample threshold · vs check -1.03 BB · model range -1.51 to -0.60 BB.
+Meets the sample threshold · vs check -1.33 BB · model range -1.88 to -0.86 BB.</pre></details></td></tr><tr><td><a href="#control-coin-9000000030-Turn">CoinPoker · Turn · #9000000030</a></td><td>Frequent raises in all three groups</td><td>bet 33% → <b>check</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -4.33 BB · model range -4.64 to -3.65 BB.
+Meets the sample threshold · vs check -5.40 BB · model range -5.76 to -4.61 BB.
+Meets the sample threshold · vs check -6.47 BB · model range -6.88 to -5.58 BB.
+Meets the sample threshold · vs check -7.60 BB · model range -8.07 to -6.61 BB.</pre></details></td></tr><tr><td><a href="#control-coin-9000000030-Turn">CoinPoker · Turn · #9000000030</a></td><td>Frequent raises against smaller bets and folds against the largest bet</td><td>bet 33% → <b>bet 85%</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -4.66 BB · model range -4.81 to -4.12 BB.
+Meets the sample threshold · vs check -5.78 BB · model range -5.96 to -5.15 BB.
+Meets the sample threshold · vs check -6.90 BB · model range -7.10 to -6.18 BB.
+Meets the sample threshold · vs check +2.96 BB · model range +2.02 to +3.47 BB.</pre></details></td></tr><tr><td><a href="#control-ip-9000000601-Flop">iPoker · Flop · #9000000601</a></td><td>Frequent calls in all three groups</td><td>bet 33% → <b>check</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -1.10 BB · model range -1.62 to -0.54 BB.
+Meets the sample threshold · vs check -1.68 BB · model range -2.30 to -1.04 BB.
+Meets the sample threshold · vs check -2.28 BB · model range -3.00 to -1.55 BB.
+Meets the sample threshold · vs check -2.92 BB · model range -3.76 to -2.09 BB.</pre></details></td></tr><tr><td><a href="#control-ip-9000000601-Flop">iPoker · Flop · #9000000601</a></td><td>Frequent raises in all three groups</td><td>bet 33% → <b>check</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -4.93 BB · model range -5.30 to -4.12 BB.
+Meets the sample threshold · vs check -6.28 BB · model range -6.71 to -5.35 BB.
+Meets the sample threshold · vs check -7.63 BB · model range -8.11 to -6.58 BB.
+Meets the sample threshold · vs check -9.06 BB · model range -9.60 to -7.89 BB.</pre></details></td></tr><tr><td><a href="#control-ip-9000000601-Flop">iPoker · Flop · #9000000601</a></td><td>Frequent raises against smaller bets and folds against the largest bet</td><td>bet 33% → <b>bet 85%</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -5.34 BB · model range -5.51 to -4.71 BB.
+Meets the sample threshold · vs check -6.75 BB · model range -6.94 to -6.02 BB.
+Meets the sample threshold · vs check -8.15 BB · model range -8.37 to -7.32 BB.
+Meets the sample threshold · vs check +3.98 BB · model range +2.76 to +4.69 BB.</pre></details></td></tr><tr><td><a href="#control-ip-9000000041-Turn">iPoker · Turn · #9000000041</a></td><td>Frequent calls in all three groups</td><td>bet 33% → <b>check</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -0.64 BB · model range -1.31 to -0.08 BB.
+Meets the sample threshold · vs check -0.86 BB · model range -1.67 to -0.19 BB.
+Meets the sample threshold · vs check -1.09 BB · model range -2.07 to -0.30 BB.
+Meets the sample threshold · vs check -1.38 BB · model range -2.54 to -0.43 BB.</pre></details></td></tr><tr><td><a href="#control-ip-9000000041-Turn">iPoker · Turn · #9000000041</a></td><td>Frequent raises in all three groups</td><td>bet 33% → <b>check</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -4.44 BB · model range -4.73 to -3.79 BB.
+Meets the sample threshold · vs check -5.38 BB · model range -5.72 to -4.63 BB.
+Meets the sample threshold · vs check -6.32 BB · model range -6.71 to -5.48 BB.
+Meets the sample threshold · vs check -7.32 BB · model range -7.76 to -6.37 BB.</pre></details></td></tr><tr><td><a href="#control-ip-9000000041-Turn">iPoker · Turn · #9000000041</a></td><td>Frequent raises against smaller bets and folds against the largest bet</td><td>bet 33% → <b>bet 85%</b><details><summary>Estimate ranges by size</summary><pre>Meets the sample threshold · vs check -4.74 BB · model range -4.89 to -4.22 BB.
+Meets the sample threshold · vs check -5.72 BB · model range -5.90 to -5.12 BB.
+Meets the sample threshold · vs check -6.71 BB · model range -6.91 to -6.02 BB.
+Meets the sample threshold · vs check +2.03 BB · model range +1.11 to +2.53 BB.</pre></details></td></tr></tbody></table></div>
+<h3>Source hands for the controlled tests</h3><div id="control-coin-9000000030-Flop"><b>CoinPoker · Flop · #9000000030</b><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Test fixture · Line 28</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000030: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 13:00:00 CEST
+Table &#x27;800030&#x27; 6-max Seat #6 is the button
+Seat 1: cec82e0e (₮22.52 in chips)
+Seat 3: Hero (₮25.99 in chips)
+Seat 4: b094b1a9 (₮34.09 in chips)
+Seat 5: ba5d6393 (₮10 in chips)
+Seat 6: f6d5add1 (₮27.42 in chips)
+cec82e0e: posts ante ₮0.04
+Hero: posts ante ₮0.04
+b094b1a9: posts ante ₮0.04
+ba5d6393: posts ante ₮0.04
+f6d5add1: posts ante ₮0.04
+cec82e0e: posts small blind ₮0.10
+Hero: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to cec82e0e
+Dealt to Hero [Kh 8h 2h Ts]
+Dealt to b094b1a9
+Dealt to ba5d6393
+Dealt to f6d5add1
+b094b1a9: folds
+ba5d6393: folds
+f6d5add1: folds
+cec82e0e: raises ₮0.50 to ₮0.75
+Hero: calls ₮0.50
+*** FLOP *** [9c 5s 2d]
+cec82e0e: checks
+Hero: checks
+*** TURN *** [9c 5s 2d] [Jc]
+cec82e0e: checks
+Hero: bets ₮1.70
+cec82e0e: folds
+Hero: RETURN ₮1.70
+*** SHOWDOWN ***
+Hero collected ₮1.60 from pot
+*** SUMMARY ***
+Total pot ₮1.70 | Rake ₮0.08 | Splash Fee ₮0.02
+Hand was run once
+Board [ 9c 5s 2d Jc ]
+Game ended: 2026/01/01 13:01:30 CEST
+Seat 1: cec82e0e folded on the Turn
+Seat 3: Hero showed [Kh 8h 2h Ts] and won (₮1.60)
+Seat 4: b094b1a9 folded before Flop (didn&#x27;t bet)
+Seat 5: ba5d6393 folded before Flop (didn&#x27;t bet)
+Seat 6: f6d5add1 folded before Flop (didn&#x27;t bet)
+</pre></details></div><div id="control-coin-9000000030-Turn"><b>CoinPoker · Turn · #9000000030</b><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Test fixture · Line 31</p><p>The source can include actions after this decision and the outcome.</p><pre>CoinPoker Hand #9000000030: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/01 13:00:00 CEST
+Table &#x27;800030&#x27; 6-max Seat #6 is the button
+Seat 1: cec82e0e (₮22.52 in chips)
+Seat 3: Hero (₮25.99 in chips)
+Seat 4: b094b1a9 (₮34.09 in chips)
+Seat 5: ba5d6393 (₮10 in chips)
+Seat 6: f6d5add1 (₮27.42 in chips)
+cec82e0e: posts ante ₮0.04
+Hero: posts ante ₮0.04
+b094b1a9: posts ante ₮0.04
+ba5d6393: posts ante ₮0.04
+f6d5add1: posts ante ₮0.04
+cec82e0e: posts small blind ₮0.10
+Hero: posts big blind ₮0.25
+*** HOLE CARDS ***
+Dealt to cec82e0e
+Dealt to Hero [Kh 8h 2h Ts]
+Dealt to b094b1a9
+Dealt to ba5d6393
+Dealt to f6d5add1
+b094b1a9: folds
+ba5d6393: folds
+f6d5add1: folds
+cec82e0e: raises ₮0.50 to ₮0.75
+Hero: calls ₮0.50
+*** FLOP *** [9c 5s 2d]
+cec82e0e: checks
+Hero: checks
+*** TURN *** [9c 5s 2d] [Jc]
+cec82e0e: checks
+Hero: bets ₮1.70
+cec82e0e: folds
+Hero: RETURN ₮1.70
+*** SHOWDOWN ***
+Hero collected ₮1.60 from pot
+*** SUMMARY ***
+Total pot ₮1.70 | Rake ₮0.08 | Splash Fee ₮0.02
+Hand was run once
+Board [ 9c 5s 2d Jc ]
+Game ended: 2026/01/01 13:01:30 CEST
+Seat 1: cec82e0e folded on the Turn
+Seat 3: Hero showed [Kh 8h 2h Ts] and won (₮1.60)
+Seat 4: b094b1a9 folded before Flop (didn&#x27;t bet)
+Seat 5: ba5d6393 folded before Flop (didn&#x27;t bet)
+Seat 6: f6d5add1 folded before Flop (didn&#x27;t bet)
+</pre></details></div><div id="control-ip-9000000601-Flop"><b>iPoker · Flop · #9000000601</b><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Test fixture · Action 10</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000000601&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,25/€0,50&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable002&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,25&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€0,50&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;00:20:02&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;25&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-04-18 17:24:24&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€121,69&lt;/bets&gt;&#13;
+  &lt;wins&gt;€44,05&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€52,66&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€50,25&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000000601&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-04-18 17:34:19&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€1,75&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;BigNeonMax&quot; seat=&quot;1&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€50,00&quot; dealer=&quot;1&quot; name=&quot;PLOReg19&quot; seat=&quot;3&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,25&quot; chips=&quot;€50,00&quot; dealer=&quot;0&quot; name=&quot;BlackKappa&quot; seat=&quot;5&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,50&quot; chips=&quot;€101,84&quot; dealer=&quot;0&quot; name=&quot;sigma_drift&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+    &lt;player bet=&quot;€4,93&quot; chips=&quot;€194,82&quot; dealer=&quot;0&quot; name=&quot;RookCheckback&quot; rakeamount=&quot;€0,28&quot; seat=&quot;8&quot; win=&quot;€3,97&quot;/&gt;&#13;
+    &lt;player bet=&quot;€0,00&quot; chips=&quot;€90,95&quot; dealer=&quot;0&quot; name=&quot;TigerCity&quot; seat=&quot;10&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;BlackKappa&quot; sum=&quot;€0,25&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;sigma_drift&quot; sum=&quot;€0,50&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;RookCheckback&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;RookCheckback&quot; sum=&quot;€1,75&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;TigerCity&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;TigerCity&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;CK C8 HJ D9&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;BigNeonMax&quot; sum=&quot;€1,75&quot; type=&quot;3&quot;/&gt;&#13;
+   &lt;cards player=&quot;PLOReg19&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;PLOReg19&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;BlackKappa&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;BlackKappa&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+   &lt;cards player=&quot;sigma_drift&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;sigma_drift&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;D4 S7 D5&lt;/cards&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;RookCheckback&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;H4&lt;/cards&gt;&#13;
+   &lt;action no=&quot;11&quot; player=&quot;RookCheckback&quot; sum=&quot;€3,18&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;12&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+ </pre></details></div><div id="control-ip-9000000041-Turn"><b>iPoker · Turn · #9000000041</b><details class="source"><summary>Open the complete source hand</summary><p><b>Decision reference</b> &nbsp;Test fixture · Action 8</p><p>The source can include actions after this decision and the outcome.</p><pre>&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&#13;
+&lt;session sessioncode=&quot;S8000000041&quot;&gt;&#13;
+ &lt;general&gt;&#13;
+  &lt;client_version&gt;25.9.1.11&lt;/client_version&gt;&#13;
+  &lt;mode&gt;real&lt;/mode&gt;&#13;
+  &lt;gametype&gt;Omaha PL €0,50/€1,00&lt;/gametype&gt;&#13;
+  &lt;tablename&gt;SampleTable042&lt;/tablename&gt;&#13;
+  &lt;tablecurrency&gt;EUR&lt;/tablecurrency&gt;&#13;
+  &lt;smallblind&gt;€0,50&lt;/smallblind&gt;&#13;
+  &lt;bigblind&gt;€1,00&lt;/bigblind&gt;&#13;
+  &lt;duration&gt;00:19:47&lt;/duration&gt;&#13;
+  &lt;gamecount&gt;26&lt;/gamecount&gt;&#13;
+  &lt;startdate&gt;2026-04-19 14:26:26&lt;/startdate&gt;&#13;
+  &lt;currency&gt;EUR&lt;/currency&gt;&#13;
+  &lt;nickname&gt;BigNeonMax&lt;/nickname&gt;&#13;
+  &lt;bets&gt;€57,10&lt;/bets&gt;&#13;
+  &lt;wins&gt;€51,50&lt;/wins&gt;&#13;
+  &lt;chipsin&gt;€99,00&lt;/chipsin&gt;&#13;
+  &lt;chipsout&gt;€120,00&lt;/chipsout&gt;&#13;
+  &lt;statuspoints&gt;0,00&lt;/statuspoints&gt;&#13;
+  &lt;awardpoints&gt;0,00&lt;/awardpoints&gt;&#13;
+  &lt;ipoints&gt;0,00&lt;/ipoints&gt;&#13;
+  &lt;tablesize&gt;6&lt;/tablesize&gt;&#13;
+ &lt;/general&gt;&#13;
+ &lt;game gamecode=&quot;9000000041&quot;&gt;&#13;
+  &lt;general&gt;&#13;
+   &lt;startdate&gt;2026-04-19 14:45:16&lt;/startdate&gt;&#13;
+   &lt;players&gt;&#13;
+    &lt;player bet=&quot;€9,00&quot; chips=&quot;€202,75&quot; dealer=&quot;0&quot; name=&quot;SilentHeart&quot; rakeamount=&quot;€0,40&quot; seat=&quot;1&quot; win=&quot;€5,60&quot;/&gt;&#13;
+    &lt;player bet=&quot;€3,00&quot; chips=&quot;€123,00&quot; dealer=&quot;1&quot; name=&quot;BigNeonMax&quot; seat=&quot;6&quot; win=&quot;€0,00&quot;/&gt;&#13;
+   &lt;/players&gt;&#13;
+  &lt;/general&gt;&#13;
+  &lt;round no=&quot;0&quot;&gt;&#13;
+   &lt;action no=&quot;1&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,50&quot; type=&quot;1&quot;/&gt;&#13;
+   &lt;action no=&quot;2&quot; player=&quot;SilentHeart&quot; sum=&quot;€1,00&quot; type=&quot;2&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;1&quot;&gt;&#13;
+   &lt;cards player=&quot;BigNeonMax&quot; type=&quot;Pocket&quot;&gt;SA C3 HA D10&lt;/cards&gt;&#13;
+   &lt;action no=&quot;3&quot; player=&quot;BigNeonMax&quot; sum=&quot;€3,00&quot; type=&quot;23&quot;/&gt;&#13;
+   &lt;cards player=&quot;SilentHeart&quot; type=&quot;Pocket&quot;&gt;X X X X&lt;/cards&gt;&#13;
+   &lt;action no=&quot;4&quot; player=&quot;SilentHeart&quot; sum=&quot;€2,00&quot; type=&quot;3&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;2&quot;&gt;&#13;
+   &lt;cards type=&quot;Flop&quot;&gt;S4 D8 SJ&lt;/cards&gt;&#13;
+   &lt;action no=&quot;5&quot; player=&quot;SilentHeart&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;6&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;3&quot;&gt;&#13;
+   &lt;cards type=&quot;Turn&quot;&gt;SK&lt;/cards&gt;&#13;
+   &lt;action no=&quot;7&quot; player=&quot;SilentHeart&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+   &lt;action no=&quot;8&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;4&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+  &lt;round no=&quot;4&quot;&gt;&#13;
+   &lt;cards type=&quot;River&quot;&gt;C7&lt;/cards&gt;&#13;
+   &lt;action no=&quot;9&quot; player=&quot;SilentHeart&quot; sum=&quot;€6,00&quot; type=&quot;5&quot;/&gt;&#13;
+   &lt;action no=&quot;10&quot; player=&quot;BigNeonMax&quot; sum=&quot;€0,00&quot; type=&quot;0&quot;/&gt;&#13;
+  &lt;/round&gt;&#13;
+ &lt;/game&gt;&#13;
+&lt;/session&gt;&#13;
+</pre></details></div>
+<p>In the bet/fold model, a fold wins the pot, a call goes to showdown, and a raise costs Hero the bet. Calling range strength remains an estimate because many cards are hidden.</p></main></html>

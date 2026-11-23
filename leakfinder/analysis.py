@@ -1,0 +1,199 @@
+"""Observed frequencies standardized to Hero's room and public-context mix."""
+
+import json
+from collections import defaultdict
+from dataclasses import dataclass, field
+from math import sqrt
+from statistics import NormalDist
+
+from .engine import METRICS
+from .storage import cohort
+
+Z95 = NormalDist().inv_cdf(0.975)
+# Two predeclared metrics, each inspected in two rooms and a combined view.
+Z_FAMILY = NormalDist().inv_cdf(1 - 0.05 / (2 * 6))
+
+
+def wilson(p, n, z=Z95):
+    if not n:
+        return None
+    den = 1 + z * z / n
+    center = (p + z * z / (2 * n)) / den
+    half = z * sqrt(p * (1 - p) / n + z * z / (4 * n * n)) / den
+    return max(0, center - half), min(1, center + half)
+
+
+@dataclass
+class Cell:
+    h: int = 0
+    hx: int = 0
+    p: int = 0
+    px: int = 0
+    days: dict = field(default_factory=dict)
+
+
+@dataclass
+class Finding:
+    node: str
+    cells: dict
+    selected: set
+    hero: int
+    pool: int
+    counts: tuple
+    high_coverage: bool
+    gap: float | None = None
+    expected: float | None = None
+    interval: tuple | None = None
+    adjusted: tuple | None = None
+    status: str = "Exploratory"
+    note: str = ""
+    blocks: tuple = (0, 0)
+
+
+def summarize(node, cells, room):
+    nh = sum(c.h for c in cells.values())
+    np = sum(c.p for c in cells.values())
+    strong = {key for key, c in cells.items() if c.h and c.p >= 20}
+    strong_h = sum(cells[key].h for key in strong)
+    robust = bool(nh and strong_h / nh >= 0.8)
+    selected = strong if robust else {key for key, c in cells.items() if c.h and c.p}
+    used = [cells[key] for key in sorted(selected)]
+    H, X, P, Y = (sum(getattr(c, k) for c in used) for k in ("h", "hx", "p", "px"))
+    f = Finding(node, cells, selected, nh, np, (X, H, Y, P), robust)
+    if not H:
+        f.note = "No matching pool context. Raw opportunities are available for review."
+        return f
+    expected = sum(c.h * c.px / c.p for c in used) / H
+    hero = X / H
+    gap = hero - expected
+    f.expected, f.gap = expected, gap
+    hs, ps = set(), set()
+    infl = defaultdict(float)
+    room_gaps = defaultdict(float)
+    for key in sorted(selected):
+        c = cells[key]
+        pc = c.px / c.p
+        room_gaps[json.loads(key)[0]] += c.h * (c.hx / c.h - pc)
+        for day, (hx, h, px, p) in c.days.items():
+            if h:
+                hs.add(day)
+            if p:
+                ps.add(day)
+            infl[day] += (hx - h * (pc + gap) - c.h / c.p * (px - p * pc)) / H
+    f.blocks = (len(hs), len(ps))
+    day_count = len(infl)
+    se = (
+        sqrt(sum(x * x for x in infl.values()) * day_count / (day_count - 1))
+        if day_count > 1
+        else 0
+    )
+    effective_pool = H * H / sum(c.h * c.h / c.p for c in used)
+
+    def interval(z):
+        hl, hu = wilson(hero, H, z)
+        pl, pu = wilson(expected, effective_pool, z)
+        return (max(-1, min(hl - pu, gap - z * se)), min(1, max(hu - pl, gap + z * se)))
+
+    f.interval = interval(Z95)
+    f.adjusted = interval(Z_FAMILY)
+    reasons = []
+    if not METRICS[node].confirmatory:
+        reasons.append("exploratory node")
+    if not robust:
+        reasons.append("sparse matched contexts")
+    if H < 50 or P < 200:
+        reasons.append("small matched sample")
+    if min(f.blocks) < 20 or any(not day or len(day) != 10 for day in infl):
+        reasons.append("limited day coverage")
+    if room == "Both" and (
+        len(room_gaps) != 2 or min(room_gaps.values()) < 0 < max(room_gaps.values())
+    ):
+        reasons.append("one room represented or room directions differ")
+    if not (f.adjusted[0] > 0.05 or f.adjusted[1] < -0.05):
+        reasons.append("adjusted interval crosses the review margin")
+    f.status = "Exploratory" if reasons else "Supported"
+    f.note = (
+        ", ".join(reasons)
+        if reasons
+        else "Audited decision; matched data support a frequency difference."
+    )
+    return f
+
+
+def analyze(db, room="Both"):
+    cohort(db, room)
+    by_node = defaultdict(dict)
+    for r in db.execute("""SELECT d.node,d.cell,h.day,d.actor=c.hero AS ishero,
+            sum(d.success) AS x,count(*) AS n FROM cohort c
+            JOIN hands h ON h.id=c.hand JOIN decisions d ON d.hand=h.id
+            GROUP BY d.node,d.cell,h.day,ishero"""):
+        cell = by_node[r["node"]].setdefault(r["cell"], Cell())
+        day = cell.days.setdefault(r["day"], [0, 0, 0, 0])
+        if r["ishero"]:
+            cell.h += r["n"]
+            cell.hx += r["x"]
+            day[0:2] = [r["x"], r["n"]]
+        else:
+            cell.p += r["n"]
+            cell.px += r["x"]
+            day[2:4] = [r["x"], r["n"]]
+    results = [
+        summarize(node, by_node[node], room) for node in METRICS if node in by_node
+    ]
+    results.sort(
+        key=lambda f: (
+            f.status != "Supported",
+            -min(abs(v) for v in f.adjusted)
+            if f.status == "Supported"
+            else list(METRICS).index(f.node),
+        )
+    )
+    eligible = db.execute("SELECT count(*) FROM cohort").fetchone()[0]
+    total = db.execute(
+        "SELECT count(*) FROM hands WHERE ?='Both' OR room=?", (room, room)
+    ).fetchone()[0]
+    return results, eligible, total
+
+
+def describe(key):
+    room, currency, bb, ante, n, pos, opp, depth, pot, texture, size, rights, behind = (
+        json.loads(key)
+    )
+    parts = [
+        room,
+        f"{currency} {bb / 1e6:g} BB",
+        f"{n}-handed",
+        pos + (f" vs {opp}" if opp else ""),
+        ("<40", "40–<80", "80–<150", "150+")[depth] + " BB",
+        pot,
+        texture,
+        size,
+    ]
+    if ante:
+        parts.append(f"antes {ante / 1e6:g}")
+    if pot == "pre":
+        parts.append(f"{behind} to act")
+    if not rights:
+        parts.append("raising closed")
+    return " · ".join(filter(None, parts))
+
+
+def evidence(db, f, side, scope, page=0, cell_key="", limit=100):
+    # Same keys and cohort as the aggregate. A temporary table avoids a parameter per cell.
+    db.execute("CREATE TEMP TABLE IF NOT EXISTS matched(cell TEXT PRIMARY KEY)")
+    db.execute("DELETE FROM matched")
+    db.executemany("INSERT INTO matched VALUES(?)", ((k,) for k in f.selected))
+    where = """FROM decisions d JOIN cohort c ON d.hand=c.hand JOIN hands h ON h.id=d.hand
+        WHERE d.node=? AND ((d.actor=c.hero)=?) AND (?='All opportunities' OR d.cell IN (SELECT cell FROM matched))
+        AND (?='' OR d.cell=?)"""
+    args = (f.node, int(side == "Hero"), scope, cell_key, cell_key)
+    count = db.execute(
+        "SELECT count(*),count(DISTINCT d.hand) " + where, args
+    ).fetchone()
+    rows = db.execute(
+        "SELECT d.*,h.room,h.number,h.day,c.hero "
+        + where
+        + " ORDER BY h.day,h.id,d.ref LIMIT ? OFFSET ?",
+        (*args, limit, page * limit),
+    ).fetchall()
+    return rows, tuple(count)

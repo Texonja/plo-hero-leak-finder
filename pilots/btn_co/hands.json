@@ -1,0 +1,499 @@
+{
+  "schema_version": 1,
+  "positions": [
+    "CO",
+    "BTN",
+    "SB",
+    "BB"
+  ],
+  "model_fields": [
+    "cards",
+    "pot",
+    "open_to",
+    "stacks",
+    "committed",
+    "threebet_to",
+    "min_raise_to",
+    "ante_per_seat",
+    "dead_antes",
+    "sb_in_bb",
+    "blinds_to_act"
+  ],
+  "units": "Betting amounts are big blinds. sb_currency and bb_currency are in the named source currency.",
+  "selection": "Six dealt PLO4 seats, UTG and HJ fold, CO full open, known four-card BTN Hero with legal raise and both blinds unacted. All four live seats have at least 30 BB remaining. Ascending SHA-256 of UTF-8 BTN-vs-CO/v1|room|id within the fixed room/ante quotas. Selection excludes no hand based on the BTN action or later play. No upper stack cap.",
+  "field_notes": "Arrays always use CO, BTN, SB, BB order. stacks are chips behind immediately before BTN acts. committed excludes antes. dead_antes covers all six seats. threebet_to is the pot-limit raise-to capped by BTN's remaining stack. actual_to is the recorded final street contribution for a call or raise and null on a fold. action, actual_to, source and all identity/trace metadata are outside the model input allowlist.",
+  "public_sources": {
+    "CoinPoker": {
+      "filename": "cash_example.txt",
+      "sha256": "4f038959acbb00cd082e020f2c782bede4e8b105968881b2afce85ce7c023d32",
+      "url": "https://github.com/Texonja/coinpoker-population-strength-analyzer/blob/6e50528b7219356c72b470f904e589c0fecbe138/cash_example.txt"
+    },
+    "iPoker": {
+      "filename": "database.pghembk",
+      "sha256": "7d8604883954cb6d0e5b643dc973ce9c9fe9106c64694fcec64c7c273c333200",
+      "url": "https://github.com/Texonja/plo-multiaccount-detector/blob/2956860995a19a0db6e6d3676d7fc88486fd93e0/database.pghembk"
+    }
+  },
+  "strata": [
+    {
+      "room": "CoinPoker",
+      "ante_per_seat": 0.16,
+      "eligible": 115,
+      "selected": 3
+    },
+    {
+      "room": "CoinPoker",
+      "ante_per_seat": 0.0,
+      "eligible": 12,
+      "selected": 2
+    },
+    {
+      "room": "iPoker",
+      "ante_per_seat": 0.0,
+      "eligible": 83,
+      "selected": 5
+    }
+  ],
+  "hands": [
+    {
+      "room": "CoinPoker",
+      "id": "9000006096",
+      "cards": [
+        "Kh",
+        "Kc",
+        "7c",
+        "5s"
+      ],
+      "pot": 5.96,
+      "open_to": 3.5,
+      "stacks": [
+        122.64,
+        211.7,
+        99.34,
+        142.78
+      ],
+      "committed": [
+        3.5,
+        0.0,
+        0.5,
+        1.0
+      ],
+      "threebet_to": 12.96,
+      "min_raise_to": 6.0,
+      "ante_per_seat": 0.16,
+      "dead_antes": 0.96,
+      "sb_in_bb": 0.5,
+      "blinds_to_act": [
+        "SB",
+        "BB"
+      ],
+      "currency": "USDT",
+      "sb_currency": 0.25,
+      "bb_currency": 0.5,
+      "action": "call",
+      "actual_to": 3.5,
+      "open_ref": "Line 26",
+      "action_ref": "Line 27",
+      "source_locator": "Text hand 6096",
+      "selection_sha256": "072146bcbcf22460d3636ee750d5ac9009b1e2d950c46e6e6e74a6a143553913",
+      "source_sha256": "a2c3e0759d82d4673ceed2fd0e70965344ccd1bfd2f675d8cc137e6ee80371a6",
+      "source": "CoinPoker Hand #9000006096: PLO 4 (₮0.25/₮0.50/₮0.08) 2026/01/09 23:12:00 CEST\nTable '800096' 6-max Seat #5 is the button\nSeat 1: 7e4b6b73 (₮71.97 in chips)\nSeat 2: 12d4b7c2 (₮132.98 in chips)\nSeat 3: fa98818d (₮60.33 in chips)\nSeat 4: d6c03f10 (₮63.15 in chips)\nSeat 5: Hero (₮105.93 in chips)\nSeat 6: b06c8c10 (₮50 in chips)\n7e4b6b73: posts ante ₮0.08\n12d4b7c2: posts ante ₮0.08\nfa98818d: posts ante ₮0.08\nd6c03f10: posts ante ₮0.08\nHero: posts ante ₮0.08\nb06c8c10: posts ante ₮0.08\nb06c8c10: posts small blind ₮0.25\n7e4b6b73: posts big blind ₮0.50\n*** HOLE CARDS ***\nDealt to 7e4b6b73\nDealt to 12d4b7c2\nDealt to fa98818d\nDealt to d6c03f10\nDealt to Hero [Kh Kc 7c 5s]\nDealt to b06c8c10\n12d4b7c2: folds\nfa98818d: folds\nd6c03f10: raises ₮1.25 to ₮1.75\nHero: calls ₮1.75\nb06c8c10: folds\n7e4b6b73: calls ₮1.25\n*** FLOP *** [Th Jc 5c]\n7e4b6b73: checks\nd6c03f10: bets ₮4.01\nHero: calls ₮4.01\n7e4b6b73: calls ₮4.01\n*** TURN *** [Th Jc 5c] [9d]\n7e4b6b73: checks\nd6c03f10: checks\nHero: checks\n*** RIVER *** [Th Jc 5c 9d] [8d]\n7e4b6b73: bets ₮5.94\nd6c03f10: folds\nHero: folds\n7e4b6b73: RETURN ₮5.94\n*** SHOWDOWN ***\n7e4b6b73 collected ₮17.06 from pot\n*** SUMMARY ***\nTotal pot ₮18.01 | Rake ₮0.90 | Splash Fee ₮0.05\nHand was run once\nBoard [ Th Jc 5c 9d 8d ]\nGame ended: 2026/01/09 23:13:30 CEST\nSeat 1: 7e4b6b73 won (₮17.06)\nSeat 2: 12d4b7c2 folded before Flop (didn't bet)\nSeat 3: fa98818d folded before Flop (didn't bet)\nSeat 4: d6c03f10 folded on the River\nSeat 5: Hero folded on the River\nSeat 6: b06c8c10 folded before Flop (didn't bet)\n"
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000004955",
+      "cards": [
+        "Ac",
+        "9c",
+        "8d",
+        "3s"
+      ],
+      "pot": 5.76,
+      "open_to": 3.4,
+      "stacks": [
+        96.44,
+        99.84,
+        148.48,
+        110.6
+      ],
+      "committed": [
+        3.4,
+        0.0,
+        0.4,
+        1.0
+      ],
+      "threebet_to": 12.56,
+      "min_raise_to": 5.8,
+      "ante_per_seat": 0.16,
+      "dead_antes": 0.96,
+      "sb_in_bb": 0.4,
+      "blinds_to_act": [
+        "SB",
+        "BB"
+      ],
+      "currency": "USDT",
+      "sb_currency": 0.1,
+      "bb_currency": 0.25,
+      "action": "fold",
+      "actual_to": null,
+      "open_ref": "Line 26",
+      "action_ref": "Line 27",
+      "source_locator": "Text hand 4955",
+      "selection_sha256": "08b005447ffbe773fd3fd478040dbfadd960359de99939f4fb8d1a25e1ab54ce",
+      "source_sha256": "f669d0d5cf04b576e3eb1102717c8088e46e64a4a722e19e7dce861dea0b9531",
+      "source": "CoinPoker Hand #9000004955: PLO 4 (₮0.10/₮0.25/₮0.04) 2026/01/08 09:10:00 CEST\nTable '800055' 6-max Seat #4 is the button\nSeat 1: 42503a5c (₮37.96 in chips)\nSeat 2: 11b3ef95 (₮50.44 in chips)\nSeat 3: d40c7482 (₮25 in chips)\nSeat 4: Hero (₮25 in chips)\nSeat 5: 9f862e37 (₮37.26 in chips)\nSeat 6: 5d5d8fdc (₮27.94 in chips)\n42503a5c: posts ante ₮0.04\n11b3ef95: posts ante ₮0.04\nd40c7482: posts ante ₮0.04\nHero: posts ante ₮0.04\n9f862e37: posts ante ₮0.04\n5d5d8fdc: posts ante ₮0.04\n9f862e37: posts small blind ₮0.10\n5d5d8fdc: posts big blind ₮0.25\n*** HOLE CARDS ***\nDealt to 42503a5c\nDealt to 11b3ef95\nDealt to d40c7482\nDealt to Hero [Ac 9c 8d 3s]\nDealt to 9f862e37\nDealt to 5d5d8fdc\n42503a5c: folds\n11b3ef95: folds\nd40c7482: raises ₮0.60 to ₮0.85\nHero: folds\n9f862e37: folds\n5d5d8fdc: folds\nd40c7482: RETURN ₮0.60\n*** SHOWDOWN ***\nd40c7482 collected ₮0.82 from pot\n*** SUMMARY ***\nTotal pot ₮0.84 | Rake ₮0 | Splash Fee ₮0.02\nHand was run once\nBoard [  ]\nGame ended: 2026/01/08 09:11:30 CEST\nSeat 1: 42503a5c folded before Flop (didn't bet)\nSeat 2: 11b3ef95 folded before Flop (didn't bet)\nSeat 3: d40c7482 won (₮0.82)\nSeat 4: Hero folded before Flop (didn't bet)\nSeat 5: 9f862e37 folded before Flop (didn't bet)\nSeat 6: 5d5d8fdc folded before Flop (didn't bet)\n"
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000004808",
+      "cards": [
+        "Qd",
+        "7h",
+        "6s",
+        "4c"
+      ],
+      "pot": 5.46,
+      "open_to": 3.0,
+      "stacks": [
+        134.88,
+        239.7,
+        100.98,
+        91.58
+      ],
+      "committed": [
+        3.0,
+        0.0,
+        0.5,
+        1.0
+      ],
+      "threebet_to": 11.46,
+      "min_raise_to": 5.0,
+      "ante_per_seat": 0.16,
+      "dead_antes": 0.96,
+      "sb_in_bb": 0.5,
+      "blinds_to_act": [
+        "SB",
+        "BB"
+      ],
+      "currency": "USDT",
+      "sb_currency": 0.25,
+      "bb_currency": 0.5,
+      "action": "fold",
+      "actual_to": null,
+      "open_ref": "Line 26",
+      "action_ref": "Line 27",
+      "source_locator": "Text hand 4808",
+      "selection_sha256": "0949ea182acc19c43b691c430b81d85a8214127ad529d2e3500411a1e7da8db3",
+      "source_sha256": "436d63d3fcf838bddffb04850f2827bf4c24733895b1ee5e9193af981bad3fba",
+      "source": "CoinPoker Hand #9000004808: PLO 4 (₮0.25/₮0.50/₮0.08) 2026/01/08 04:16:00 CEST\nTable '800008' 6-max Seat #2 is the button\nSeat 1: c3721a9e (₮69.02 in chips)\nSeat 2: Hero (₮119.93 in chips)\nSeat 3: c41d23ff (₮50.82 in chips)\nSeat 4: a7a23b4c (₮46.37 in chips)\nSeat 5: ff8b8bf8 (₮50 in chips)\nSeat 6: b32856be (₮68.58 in chips)\nc3721a9e: posts ante ₮0.08\nHero: posts ante ₮0.08\nc41d23ff: posts ante ₮0.08\na7a23b4c: posts ante ₮0.08\nff8b8bf8: posts ante ₮0.08\nb32856be: posts ante ₮0.08\nc41d23ff: posts small blind ₮0.25\na7a23b4c: posts big blind ₮0.50\n*** HOLE CARDS ***\nDealt to c3721a9e\nDealt to Hero [Qd 7h 6s 4c]\nDealt to c41d23ff\nDealt to a7a23b4c\nDealt to ff8b8bf8\nDealt to b32856be\nff8b8bf8: folds\nb32856be: folds\nc3721a9e: raises ₮1 to ₮1.50\nHero: folds\nc41d23ff: folds\na7a23b4c: raises ₮3.25 to ₮4.75\nc3721a9e: calls ₮3.25\n*** FLOP *** [Kh 9d Tc]\na7a23b4c: bets ₮3.38\nc3721a9e: folds\na7a23b4c: RETURN ₮3.38\n*** SHOWDOWN ***\na7a23b4c collected ₮9.67 from pot\n*** SUMMARY ***\nTotal pot ₮10.23 | Rake ₮0.51 | Splash Fee ₮0.05\nHand was run once\nBoard [ Kh 9d Tc ]\nGame ended: 2026/01/08 04:17:30 CEST\nSeat 1: c3721a9e folded on the Flop\nSeat 2: Hero folded before Flop (didn't bet)\nSeat 3: c41d23ff folded before Flop (didn't bet)\nSeat 4: a7a23b4c won (₮9.67)\nSeat 5: ff8b8bf8 folded before Flop (didn't bet)\nSeat 6: b32856be folded before Flop (didn't bet)\n"
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000002519",
+      "cards": [
+        "Ac",
+        "7c",
+        "Kh",
+        "8h"
+      ],
+      "pot": 4.8,
+      "open_to": 3.4,
+      "stacks": [
+        61.44,
+        160.16,
+        105.76,
+        123.96
+      ],
+      "committed": [
+        3.4,
+        0.0,
+        0.4,
+        1.0
+      ],
+      "threebet_to": 11.6,
+      "min_raise_to": 5.8,
+      "ante_per_seat": 0.0,
+      "dead_antes": 0.0,
+      "sb_in_bb": 0.4,
+      "blinds_to_act": [
+        "SB",
+        "BB"
+      ],
+      "currency": "USDT",
+      "sb_currency": 0.1,
+      "bb_currency": 0.25,
+      "action": "raise",
+      "actual_to": 11.6,
+      "open_ref": "Line 20",
+      "action_ref": "Line 21",
+      "source_locator": "Text hand 2519",
+      "selection_sha256": "0829a720bd070144191c02056dd43c0ee5f74feba6ee4fa23deeb1b7e3c29a35",
+      "source_sha256": "f86e49cb1064ec84508875db9f6928c5cbee1ab7955427920519683e57029493",
+      "source": "CoinPoker Hand #9000002519: PLO 4 (₮0.10/₮0.25) 2026/01/04 23:58:00 CEST\nTable '800019' 6-max Seat #1 is the button\nSeat 1: Hero (₮40.04 in chips)\nSeat 2: 6df57319 (₮26.54 in chips)\nSeat 3: a1262c09 (₮31.24 in chips)\nSeat 4: 36b3549b (₮25 in chips)\nSeat 5: 91980893 (₮24.36 in chips)\nSeat 6: 5142eae3 (₮16.21 in chips)\n6df57319: posts small blind ₮0.10\na1262c09: posts big blind ₮0.25\n*** HOLE CARDS ***\nDealt to Hero [Ac 7c Kh 8h]\nDealt to 6df57319\nDealt to a1262c09\nDealt to 36b3549b\nDealt to 91980893\nDealt to 5142eae3\n36b3549b: folds\n91980893: folds\n5142eae3: raises ₮0.60 to ₮0.85\nHero: raises ₮2.05 to ₮2.90\n6df57319: folds\na1262c09: folds\n5142eae3: calls ₮2.05\n*** FLOP *** [Ad Jd 6d]\n5142eae3: checks\nHero: checks\n*** TURN *** [Ad Jd 6d] [5s]\n5142eae3: bets ₮6.15\nHero: folds\n5142eae3: RETURN ₮6.15\n*** SHOWDOWN ***\n5142eae3 collected ₮5.82 from pot\n*** SUMMARY ***\nTotal pot ₮6.15 | Rake ₮0.31 | Splash Fee ₮0.02\nHand was run once\nBoard [ Ad Jd 6d 5s ]\nGame ended: 2026/01/04 23:59:30 CEST\nSeat 1: Hero folded on the Turn\nSeat 2: 6df57319 folded before Flop (didn't bet)\nSeat 3: a1262c09 folded before Flop (didn't bet)\nSeat 4: 36b3549b folded before Flop (didn't bet)\nSeat 5: 91980893 folded before Flop (didn't bet)\nSeat 6: 5142eae3 won (₮5.82)\n"
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000002679",
+      "cards": [
+        "Ah",
+        "Qh",
+        "Qs",
+        "9s"
+      ],
+      "pot": 5.0,
+      "open_to": 3.5,
+      "stacks": [
+        150.2,
+        100.0,
+        137.22,
+        362.5
+      ],
+      "committed": [
+        3.5,
+        0.0,
+        0.5,
+        1.0
+      ],
+      "threebet_to": 12.0,
+      "min_raise_to": 6.0,
+      "ante_per_seat": 0.0,
+      "dead_antes": 0.0,
+      "sb_in_bb": 0.5,
+      "blinds_to_act": [
+        "SB",
+        "BB"
+      ],
+      "currency": "USDT",
+      "sb_currency": 0.25,
+      "bb_currency": 0.5,
+      "action": "raise",
+      "actual_to": 12.0,
+      "open_ref": "Line 20",
+      "action_ref": "Line 21",
+      "source_locator": "Text hand 2679",
+      "selection_sha256": "23ebdc775b1dfaef95d3a86b0ad12c7c592f267990e941263ba94ac2fc5235f2",
+      "source_sha256": "081cb93c86b529d8c94ae77fc6eea35c7303de0f6b90ca857943fa2e23eff418",
+      "source": "CoinPoker Hand #9000002679: PLO 4 (₮0.25/₮0.50) 2026/01/05 05:18:00 CEST\nTable '800079' 6-max Seat #4 is the button\nSeat 1: fcaa12c5 (₮50.37 in chips)\nSeat 2: f9f363e3 (₮50.65 in chips)\nSeat 3: 4cf6fbc0 (₮76.85 in chips)\nSeat 4: Hero (₮50 in chips)\nSeat 5: 921bbb89 (₮68.86 in chips)\nSeat 6: a500f2da (₮181.75 in chips)\n921bbb89: posts small blind ₮0.25\na500f2da: posts big blind ₮0.50\n*** HOLE CARDS ***\nDealt to fcaa12c5\nDealt to f9f363e3\nDealt to 4cf6fbc0\nDealt to Hero [Ah Qh Qs 9s]\nDealt to 921bbb89\nDealt to a500f2da\nfcaa12c5: folds\nf9f363e3: folds\n4cf6fbc0: raises ₮1.25 to ₮1.75\nHero: raises ₮4.25 to ₮6\n921bbb89: folds\na500f2da: folds\n4cf6fbc0: calls ₮4.25\n*** FLOP *** [Kc 6c Tc]\n4cf6fbc0: checks\nHero: checks\n*** TURN *** [Kc 6c Tc] [8d]\n4cf6fbc0: bets ₮8.50\nHero: folds\n4cf6fbc0: RETURN ₮8.50\n*** SHOWDOWN ***\n4cf6fbc0 collected ₮12.06 from pot\n*** SUMMARY ***\nTotal pot ₮12.75 | Rake ₮0.64 | Splash Fee ₮0.05\nHand was run once\nBoard [ Kc 6c Tc 8d ]\nGame ended: 2026/01/05 05:19:30 CEST\nSeat 1: fcaa12c5 folded before Flop (didn't bet)\nSeat 2: f9f363e3 folded before Flop (didn't bet)\nSeat 3: 4cf6fbc0 won (₮12.06)\nSeat 4: Hero folded on the Turn\nSeat 5: 921bbb89 folded before Flop (didn't bet)\nSeat 6: a500f2da folded before Flop (didn't bet)\n"
+    },
+    {
+      "room": "iPoker",
+      "id": "9000010639",
+      "cards": [
+        "2d",
+        "4d",
+        "Tc",
+        "Qd"
+      ],
+      "pot": 4.8,
+      "open_to": 3.4,
+      "stacks": [
+        157.2,
+        117.92,
+        99.6,
+        103.36
+      ],
+      "committed": [
+        3.4,
+        0.0,
+        0.4,
+        1.0
+      ],
+      "threebet_to": 11.6,
+      "min_raise_to": 5.8,
+      "ante_per_seat": 0.0,
+      "dead_antes": 0.0,
+      "sb_in_bb": 0.4,
+      "blinds_to_act": [
+        "SB",
+        "BB"
+      ],
+      "currency": "EUR",
+      "sb_currency": 0.1,
+      "bb_currency": 0.25,
+      "action": "fold",
+      "actual_to": null,
+      "open_ref": "Action 5",
+      "action_ref": "Action 6",
+      "source_locator": "HM2 row 10639",
+      "selection_sha256": "01e69fcf633cbb7c85a3afce6952a53f39631f36c298f7465ce796394ddf32c9",
+      "source_sha256": "77e6c1ce1fdd90a2db01c95128f7557eeea45f7c5665f05014e9dc25da9c9ba4",
+      "source": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<session sessioncode=\"S8000010639\">\r\n <general>\r\n  <client_version>26.1.1.22</client_version>\r\n  <mode>real</mode>\r\n  <gametype>Omaha PL €0,10/€0,25</gametype>\r\n  <tablename>SampleTable040</tablename>\r\n  <tablecurrency>EUR</tablecurrency>\r\n  <smallblind>€0,10</smallblind>\r\n  <bigblind>€0,25</bigblind>\r\n  <duration>01:46:46</duration>\r\n  <gamecount>91</gamecount>\r\n  <startdate>2026-05-18 16:15:08</startdate>\r\n  <currency>EUR</currency>\r\n  <nickname>BigNeonMax</nickname>\r\n  <bets>€56,14</bets>\r\n  <wins>€34,46</wins>\r\n  <chipsin>€24,75</chipsin>\r\n  <chipsout>€32,01</chipsout>\r\n  <statuspoints>0,00</statuspoints>\r\n  <awardpoints>0,00</awardpoints>\r\n  <ipoints>0,00</ipoints>\r\n  <tablesize>6</tablesize>\r\n </general>\r\n <game gamecode=\"9000010639\">\r\n  <general>\r\n   <startdate>2026-05-18 17:40:49</startdate>\r\n   <players>\r\n    <player bet=\"€0,85\" chips=\"€40,15\" dealer=\"0\" name=\"CopperStorm247\" seat=\"1\" win=\"€0,60\"/>\r\n    <player bet=\"€0,00\" chips=\"€29,48\" dealer=\"1\" name=\"BigNeonMax\" seat=\"3\" win=\"€0,00\"/>\r\n    <player bet=\"€0,10\" chips=\"€25,00\" dealer=\"0\" name=\"x7hund3rProxyx3\" seat=\"5\" win=\"€0,00\"/>\r\n    <player bet=\"€0,25\" chips=\"€26,09\" dealer=\"0\" name=\"frost_bluff\" seat=\"6\" win=\"€0,00\"/>\r\n    <player bet=\"€0,00\" chips=\"€34,13\" dealer=\"0\" name=\"AndreRaises19\" seat=\"8\" win=\"€0,00\"/>\r\n    <player bet=\"€0,00\" chips=\"€55,87\" dealer=\"0\" name=\"IronPulse\" seat=\"10\" win=\"€0,00\"/>\r\n   </players>\r\n  </general>\r\n  <round no=\"0\">\r\n   <action no=\"1\" player=\"x7hund3rProxyx3\" sum=\"€0,10\" type=\"1\"/>\r\n   <action no=\"2\" player=\"frost_bluff\" sum=\"€0,25\" type=\"2\"/>\r\n  </round>\r\n  <round no=\"1\">\r\n   <cards player=\"CopperStorm247\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"BigNeonMax\" type=\"Pocket\">D2 D4 C10 DQ</cards>\r\n   <cards player=\"x7hund3rProxyx3\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"frost_bluff\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"AndreRaises19\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"IronPulse\" type=\"Pocket\">X X X X</cards>\r\n   <action no=\"3\" player=\"AndreRaises19\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"4\" player=\"IronPulse\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"5\" player=\"CopperStorm247\" sum=\"€0,85\" type=\"23\"/>\r\n   <action no=\"6\" player=\"BigNeonMax\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"7\" player=\"x7hund3rProxyx3\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"8\" player=\"frost_bluff\" sum=\"€0,00\" type=\"0\"/>\r\n  </round>\r\n </game>\r\n "
+    },
+    {
+      "room": "iPoker",
+      "id": "9000002888",
+      "cards": [
+        "Kc",
+        "9c",
+        "Th",
+        "9d"
+      ],
+      "pot": 5.0,
+      "open_to": 3.5,
+      "stacks": [
+        136.8,
+        194.12,
+        250.3,
+        98.1
+      ],
+      "committed": [
+        3.5,
+        0.0,
+        0.5,
+        1.0
+      ],
+      "threebet_to": 12.0,
+      "min_raise_to": 6.0,
+      "ante_per_seat": 0.0,
+      "dead_antes": 0.0,
+      "sb_in_bb": 0.5,
+      "blinds_to_act": [
+        "SB",
+        "BB"
+      ],
+      "currency": "EUR",
+      "sb_currency": 0.25,
+      "bb_currency": 0.5,
+      "action": "call",
+      "actual_to": 3.5,
+      "open_ref": "Action 5",
+      "action_ref": "Action 6",
+      "source_locator": "HM2 row 2888",
+      "selection_sha256": "04b4058484380a665b7a5acb20db1ca97d1f676c9e71eb5d3c29db1792f096a7",
+      "source_sha256": "e2f8690f6ce6aec783578e81e825f55bc3599d4f4cac1b15f0a574e1b402a537",
+      "source": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<session sessioncode=\"S8000002888\">\r\n <general>\r\n  <client_version>25.9.1.11</client_version>\r\n  <mode>real</mode>\r\n  <gametype>Omaha PL €0,25/€0,50</gametype>\r\n  <tablename>SampleTable089</tablename>\r\n  <tablecurrency>EUR</tablecurrency>\r\n  <smallblind>€0,25</smallblind>\r\n  <bigblind>€0,50</bigblind>\r\n  <duration>01:03:22</duration>\r\n  <gamecount>86</gamecount>\r\n  <startdate>2026-04-27 19:45:18</startdate>\r\n  <currency>EUR</currency>\r\n  <nickname>BigNeonMax</nickname>\r\n  <bets>€213,86</bets>\r\n  <wins>€210,50</wins>\r\n  <chipsin>€54,29</chipsin>\r\n  <chipsout>€102,75</chipsout>\r\n  <statuspoints>0,00</statuspoints>\r\n  <awardpoints>0,00</awardpoints>\r\n  <ipoints>0,00</ipoints>\r\n  <tablesize>6</tablesize>\r\n </general>\r\n <game gamecode=\"9000002888\">\r\n  <general>\r\n   <startdate>2026-04-27 20:07:45</startdate>\r\n   <players>\r\n    <player bet=\"€1,75\" chips=\"€97,06\" dealer=\"1\" name=\"BigNeonMax\" seat=\"1\" win=\"€0,00\"/>\r\n    <player bet=\"€7,35\" chips=\"€125,40\" dealer=\"0\" name=\"NeonB0l7\" seat=\"3\" win=\"€0,00\"/>\r\n    <player bet=\"€1,75\" chips=\"€49,55\" dealer=\"0\" name=\"UrbanWallet\" seat=\"5\" win=\"€0,00\"/>\r\n    <player bet=\"€0,00\" chips=\"€103,43\" dealer=\"0\" name=\"MicroSailor\" seat=\"6\" win=\"€0,00\"/>\r\n    <player bet=\"€0,00\" chips=\"€19,09\" dealer=\"0\" name=\"L0udH3art\" seat=\"8\" win=\"€0,00\"/>\r\n    <player bet=\"€16,45\" chips=\"€70,15\" dealer=\"0\" name=\"HunterOracle\" rakeamount=\"€1,21\" seat=\"10\" win=\"€16,99\"/>\r\n   </players>\r\n  </general>\r\n  <round no=\"0\">\r\n   <action no=\"1\" player=\"NeonB0l7\" sum=\"€0,25\" type=\"1\"/>\r\n   <action no=\"2\" player=\"UrbanWallet\" sum=\"€0,50\" type=\"2\"/>\r\n  </round>\r\n  <round no=\"1\">\r\n   <cards player=\"MicroSailor\" type=\"Pocket\">X X X X</cards>\r\n   <action no=\"3\" player=\"MicroSailor\" sum=\"€0,00\" type=\"0\"/>\r\n   <cards player=\"L0udH3art\" type=\"Pocket\">X X X X</cards>\r\n   <action no=\"4\" player=\"L0udH3art\" sum=\"€0,00\" type=\"0\"/>\r\n   <cards player=\"HunterOracle\" type=\"Pocket\">X X X X</cards>\r\n   <action no=\"5\" player=\"HunterOracle\" sum=\"€1,75\" type=\"23\"/>\r\n   <cards player=\"BigNeonMax\" type=\"Pocket\">CK C9 H10 D9</cards>\r\n   <action no=\"6\" player=\"BigNeonMax\" sum=\"€1,75\" type=\"3\"/>\r\n   <cards player=\"NeonB0l7\" type=\"Pocket\">X X X X</cards>\r\n   <action no=\"7\" player=\"NeonB0l7\" sum=\"€1,50\" type=\"3\"/>\r\n   <cards player=\"UrbanWallet\" type=\"Pocket\">X X X X</cards>\r\n   <action no=\"8\" player=\"UrbanWallet\" sum=\"€1,25\" type=\"3\"/>\r\n  </round>\r\n  <round no=\"2\">\r\n   <cards type=\"Flop\">D4 H2 D10</cards>\r\n   <action no=\"9\" player=\"NeonB0l7\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"10\" player=\"UrbanWallet\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"11\" player=\"HunterOracle\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"12\" player=\"BigNeonMax\" sum=\"€0,00\" type=\"4\"/>\r\n  </round>\r\n  <round no=\"3\">\r\n   <cards type=\"Turn\">CJ</cards>\r\n   <action no=\"13\" player=\"NeonB0l7\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"14\" player=\"UrbanWallet\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"15\" player=\"HunterOracle\" sum=\"€5,60\" type=\"5\"/>\r\n   <action no=\"16\" player=\"BigNeonMax\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"17\" player=\"NeonB0l7\" sum=\"€5,60\" type=\"3\"/>\r\n   <action no=\"18\" player=\"UrbanWallet\" sum=\"€0,00\" type=\"0\"/>\r\n  </round>\r\n  <round no=\"4\">\r\n   <cards type=\"River\">C2</cards>\r\n   <action no=\"19\" player=\"NeonB0l7\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"20\" player=\"HunterOracle\" sum=\"€9,10\" type=\"5\"/>\r\n   <action no=\"21\" player=\"NeonB0l7\" sum=\"€0,00\" type=\"0\"/>\r\n  </round>\r\n </game>\r\n "
+    },
+    {
+      "room": "iPoker",
+      "id": "9000012000",
+      "cards": [
+        "Ks",
+        "Jc",
+        "Qc",
+        "3h"
+      ],
+      "pot": 3.5,
+      "open_to": 2.0,
+      "stacks": [
+        233.16,
+        100.0,
+        238.02,
+        67.0
+      ],
+      "committed": [
+        2.0,
+        0.0,
+        0.5,
+        1.0
+      ],
+      "threebet_to": 7.5,
+      "min_raise_to": 3.0,
+      "ante_per_seat": 0.0,
+      "dead_antes": 0.0,
+      "sb_in_bb": 0.5,
+      "blinds_to_act": [
+        "SB",
+        "BB"
+      ],
+      "currency": "EUR",
+      "sb_currency": 0.25,
+      "bb_currency": 0.5,
+      "action": "fold",
+      "actual_to": null,
+      "open_ref": "Action 5",
+      "action_ref": "Action 6",
+      "source_locator": "HM2 row 12000",
+      "selection_sha256": "09459dab7ebafe91c7cab3515cdd334f1f274aab865eca51adb3a7f78888fd7e",
+      "source_sha256": "c815d904375ba8e2abef16f8d8958b44244af4e7412c21aa48749779ef075c0c",
+      "source": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<session sessioncode=\"S8000012000\">\r\n <general>\r\n  <client_version>26.1.1.22</client_version>\r\n  <mode>real</mode>\r\n  <gametype>Omaha PL €0,25/€0,50</gametype>\r\n  <tablename>SampleTable001</tablename>\r\n  <tablecurrency>EUR</tablecurrency>\r\n  <smallblind>€0,25</smallblind>\r\n  <bigblind>€0,50</bigblind>\r\n  <duration>02:13:44</duration>\r\n  <gamecount>151</gamecount>\r\n  <startdate>2026-05-21 15:53:31</startdate>\r\n  <currency>EUR</currency>\r\n  <nickname>BigNeonMax</nickname>\r\n  <bets>€317,96</bets>\r\n  <wins>€250,00</wins>\r\n  <chipsin>€49,50</chipsin>\r\n  <chipsout>€147,46</chipsout>\r\n  <statuspoints>0,00</statuspoints>\r\n  <awardpoints>0,00</awardpoints>\r\n  <ipoints>0,00</ipoints>\r\n  <tablesize>6</tablesize>\r\n </general>\r\n <game gamecode=\"9000012000\">\r\n  <general>\r\n   <startdate>2026-05-21 17:11:37</startdate>\r\n   <players>\r\n    <player bet=\"€34,00\" chips=\"€34,00\" dealer=\"0\" name=\"BeaconDriver93\" rakeamount=\"€3,00\" seat=\"1\" win=\"€76,37\"/>\r\n    <player bet=\"€0,00\" chips=\"€71,81\" dealer=\"0\" name=\"EnzoReraises\" seat=\"3\" win=\"€0,00\"/>\r\n    <player bet=\"€0,00\" chips=\"€60,53\" dealer=\"0\" name=\"MaxCalls\" seat=\"5\" win=\"€0,00\"/>\r\n    <player bet=\"€11,37\" chips=\"€117,58\" dealer=\"0\" name=\"OddVillain\" seat=\"6\" win=\"€0,00\"/>\r\n    <player bet=\"€0,00\" chips=\"€50,00\" dealer=\"1\" name=\"BigNeonMax\" seat=\"8\" win=\"€0,00\"/>\r\n    <player bet=\"€45,48\" chips=\"€119,26\" dealer=\"0\" name=\"TigerCity\" seat=\"10\" win=\"€0,00\"/>\r\n   </players>\r\n  </general>\r\n  <round no=\"0\">\r\n   <action no=\"1\" player=\"TigerCity\" sum=\"€0,25\" type=\"1\"/>\r\n   <action no=\"2\" player=\"BeaconDriver93\" sum=\"€0,50\" type=\"2\"/>\r\n  </round>\r\n  <round no=\"1\">\r\n   <cards player=\"BeaconDriver93\" type=\"Pocket\">DK C5 C4 D8</cards>\r\n   <cards player=\"EnzoReraises\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"MaxCalls\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"OddVillain\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"BigNeonMax\" type=\"Pocket\">SK CJ CQ H3</cards>\r\n   <cards player=\"TigerCity\" type=\"Pocket\">S6 DA D10 SA</cards>\r\n   <action no=\"3\" player=\"EnzoReraises\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"4\" player=\"MaxCalls\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"5\" player=\"OddVillain\" sum=\"€1,00\" type=\"23\"/>\r\n   <action no=\"6\" player=\"BigNeonMax\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"7\" player=\"TigerCity\" sum=\"€3,50\" type=\"23\"/>\r\n   <action no=\"8\" player=\"BeaconDriver93\" sum=\"€3,00\" type=\"3\"/>\r\n   <action no=\"9\" player=\"OddVillain\" sum=\"€2,50\" type=\"3\"/>\r\n  </round>\r\n  <round no=\"2\">\r\n   <action no=\"10\" player=\"TigerCity\" sum=\"€7,87\" type=\"5\"/>\r\n   <action no=\"11\" player=\"BeaconDriver93\" sum=\"€7,87\" type=\"3\"/>\r\n   <action no=\"12\" player=\"OddVillain\" sum=\"€7,87\" type=\"3\"/>\r\n   <cards type=\"Flop\">H2 D3 HA</cards>\r\n  </round>\r\n  <round no=\"3\">\r\n   <action no=\"13\" player=\"TigerCity\" sum=\"€34,11\" type=\"5\"/>\r\n   <action no=\"14\" player=\"BeaconDriver93\" sum=\"€22,63\" type=\"7\"/>\r\n   <action no=\"15\" player=\"OddVillain\" sum=\"€0,00\" type=\"0\"/>\r\n   <cards type=\"Turn\">C9</cards>\r\n  </round>\r\n  <round no=\"4\">\r\n   <cards type=\"River\">C6</cards>\r\n  </round>\r\n </game>\r\n "
+    },
+    {
+      "room": "iPoker",
+      "id": "9000008520",
+      "cards": [
+        "4d",
+        "6d",
+        "Ah",
+        "Qc"
+      ],
+      "pot": 5.0,
+      "open_to": 3.5,
+      "stacks": [
+        188.88,
+        111.68,
+        63.58,
+        264.2
+      ],
+      "committed": [
+        3.5,
+        0.0,
+        0.5,
+        1.0
+      ],
+      "threebet_to": 12.0,
+      "min_raise_to": 6.0,
+      "ante_per_seat": 0.0,
+      "dead_antes": 0.0,
+      "sb_in_bb": 0.5,
+      "blinds_to_act": [
+        "SB",
+        "BB"
+      ],
+      "currency": "EUR",
+      "sb_currency": 0.25,
+      "bb_currency": 0.5,
+      "action": "fold",
+      "actual_to": null,
+      "open_ref": "Action 5",
+      "action_ref": "Action 6",
+      "source_locator": "HM2 row 8520",
+      "selection_sha256": "09cc7b7db2168dabc0c227760abb88038c864e4cd21151c9d7a482e257733bee",
+      "source_sha256": "143544705d43613b5e33f01dc028b11a3d2d5c935f1408d589f8143c2c79a4b6",
+      "source": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<session sessioncode=\"S8000008520\">\r\n <general>\r\n  <client_version>26.1.1.22</client_version>\r\n  <mode>real</mode>\r\n  <gametype>Omaha PL €0,25/€0,50</gametype>\r\n  <tablename>SampleTable121</tablename>\r\n  <tablecurrency>EUR</tablecurrency>\r\n  <smallblind>€0,25</smallblind>\r\n  <bigblind>€0,50</bigblind>\r\n  <duration>01:00:05</duration>\r\n  <gamecount>70</gamecount>\r\n  <startdate>2026-05-10 22:11:51</startdate>\r\n  <currency>EUR</currency>\r\n  <nickname>BigNeonMax</nickname>\r\n  <bets>€227,98</bets>\r\n  <wins>€335,67</wins>\r\n  <chipsin>€49,50</chipsin>\r\n  <chipsout>€212,36</chipsout>\r\n  <statuspoints>0,00</statuspoints>\r\n  <awardpoints>0,00</awardpoints>\r\n  <ipoints>0,00</ipoints>\r\n  <tablesize>6</tablesize>\r\n </general>\r\n <game gamecode=\"9000008520\">\r\n  <general>\r\n   <startdate>2026-05-10 22:43:59</startdate>\r\n   <players>\r\n    <player bet=\"€0,00\" chips=\"€41,29\" dealer=\"0\" name=\"HiddenDust64\" seat=\"1\" win=\"€0,00\"/>\r\n    <player bet=\"€12,56\" chips=\"€96,19\" dealer=\"0\" name=\"RoccoReraises\" rakeamount=\"€0,62\" seat=\"3\" win=\"€8,75\"/>\r\n    <player bet=\"€0,00\" chips=\"€55,84\" dealer=\"1\" name=\"BigNeonMax\" seat=\"5\" win=\"€0,00\"/>\r\n    <player bet=\"€0,25\" chips=\"€32,04\" dealer=\"0\" name=\"DragonLambda23\" seat=\"6\" win=\"€0,00\"/>\r\n    <player bet=\"€4,56\" chips=\"€132,60\" dealer=\"0\" name=\"VikingBlind\" seat=\"8\" win=\"€0,00\"/>\r\n    <player bet=\"€0,00\" chips=\"€50,00\" dealer=\"0\" name=\"frost_bluff\" seat=\"10\" win=\"€0,00\"/>\r\n   </players>\r\n  </general>\r\n  <round no=\"0\">\r\n   <action no=\"1\" player=\"DragonLambda23\" sum=\"€0,25\" type=\"1\"/>\r\n   <action no=\"2\" player=\"VikingBlind\" sum=\"€0,50\" type=\"2\"/>\r\n  </round>\r\n  <round no=\"1\">\r\n   <cards player=\"HiddenDust64\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"RoccoReraises\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"BigNeonMax\" type=\"Pocket\">D4 D6 HA CQ</cards>\r\n   <cards player=\"DragonLambda23\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"VikingBlind\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"frost_bluff\" type=\"Pocket\">X X X X</cards>\r\n   <action no=\"3\" player=\"frost_bluff\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"4\" player=\"HiddenDust64\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"5\" player=\"RoccoReraises\" sum=\"€1,75\" type=\"23\"/>\r\n   <action no=\"6\" player=\"BigNeonMax\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"7\" player=\"DragonLambda23\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"8\" player=\"VikingBlind\" sum=\"€1,25\" type=\"3\"/>\r\n  </round>\r\n  <round no=\"2\">\r\n   <action no=\"9\" player=\"VikingBlind\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"10\" player=\"RoccoReraises\" sum=\"€0,00\" type=\"4\"/>\r\n   <cards type=\"Flop\">D7 C4 CK</cards>\r\n  </round>\r\n  <round no=\"3\">\r\n   <action no=\"11\" player=\"VikingBlind\" sum=\"€2,81\" type=\"5\"/>\r\n   <action no=\"12\" player=\"RoccoReraises\" sum=\"€2,81\" type=\"3\"/>\r\n   <cards type=\"Turn\">C3</cards>\r\n  </round>\r\n  <round no=\"4\">\r\n   <action no=\"13\" player=\"VikingBlind\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"14\" player=\"RoccoReraises\" sum=\"€8,00\" type=\"5\"/>\r\n   <action no=\"15\" player=\"VikingBlind\" sum=\"€0,00\" type=\"0\"/>\r\n   <cards type=\"River\">SK</cards>\r\n  </round>\r\n </game>\r\n "
+    },
+    {
+      "room": "iPoker",
+      "id": "9000006911",
+      "cards": [
+        "Jh",
+        "9d",
+        "Ac",
+        "3c"
+      ],
+      "pot": 5.0,
+      "open_to": 3.5,
+      "stacks": [
+        73.0,
+        125.3,
+        210.95,
+        99.0
+      ],
+      "committed": [
+        3.5,
+        0.0,
+        0.5,
+        1.0
+      ],
+      "threebet_to": 12.0,
+      "min_raise_to": 6.0,
+      "ante_per_seat": 0.0,
+      "dead_antes": 0.0,
+      "sb_in_bb": 0.5,
+      "blinds_to_act": [
+        "SB",
+        "BB"
+      ],
+      "currency": "EUR",
+      "sb_currency": 0.5,
+      "bb_currency": 1.0,
+      "action": "call",
+      "actual_to": 3.5,
+      "open_ref": "Action 5",
+      "action_ref": "Action 6",
+      "source_locator": "HM2 row 6911",
+      "selection_sha256": "0a2818d0a7e3ba957e103cc6aae5949ea87028ab5dc60ea6fc2fd18457c3859a",
+      "source_sha256": "54af1e7871f2cc1797abbc7c10e13431446affae6e1ea178620f4f33d78ced04",
+      "source": "<?xml version=\"1.0\" encoding=\"utf-8\"?>\r\n<session sessioncode=\"S8000006911\">\r\n <general>\r\n  <client_version>26.1.1.22</client_version>\r\n  <mode>real</mode>\r\n  <gametype>Omaha PL €0,50/€1,00</gametype>\r\n  <tablename>SampleTable112</tablename>\r\n  <tablecurrency>EUR</tablecurrency>\r\n  <smallblind>€0,50</smallblind>\r\n  <bigblind>€1,00</bigblind>\r\n  <duration>02:32:20</duration>\r\n  <gamecount>159</gamecount>\r\n  <startdate>2026-05-06 23:19:36</startdate>\r\n  <currency>EUR</currency>\r\n  <nickname>BigNeonMax</nickname>\r\n  <bets>€1.071,45</bets>\r\n  <wins>€1.042,46</wins>\r\n  <chipsin>€99,00</chipsin>\r\n  <chipsout>€439,99</chipsout>\r\n  <statuspoints>0,00</statuspoints>\r\n  <awardpoints>0,00</awardpoints>\r\n  <ipoints>0,00</ipoints>\r\n  <tablesize>6</tablesize>\r\n </general>\r\n <game gamecode=\"9000006911\">\r\n  <general>\r\n   <startdate>2026-05-06 23:57:48</startdate>\r\n   <players>\r\n    <player bet=\"€0,00\" chips=\"€299,98\" dealer=\"0\" name=\"storm_pirate\" seat=\"1\" win=\"€0,00\"/>\r\n    <player bet=\"€0,00\" chips=\"€318,34\" dealer=\"0\" name=\"CalmGrinder88\" seat=\"3\" win=\"€0,00\"/>\r\n    <player bet=\"€17,50\" chips=\"€76,50\" dealer=\"0\" name=\"Dinar5a1lor8\" seat=\"5\" win=\"€0,00\"/>\r\n    <player bet=\"€37,50\" chips=\"€125,30\" dealer=\"1\" name=\"BigNeonMax\" rakeamount=\"€3,50\" seat=\"6\" win=\"€52,50\"/>\r\n    <player bet=\"€17,50\" chips=\"€211,45\" dealer=\"0\" name=\"QuietPilot505\" seat=\"8\" win=\"€0,00\"/>\r\n    <player bet=\"€3,50\" chips=\"€100,00\" dealer=\"0\" name=\"RakeCobra808\" seat=\"10\" win=\"€0,00\"/>\r\n   </players>\r\n  </general>\r\n  <round no=\"0\">\r\n   <action no=\"1\" player=\"QuietPilot505\" sum=\"€0,50\" type=\"1\"/>\r\n   <action no=\"2\" player=\"RakeCobra808\" sum=\"€1,00\" type=\"2\"/>\r\n  </round>\r\n  <round no=\"1\">\r\n   <cards player=\"storm_pirate\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"CalmGrinder88\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"Dinar5a1lor8\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"BigNeonMax\" type=\"Pocket\">HJ D9 CA C3</cards>\r\n   <cards player=\"QuietPilot505\" type=\"Pocket\">X X X X</cards>\r\n   <cards player=\"RakeCobra808\" type=\"Pocket\">X X X X</cards>\r\n   <action no=\"3\" player=\"storm_pirate\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"4\" player=\"CalmGrinder88\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"5\" player=\"Dinar5a1lor8\" sum=\"€3,50\" type=\"23\"/>\r\n   <action no=\"6\" player=\"BigNeonMax\" sum=\"€3,50\" type=\"3\"/>\r\n   <action no=\"7\" player=\"QuietPilot505\" sum=\"€3,00\" type=\"3\"/>\r\n   <action no=\"8\" player=\"RakeCobra808\" sum=\"€2,50\" type=\"3\"/>\r\n  </round>\r\n  <round no=\"2\">\r\n   <action no=\"9\" player=\"QuietPilot505\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"10\" player=\"RakeCobra808\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"11\" player=\"Dinar5a1lor8\" sum=\"€14,00\" type=\"5\"/>\r\n   <action no=\"12\" player=\"BigNeonMax\" sum=\"€14,00\" type=\"3\"/>\r\n   <action no=\"13\" player=\"QuietPilot505\" sum=\"€14,00\" type=\"3\"/>\r\n   <action no=\"14\" player=\"RakeCobra808\" sum=\"€0,00\" type=\"0\"/>\r\n   <cards type=\"Flop\">C9 S6 C2</cards>\r\n  </round>\r\n  <round no=\"3\">\r\n   <action no=\"15\" player=\"QuietPilot505\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"16\" player=\"Dinar5a1lor8\" sum=\"€0,00\" type=\"4\"/>\r\n   <action no=\"17\" player=\"BigNeonMax\" sum=\"€20,00\" type=\"5\"/>\r\n   <action no=\"18\" player=\"QuietPilot505\" sum=\"€0,00\" type=\"0\"/>\r\n   <action no=\"19\" player=\"Dinar5a1lor8\" sum=\"€0,00\" type=\"0\"/>\r\n   <cards type=\"Turn\">S9</cards>\r\n  </round>\r\n </game>\r\n "
+    }
+  ]
+}

@@ -1,0 +1,991 @@
+{
+  "schema_version": 1,
+  "scope": "Public holdout after removing the ten pilot hands. Conditional on the recorded BTN action. Each observed hand has equal weight. Observed intervals use marginal Wilson 95%; they do not adjust for repeated players or sessions. This compares future behavior only and does not validate EV or select or rank actions.",
+  "definitions": {
+    "multiway_flop": "Three or more live players after all preflop action, unconditional on BTN seeing a flop.",
+    "flop": "Two or more live players after preflop.",
+    "immediate_folds": "All three opponents immediately fold to BTN's exact pot three-bet. In the capped simulator this equals won_preflop; each event is measured separately in observed histories.",
+    "fourbet": "Any preflop re-raise after BTN's exact pot three-bet.",
+    "won_preflop": "Only BTN remains when preflop action ends, including any later win after a re-raise."
+  },
+  "pilot_keys": [
+    [
+      "CoinPoker",
+      "9000002519"
+    ],
+    [
+      "CoinPoker",
+      "9000002679"
+    ],
+    [
+      "CoinPoker",
+      "9000004808"
+    ],
+    [
+      "CoinPoker",
+      "9000004955"
+    ],
+    [
+      "CoinPoker",
+      "9000006096"
+    ],
+    [
+      "iPoker",
+      "9000002888"
+    ],
+    [
+      "iPoker",
+      "9000006911"
+    ],
+    [
+      "iPoker",
+      "9000008520"
+    ],
+    [
+      "iPoker",
+      "9000010639"
+    ],
+    [
+      "iPoker",
+      "9000012000"
+    ]
+  ],
+  "eligible_before_pilot_exclusion": 210,
+  "holdout_action_counts": {
+    "call_events": 37,
+    "fold": 151,
+    "raise_other_size": 6,
+    "threebet_events": 6
+  },
+  "public_sources": {
+    "CoinPoker": {
+      "filename": "cash_example.txt",
+      "sha256": "4f038959acbb00cd082e020f2c782bede4e8b105968881b2afce85ce7c023d32",
+      "url": "https://github.com/Texonja/coinpoker-population-strength-analyzer/blob/6e50528b7219356c72b470f904e589c0fecbe138/cash_example.txt"
+    },
+    "iPoker": {
+      "filename": "database.pghembk",
+      "sha256": "7d8604883954cb6d0e5b643dc973ce9c9fe9106c64694fcec64c7c273c333200",
+      "url": "https://github.com/Texonja/plo-multiaccount-detector/blob/2956860995a19a0db6e6d3676d7fc88486fd93e0/database.pghembk"
+    }
+  },
+  "simulation": {
+    "settings": {
+      "open-pct": 32,
+      "co-continue": 18,
+      "blind-scale": 1,
+      "postflop": "simple",
+      "rake": 0.05,
+      "cap": 3
+    },
+    "profile": "base",
+    "ante": "Original per-seat ante in BB for each hand.",
+    "trials_per_hand": 12000,
+    "seed_rule": "First four bytes (unsigned big-endian) of SHA256(UTF8('BTN-CO/holdout-1|room|id')).",
+    "sim_cpp_sha256": "ec0e029f8b105e381e6527e7ea811e684464dd5677b5f703bd266364e02935ea"
+  },
+  "groups": {
+    "CoinPoker": {
+      "multiway_flop": {
+        "hands": 26,
+        "observed_events": 12,
+        "observed_rate": 0.461538,
+        "observed_wilson95": [
+          0.287559,
+          0.645421
+        ],
+        "mean_predicted_rate": 0.4325
+      },
+      "flop": {
+        "hands": 26,
+        "observed_events": 26,
+        "observed_rate": 1.0,
+        "observed_wilson95": [
+          0.871271,
+          1
+        ],
+        "mean_predicted_rate": 0.985904
+      },
+      "immediate_folds": {
+        "hands": 2,
+        "observed_events": 1,
+        "observed_rate": 0.5,
+        "observed_wilson95": [
+          0.094531,
+          0.905469
+        ],
+        "mean_predicted_rate": 0.357333
+      },
+      "fourbet": {
+        "hands": 2,
+        "observed_events": 0,
+        "observed_rate": 0.0,
+        "observed_wilson95": [
+          0,
+          0.65762
+        ],
+        "mean_predicted_rate": 0.119458
+      },
+      "won_preflop": {
+        "hands": 2,
+        "observed_events": 1,
+        "observed_rate": 0.5,
+        "observed_wilson95": [
+          0.094531,
+          0.905469
+        ],
+        "mean_predicted_rate": 0.357333
+      }
+    },
+    "iPoker": {
+      "multiway_flop": {
+        "hands": 11,
+        "observed_events": 10,
+        "observed_rate": 0.909091,
+        "observed_wilson95": [
+          0.622642,
+          0.983768
+        ],
+        "mean_predicted_rate": 0.416833
+      },
+      "flop": {
+        "hands": 11,
+        "observed_events": 11,
+        "observed_rate": 1.0,
+        "observed_wilson95": [
+          0.741167,
+          1
+        ],
+        "mean_predicted_rate": 0.982439
+      },
+      "immediate_folds": {
+        "hands": 4,
+        "observed_events": 0,
+        "observed_rate": 0.0,
+        "observed_wilson95": [
+          0,
+          0.489891
+        ],
+        "mean_predicted_rate": 0.397042
+      },
+      "fourbet": {
+        "hands": 4,
+        "observed_events": 1,
+        "observed_rate": 0.25,
+        "observed_wilson95": [
+          0.045587,
+          0.699358
+        ],
+        "mean_predicted_rate": 0.089708
+      },
+      "won_preflop": {
+        "hands": 4,
+        "observed_events": 0,
+        "observed_rate": 0.0,
+        "observed_wilson95": [
+          0,
+          0.489891
+        ],
+        "mean_predicted_rate": 0.397042
+      }
+    },
+    "combined": {
+      "multiway_flop": {
+        "hands": 37,
+        "observed_events": 22,
+        "observed_rate": 0.594595,
+        "observed_wilson95": [
+          0.43486,
+          0.736535
+        ],
+        "mean_predicted_rate": 0.427842
+      },
+      "flop": {
+        "hands": 37,
+        "observed_events": 37,
+        "observed_rate": 1.0,
+        "observed_wilson95": [
+          0.905942,
+          1
+        ],
+        "mean_predicted_rate": 0.984874
+      },
+      "immediate_folds": {
+        "hands": 6,
+        "observed_events": 1,
+        "observed_rate": 0.166667,
+        "observed_wilson95": [
+          0.030053,
+          0.563503
+        ],
+        "mean_predicted_rate": 0.383806
+      },
+      "fourbet": {
+        "hands": 6,
+        "observed_events": 1,
+        "observed_rate": 0.166667,
+        "observed_wilson95": [
+          0.030053,
+          0.563503
+        ],
+        "mean_predicted_rate": 0.099625
+      },
+      "won_preflop": {
+        "hands": 6,
+        "observed_events": 1,
+        "observed_rate": 0.166667,
+        "observed_wilson95": [
+          0.030053,
+          0.563503
+        ],
+        "mean_predicted_rate": 0.383806
+      }
+    }
+  },
+  "cases": [
+    {
+      "room": "CoinPoker",
+      "id": "9000000327",
+      "ref": "Line 27",
+      "locator": "Text hand 327",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 3299265753,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5946,
+        "flop": 11536
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000001070",
+      "ref": "Line 27",
+      "locator": "Text hand 1070",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 895217370,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4881,
+        "flop": 11657
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000001668",
+      "ref": "Line 21",
+      "locator": "Text hand 1668",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 3378236616,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5128,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000002151",
+      "ref": "Line 27",
+      "locator": "Text hand 2151",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 1011930998,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4695,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000002193",
+      "ref": "Line 27",
+      "locator": "Text hand 2193",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 97319568,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5921,
+        "flop": 11541
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000002689",
+      "ref": "Line 27",
+      "locator": "Text hand 2689",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 1284253644,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5522,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000003415",
+      "ref": "Line 27",
+      "locator": "Text hand 3415",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 2712553772,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4869,
+        "flop": 11688
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000003788",
+      "ref": "Line 27",
+      "locator": "Text hand 3788",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 3909507178,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5501,
+        "flop": 11654
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000003878",
+      "ref": "Line 27",
+      "locator": "Text hand 3878",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 1131813743,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5315,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000003997",
+      "ref": "Line 27",
+      "locator": "Text hand 3997",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 3247758124,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5611,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000004214",
+      "ref": "Line 27",
+      "locator": "Text hand 4214",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 2465476306,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5237,
+        "flop": 11686
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000004315",
+      "ref": "Line 27",
+      "locator": "Text hand 4315",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 1773547474,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5585,
+        "flop": 11668
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000004752",
+      "ref": "Line 21",
+      "locator": "Text hand 4752",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 3142828049,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5025,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000004769",
+      "ref": "Line 27",
+      "locator": "Text hand 4769",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 128107708,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5071,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000005370",
+      "ref": "Line 27",
+      "locator": "Text hand 5370",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 1530506681,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5188,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000005617",
+      "ref": "Line 21",
+      "locator": "Text hand 5617",
+      "action": "raise",
+      "ante_per_seat_bb": 0.0,
+      "seed": 3361417050,
+      "observed": {
+        "immediate_folds": true,
+        "fourbet": false,
+        "won_preflop": true
+      },
+      "simulated_event_counts": {
+        "immediate_folds": 4099,
+        "fourbet": 1519,
+        "won_preflop": 4099
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000006356",
+      "ref": "Line 27",
+      "locator": "Text hand 6356",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 2740088345,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5113,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000006372",
+      "ref": "Line 27",
+      "locator": "Text hand 6372",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 835866681,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4866,
+        "flop": 11605
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000006462",
+      "ref": "Line 27",
+      "locator": "Text hand 6462",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 2833940062,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4875,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000006784",
+      "ref": "Line 27",
+      "locator": "Text hand 6784",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 2213069724,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5183,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000006795",
+      "ref": "Line 27",
+      "locator": "Text hand 6795",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 3596850295,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4816,
+        "flop": 11675
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000006890",
+      "ref": "Line 27",
+      "locator": "Text hand 6890",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 3396558397,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5049,
+        "flop": 11657
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000006896",
+      "ref": "Line 21",
+      "locator": "Text hand 6896",
+      "action": "raise",
+      "ante_per_seat_bb": 0.0,
+      "seed": 2693638409,
+      "observed": {
+        "immediate_folds": false,
+        "fourbet": false,
+        "won_preflop": false
+      },
+      "simulated_event_counts": {
+        "immediate_folds": 4477,
+        "fourbet": 1348,
+        "won_preflop": 4477
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000007635",
+      "ref": "Line 27",
+      "locator": "Text hand 7635",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 972957214,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4902,
+        "flop": 11688
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000008036",
+      "ref": "Line 27",
+      "locator": "Text hand 8036",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 4164275885,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4993,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000008757",
+      "ref": "Line 27",
+      "locator": "Text hand 8757",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 792866297,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5269,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000008855",
+      "ref": "Line 27",
+      "locator": "Text hand 8855",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 1673229344,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5293,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "CoinPoker",
+      "id": "9000009627",
+      "ref": "Line 27",
+      "locator": "Text hand 9627",
+      "action": "call",
+      "ante_per_seat_bb": 0.16,
+      "seed": 3135474946,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5086,
+        "flop": 11547
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000000509",
+      "ref": "Action 6",
+      "locator": "HM2 row 509",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 2052986349,
+      "observed": {
+        "multiway_flop": false,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4797,
+        "flop": 11679
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000000934",
+      "ref": "Action 6",
+      "locator": "HM2 row 934",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 400469216,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4967,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000002856",
+      "ref": "Action 6",
+      "locator": "HM2 row 2856",
+      "action": "raise",
+      "ante_per_seat_bb": 0.0,
+      "seed": 2909737906,
+      "observed": {
+        "immediate_folds": false,
+        "fourbet": true,
+        "won_preflop": false
+      },
+      "simulated_event_counts": {
+        "immediate_folds": 4392,
+        "fourbet": 1513,
+        "won_preflop": 4392
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000003782",
+      "ref": "Action 6",
+      "locator": "HM2 row 3782",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 2444867260,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5175,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000004341",
+      "ref": "Action 6",
+      "locator": "HM2 row 4341",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 2930251992,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4894,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000004569",
+      "ref": "Action 6",
+      "locator": "HM2 row 4569",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 1036313448,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5290,
+        "flop": 11550
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000005608",
+      "ref": "Action 6",
+      "locator": "HM2 row 5608",
+      "action": "raise",
+      "ante_per_seat_bb": 0.0,
+      "seed": 2613533619,
+      "observed": {
+        "immediate_folds": false,
+        "fourbet": false,
+        "won_preflop": false
+      },
+      "simulated_event_counts": {
+        "immediate_folds": 4361,
+        "fourbet": 1450,
+        "won_preflop": 4361
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000005708",
+      "ref": "Action 6",
+      "locator": "HM2 row 5708",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 635432843,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4765,
+        "flop": 11646
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000006004",
+      "ref": "Action 6",
+      "locator": "HM2 row 6004",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 489254011,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4809,
+        "flop": 11641
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000006110",
+      "ref": "Action 6",
+      "locator": "HM2 row 6110",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 327283413,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5071,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000006897",
+      "ref": "Action 6",
+      "locator": "HM2 row 6897",
+      "action": "raise",
+      "ante_per_seat_bb": 0.0,
+      "seed": 3941638134,
+      "observed": {
+        "immediate_folds": false,
+        "fourbet": false,
+        "won_preflop": false
+      },
+      "simulated_event_counts": {
+        "immediate_folds": 5080,
+        "fourbet": 824,
+        "won_preflop": 5080
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000007276",
+      "ref": "Action 6",
+      "locator": "HM2 row 7276",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 1126141967,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 5645,
+        "flop": 11562
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000007307",
+      "ref": "Action 6",
+      "locator": "HM2 row 7307",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 2993277697,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4835,
+        "flop": 12000
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000009254",
+      "ref": "Action 6",
+      "locator": "HM2 row 9254",
+      "action": "raise",
+      "ante_per_seat_bb": 0.0,
+      "seed": 1732291054,
+      "observed": {
+        "immediate_folds": false,
+        "fourbet": false,
+        "won_preflop": false
+      },
+      "simulated_event_counts": {
+        "immediate_folds": 5225,
+        "fourbet": 519,
+        "won_preflop": 5225
+      }
+    },
+    {
+      "room": "iPoker",
+      "id": "9000012765",
+      "ref": "Action 6",
+      "locator": "HM2 row 12765",
+      "action": "call",
+      "ante_per_seat_bb": 0.0,
+      "seed": 370542757,
+      "observed": {
+        "multiway_flop": true,
+        "flop": true
+      },
+      "simulated_event_counts": {
+        "multiway_flop": 4774,
+        "flop": 11604
+      }
+    }
+  ],
+  "note_en": "After a BTN call, at least three players saw the flop in 22/37 hands (59.5%, model 42.8%). On iPoker this happened in 10/11 hands (90.9%, model 41.7%). A pot-sized 3-bet won immediately in 1/6 hands without antes (16.7%, model 38.4%). This holdout checks forecasts of later actions. Action EV requires a separate validation."
+}
