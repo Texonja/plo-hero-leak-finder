@@ -116,13 +116,6 @@ def _sizing_history(snap, point, baseline, responses_by_size):
             "Too few comparable responses to change the recommendation.",
             lines,
         )
-    rank, kickers, *_ = best_plo_hand(snap.hero_cards, snap.board)
-    if rank >= 4 and nuts(snap.hero_cards, snap.board, rank, tuple(kickers)):
-        return (
-            baseline,
-            "Use the guide's value line with the nuts. The historical scenario assumes a fold to a raise.",
-            lines,
-        )
     chosen, reason = supported_sizing(snap.pot, baseline, ready)
     return chosen, reason, lines
 
@@ -165,6 +158,14 @@ def _early_review(snap, hero, opponent, history):
     )
     fit_call = heads_up and facing and last is not None and last.name == opponent.name
     fit_bet = heads_up and checked_to_hero and not facing and bool(amounts)
+    exclude_bet_fold = False
+    if fit_bet and any(s < min(hero.stack, opponent.stack) for s in amounts):
+        rank, kickers, *_ = best_plo_hand(snap.hero_cards, snap.board)
+        exclude_bet_fold = rank >= 3 and nuts(
+            snap.hero_cards, snap.board, rank, tuple(kickers)
+        )
+        if exclude_bet_fold:
+            fit_bet = False
     price = heads_up_price(snap) if fit_call else None
 
     def choice(point, calling=0.0):
@@ -210,7 +211,7 @@ def _early_review(snap, hero, opponent, history):
         before = choice(current.uniform)[0]
         after, ev = choice(current.steps[-1])
         lines.append(
-            f"On the current board · uniform range → action-weighted range · {before} → {after}"
+            f"Checkdown model on the current board · uniform range → action-weighted range · {before} → {after}"
         )
         if fit_bet:
             effective = min(hero.stack, opponent.stack)
@@ -229,7 +230,7 @@ def _early_review(snap, hero, opponent, history):
             hist_comparison = (after, picked_label)
             lines.extend(
                 (
-                    f"Model recommendation → recommendation with history · {after} → {picked_label}",
+                    f"Bet/fold scenario with no later betting · Model recommendation → recommendation with history · {after} → {picked_label}",
                     reason,
                 )
             )
@@ -322,6 +323,10 @@ def _early_review(snap, hero, opponent, history):
                 )
         lines.append(
             "Values are relative to checking back. A bet needs an edge above 2% of the pot. Uncalled chips are returned to Hero. Hero folds to a raise. After a call, the hand goes to showdown without further betting. See the guide for lines that continue against a raise."
+        )
+    elif exclude_bet_fold:
+        lines.append(
+            "Hero holds the current nuts. Comparing bet sizes here requires a policy for continuing against raises. The bet/fold sizing model assumes Hero always surrenders the pot to a raise."
         )
     else:
         lines.append(
@@ -476,11 +481,11 @@ def build_range_review(snap, hero, opponent, history):
         model_choice = (
             "call" if stage.weaker + stage.tied / 2 > heads_up_price(snap) else "fold"
         )
-        if adjusted and adjusted.choices and model_choice not in adjusted.choices:
+        if adjusted and model_choice not in adjusted.choices:
             lines.insert(
                 4,
-                f"Review this range assumption: the guide suggests {_play(adjusted)}; "
-                f"the modeled bet range favors {model_choice} when comparing calling with folding.",
+                f"Review this range assumption. The modeled bet range favors {model_choice} when comparing calling with folding. "
+                f"The guide lists {_play(adjusted)}.",
             )
     lines.extend(("", "EARLIER HANDS AGAINST THIS OPPONENT"))
     sources = {}
@@ -490,7 +495,8 @@ def build_range_review(snap, hero, opponent, history):
     sizes = (
         tuple(
             dict.fromkeys(
-                bet_size(snap, hero, [opponent], pct).amount for pct in (33, 65, 85)
+                bet_size(snap, hero, [opponent], pct).contestable
+                for pct in (33, 65, 85)
             )
         )
         if not facing
@@ -511,7 +517,7 @@ def build_range_review(snap, hero, opponent, history):
         )
         if any(a.street == "River" and a.action == "raise" for a in snap.history):
             lines.append(
-                "This is a raise spot. The historical estimate covers the opening bet."
+                "This is a raise spot. Opening-bet history cannot estimate the opponent's raising range."
             )
         if n:
             lines.append(
@@ -549,7 +555,7 @@ def build_range_review(snap, hero, opponent, history):
     )[:12]:
         sources.setdefault((row.hand, row.ref), row)
     lines.append(
-        "The comparison matches network, stakes, antes, preflop role, position, turn action, board texture and size group. The guide requires at least 30 comparable decisions across three dates and a gap of at least 3 percentage points between the call price and the interval. It uses only completed earlier hands or sessions. The comparison assumes behavior carries over. Hand categories that are impossible on the current board remain uncertain."
+        "The comparison matches network, stakes, antes, preflop role, position, turn action, board rank and suit patterns, stack-to-pot group, all-in status and effective size group. The guide requires at least 30 comparable decisions across three dates and a gap of at least 3 percentage points between the call price and the interval. It uses only completed earlier hands or sessions. The comparison assumes behavior carries over. Hand categories that are impossible on the current board remain uncertain."
     )
     lines.extend(("", "MODELED RANGE FROM PREFLOP TO RIVER", stages.summary))
     for stage in stages.stages:

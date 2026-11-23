@@ -431,7 +431,14 @@ class TableDialog:
                 (suggestion.play.capitalize() or "Manual review") + "\n",
                 "active",
             )
-            box.insert("end", suggestion.why + "\nStudy recommendation.", "amount")
+            note = (
+                "Study recommendation."
+                if suggestion.can_compare(snap)
+                else "Study only. Excluded from guide rankings."
+            )
+            if suggestion.size:
+                note += " The bet size is an example."
+            box.insert("end", suggestion.why + "\n" + note, "amount")
             if (
                 eligible
                 and snap.street == "River"

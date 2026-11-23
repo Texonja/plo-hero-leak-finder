@@ -25,6 +25,10 @@ class BetSize:
     def label(self):
         return f"bet about {self.amount / self.pot:.0%} pot ({self.amount / self.bb:.2f} BB)"
 
+    @property
+    def contestable(self):
+        return min(self.amount, self.effective)
+
     def far_from(self, observed):
         # The policy uses coarse sizes. Ignore rounding and nominal money that
         # could not be matched by anyone still in the hand.
@@ -72,7 +76,7 @@ def line_context(snap, hero, opponents, actions):
         start_pot = snap.pot - sum(
             -a.amount if a.action == "return" else a.amount
             for a in snap.history
-            if a.street == last
+            if a.street in {last, snap.street}
         )
         large_call = bool(
             callers
@@ -190,13 +194,13 @@ def value_plan(
             return (
                 choices,
                 value
-                + " A small bet gives weaker hands a price to call. Checking gives the opponent a chance to improve or take the lead next street.",
+                + " A small bet gives weaker hands a price to call. Checking can induce a bet or let a weaker hand improve enough to pay on a later street.",
                 bet_size(snap, hero, opponents, fraction),
             )
         if river and blocked:
             fraction = 50 if large_call else 35 if called else 30
             return (
-                ("bet",) if called else bet_or_check,
+                bet_or_check,
                 value
                 + " Use a smaller value bet because the weaker part of the opponent's line struggles to call a large bet. A bigger size makes sense if they call large bets with full houses often enough.",
                 bet_size(snap, hero, opponents, fraction),
@@ -204,7 +208,8 @@ def value_plan(
         fraction = 50 if called else 40
         return (
             bet_or_check,
-            value + " Most value comes from made hands. This size keeps them in play.",
+            value
+            + " A moderate bet targets those made hands. Whether they call depends on the opponent and the price.",
             bet_size(snap, hero, opponents, fraction),
         )
 
@@ -241,9 +246,18 @@ def value_plan(
                 top = RANK_LABEL[kicks[0]]
                 if used[top] < 4:
                     target += f", and with a small bet some {top}x with backup"
+                board_ranks = {RANK_VALUE[c[0]] for c in board}
+                has_straight_draw = any(
+                    len(board_ranks & window) >= 2 for window in STRAIGHTS
+                )
+                texture = (
+                    "There is no immediate flush draw, but straight draws can pay to see the next card."
+                    if has_straight_draw
+                    else "Neither a straight nor a flush can complete on the next card."
+                )
                 return (
                     bet_or_check,
-                    f"{context} Target value calls from {target}. On a dry board, a smaller bet gives weaker hands more room to call or raise.".strip(),
+                    f"{context} Target value calls from {target}. {texture} A smaller value bet is one option if weaker hands would fold to a larger bet.".strip(),
                     bet_size(snap, hero, opponents, 40),
                 )
         else:
@@ -263,9 +277,8 @@ def value_plan(
             "Before betting, identify enough weaker hands that fit the line and can still call.",
             None,
         )
-    choices = ("bet",) if river and called and not multiway else bet_or_check
     return (
-        choices,
+        bet_or_check,
         f"{context} Target value calls from {target}. {reason}".strip(),
         bet_size(snap, hero, opponents, fraction),
     )

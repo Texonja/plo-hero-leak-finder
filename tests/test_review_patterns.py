@@ -66,7 +66,7 @@ class PatternTests(unittest.TestCase):
                 q = build_queue(
                     db,
                     room,
-                    street="Preflop",
+                    street="All streets",
                     scope="Last 5 sessions",
                     findings={},
                     guide_index=index,
@@ -74,16 +74,20 @@ class PatternTests(unittest.TestCase):
                 self.assertEqual(
                     sum(g.differences for g in q.patterns), len(q.guide_items)
                 )
-                self.assertGreater(len(q.patterns), 0)
                 selected = {
                     row[0] for row in db.execute("SELECT hand FROM review_hands")
                 }
-                rows = [
-                    i
-                    for i in index.items
-                    if i.street == "Preflop" and i.hand in selected
-                ]
+                rows = [i for i in index.items if i.hand in selected]
                 self.assertEqual(len(rows), q.guide_choices)
+                self.assertTrue(rows)
+                # The real sample can contain only agreements after an audit.
+                self.assertEqual(bool(q.patterns), any(i.difference for i in rows))
+                for item in rows[:2]:
+                    snap = load_snapshot(db, item.hand, item.hero, item.ref)
+                    self.assertEqual(
+                        (snap.room, snap.street, snap.hero_cards),
+                        (room, item.street, item.cards),
+                    )
                 self.assertLessEqual(len({i.session for i in rows}), 5)
                 for group in q.patterns:
                     self.assertEqual(
@@ -92,5 +96,5 @@ class PatternTests(unittest.TestCase):
                     for i in group.examples[:2]:
                         s = load_snapshot(db, i.hand, i.hero, i.ref)
                         self.assertEqual(
-                            (s.room, s.street, s.hero_cards), (room, "Preflop", i.cards)
+                            (s.room, s.street, s.hero_cards), (room, i.street, i.cards)
                         )

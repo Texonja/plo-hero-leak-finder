@@ -12,7 +12,7 @@ from queue import Empty, Queue
 from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
-from .analysis import analyze
+from .analysis import analyze, cached_comparison, save_comparison
 from .demo import demo_path, load_demo
 from .engine import METRICS
 from .home import BG, INK, MUTED, NAV, NAV_ACTIVE, ORANGE, HandReview
@@ -25,7 +25,9 @@ from .review_queue import (
     guide_revision,
     has_saved_batch,
     index_guides,
+    preview_decisions,
     remember_batch,
+    review_selection,
     save_guides,
 )
 from .storage import (
@@ -140,6 +142,8 @@ class Workspace:
         self.queue = None
         self.library_counts = (0, 0)
         self.room_results = {}
+        self.review_selections = {}
+        self.preview_ready = False
         self.guide_index = None
         self.view = "home"
         self.jobs = Queue()
@@ -509,7 +513,7 @@ class Workspace:
             self.notice_label.pack(before=self.body, fill="x", pady=(0, 8))
 
     def open_item(self, item):
-        if self.busy:
+        if self.busy and not (self.preview_ready and item.status == "Recorded"):
             return
         from .table_ui import open_table
 
@@ -542,6 +546,7 @@ class Workspace:
             self.scope.set("Latest import" if has_saved_batch(self.db) else "All hands")
             self.library_counts = (0, 0)
             self.room_results.clear()
+            self.review_selections.clear()
             self.guide_index = None
             self.queue = None
             self.home.clear("Finding Hero decisions…")
@@ -607,9 +612,16 @@ class Workspace:
         try:
             while True:
                 msg = self.jobs.get_nowait()
+                if msg[0] == "review-preview":
+                    self.preview_ready = True
+                    self.home.preview(msg[1])
+                    continue
                 if msg[0] == "progress":
                     self.status.set(msg[1])
+                    if self.preview_ready:
+                        self.home.summary.set("Recent decisions · " + msg[1])
                     continue
+                self.preview_ready = False
                 self.busy = False
                 self.import_btn.state(["!disabled"])
                 self.hero_btn.state(["!disabled"])
@@ -812,7 +824,19 @@ class Workspace:
             self.home.clear("Finding Hero decisions…")
 
         def done(result):
-            findings, e, t, self.queue, pockets, key, revision, guide = result
+            (
+                findings,
+                e,
+                t,
+                self.queue,
+                pockets,
+                key,
+                revision,
+                guide,
+                selection_key,
+                selection,
+            ) = result
+            self.review_selections[room, scope] = selection_key, selection
             self.room_results[room] = key, findings, e, t
             self.guide_index = revision, guide
             self.results = findings
@@ -842,8 +866,9 @@ class Workspace:
             self.status.set(coverage)
 
         demo = self.is_demo
-        cached_comparison = self.room_results.get(room)
+        previous_comparison = self.room_results.get(room)
         cached_index = self.guide_index
+        previous_selection = self.review_selections.get((room, scope))
 
         def read(db):
             if demo:
@@ -861,12 +886,31 @@ class Workspace:
                     )
                 ),
             )
-            if cached_comparison and key == cached_comparison[0]:
-                _, findings, e, t = cached_comparison
+            revision = guide_revision(key[1:])
+            batch = tuple(
+                r[0]
+                for r in db.execute("SELECT source FROM review_batch ORDER BY source")
+            )
+            selection_key = (key, batch)
+            if previous_selection and previous_selection[0] == selection_key:
+                selection = previous_selection[1]
             else:
+                selection = review_selection(db, room, scope)
+                if cached_index is None and selection[1] > 1000:
+                    sample = preview_decisions(db, street)
+                    if sample:
+                        self.jobs.put(("review-preview", sample))
+            population_key = json.dumps((1, key), separators=(",", ":"))
+            comparison = (
+                previous_comparison[1:]
+                if previous_comparison and previous_comparison[0] == key
+                else cached_comparison(db, room, population_key)
+            )
+            if comparison is None:
                 items, e, t = analyze(db, room)
                 findings = {f.node: f for f in items}
-            revision = guide_revision(key[1:])
+            else:
+                findings, e, t = comparison
             guide = (
                 cached_index[1]
                 if cached_index and cached_index[0] == revision
@@ -892,6 +936,7 @@ class Workspace:
                 street=street,
                 scope=scope,
                 guide_index=guide,
+                selection=selection,
             )
             pockets = {}
             for item in queue.items:
@@ -901,9 +946,22 @@ class Workspace:
                 hero = next(seat for seat in snapshot.seats if seat.is_hero)
                 pockets[item.hand] = snapshot.hero_cards or (), hero.position
             db.commit()
+            if comparison is None:
+                save_comparison(db, room, population_key, findings, e, t)
             if needs_index:
                 save_guides(db, "Both", revision, guide)
-            return findings, e, t, queue, pockets, key, revision, guide
+            return (
+                findings,
+                e,
+                t,
+                queue,
+                pockets,
+                key,
+                revision,
+                guide,
+                selection_key,
+                selection,
+            )
 
         self.work(read, done)
 

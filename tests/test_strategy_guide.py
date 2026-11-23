@@ -13,8 +13,8 @@ from leakfinder.replay_view import (
     hero_decisions,
     load_snapshot,
 )
-from leakfinder.review_queue import build_queue
-from leakfinder.storage import connect, initialize
+from leakfinder.review_queue import build_queue, index_guides
+from leakfinder.storage import cohort, connect, initialize
 from leakfinder.strategy_guide import advice_at, nuts
 from leakfinder.vendor.primitives import best_plo_hand
 
@@ -70,7 +70,7 @@ class StrategyTests(unittest.TestCase):
         sb_limp = move("SB", "call", 0.5)
         self.assertEqual(
             advice_at(view("Qd 7h 6s 4c", "BB", prior=[sb_limp], owed=0)).choices,
-            ("check",),
+            (),
         )
 
     def test_open_3bet_and_squeeze_use_action_prefix_and_raise_rights(self):
@@ -81,7 +81,7 @@ class StrategyTests(unittest.TestCase):
         ]
         self.assertEqual(
             advice_at(view("Jh 9d Ac 3c", prior=opens, owed=3.5, pot=5)).choices,
-            ("fold",),
+            (),
         )
         squeeze = opens + [move("BTN", "call", 3.5)]
         guide = advice_at(view("As Ah Ks Kh", "SB", prior=squeeze, owed=3, pot=8.5))
@@ -121,7 +121,7 @@ class StrategyTests(unittest.TestCase):
             pot=19,
             history=(*folds, move("BB", "bet", 9, "River")),
         )
-        self.assertEqual(advice_at(air).choices, ("fold",))
+        self.assertEqual(advice_at(air).choices, ())
         for street, board in (("Flop", "Qs Js Ts"), ("Turn", "Qs Js Ts 3c")):
             snap = replace(royal, street=street, board=tuple(board.split()))
             self.assertIn("bet", advice_at(snap).choices)
@@ -152,14 +152,19 @@ class StrategyTests(unittest.TestCase):
         with closing(connect(":memory:")) as db:
             initialize(db)
             load_demo(db)
-            queue = build_queue(db, scope="All hands", findings={})
+            cohort(db)
+            index = index_guides(db, "Both")
+            queue = build_queue(db, scope="All hands", findings={}, guide_index=index)
             self.assertEqual(queue.hand_count, 640)
-            self.assertTrue(
-                queue.items and all(i.status == "Guide" for i in queue.items)
-            )
-            self.assertEqual(
-                {i.room for i in queue.guide_items}, {"CoinPoker", "iPoker"}
-            )
+            self.assertEqual(len(queue.items), 12)
+            for item in queue.items:
+                self.assertIn(item.status, {"Guide", "Exploratory", "Study"})
+                self.assertEqual(item.status == "Guide", item.node == "GUIDE")
+                self.assertEqual(
+                    load_snapshot(db, item.hand, item.hero, item.ref).number,
+                    item.number,
+                )
+            self.assertEqual({i.room for i in index.items}, {"CoinPoker", "iPoker"})
             self.assertGreater(queue.guide_choices, len(queue.guide_items))
             hid, hero = db.execute(
                 "SELECT id,hint FROM hands WHERE room='CoinPoker' AND number='9000005623'"
@@ -181,11 +186,9 @@ class StrategyTests(unittest.TestCase):
             e, _, river = seen["River"]
             self.assertIn("SB called", river.why)
             self.assertIn("35%", river.play)
-            self.assertEqual(river.difference(e.action, e.amount), "size")
+            self.assertIsNone(river.difference(e.action, e.amount))
             items = [i for i in queue.guide_items if i.hand == hid]
-            self.assertEqual(
-                [i.street for i in items if i.street != "Preflop"], ["River"]
-            )
+            self.assertEqual([i.street for i in items if i.street != "Preflop"], [])
             for i in queue.guide_items:
                 snap = load_snapshot(db, i.hand, i.hero, i.ref)
                 self.assertEqual(
@@ -202,19 +205,19 @@ class StrategyTests(unittest.TestCase):
                 )
 
             river_cases = (
-                ("CoinPoker", "9000002844", "Line 32", "call", "25.0%", None),
+                ("CoinPoker", "9000002844", "Line 32", None, "25.0%", None),
                 ("CoinPoker", "9000001429", "Line 40", "bet", "55%", 0.55),
                 ("CoinPoker", "9000002860", "Line 23", "check", "33%", 0.33),
                 (
                     "iPoker",
                     "9000005984",
                     "Action 16",
-                    "fold",
+                    None,
                     "before the other players act",
                     None,
                 ),
-                ("iPoker", "9000010026", "Action 17", "fold", "29.5%", None),
-                ("iPoker", "9000014007", "Action 16", "fold", "20.0%", None),
+                ("iPoker", "9000010026", "Action 17", None, "29.5%", None),
+                ("iPoker", "9000014007", "Action 16", None, "20.0%", None),
             )
             for room, number, ref, action, phrase, fraction in river_cases:
                 hid, hero = db.execute(
@@ -224,7 +227,8 @@ class StrategyTests(unittest.TestCase):
                 snap = load_snapshot(db, hid, hero, ref)
                 advice = advice_at(snap)
                 with self.subTest(room=room, number=number, ref=ref):
-                    self.assertEqual(advice.choices[0], action)
+                    self.assertEqual(next(iter(advice.choices), None), action)
+                    self.assertFalse(advice.rankable)
                     self.assertIn(phrase, f"{advice.play} {advice.why}")
                     if fraction is not None:
                         self.assertAlmostEqual(

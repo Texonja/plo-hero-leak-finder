@@ -5,6 +5,7 @@ from dataclasses import dataclass
 from functools import lru_cache
 from itertools import combinations
 
+from .opponent_history import heads_up_price
 from .postflop_value import STRAIGHTS, BetSize, bet_size, line_context
 from .vendor.common import RANK_VALUE
 
@@ -28,6 +29,17 @@ class Draws:
     @property
     def total(self):
         return self.straight + self.flush - self.both
+
+
+def highest_flush_draw(hole, board):
+    """Two suited hole cards including the highest non-board card of that suit."""
+    return any(
+        sum(c[1] == suit for c in board) == 2
+        and sum(c[1] == suit for c in hole) >= 2
+        and next(r + suit for r in reversed(RANK_VALUE) if r + suit not in board)
+        in hole
+        for suit in "cdhs"
+    )
 
 
 @lru_cache(maxsize=4096)
@@ -176,11 +188,12 @@ def _draw_note(draws, street):
     total = draws.total
     unknown = 45 if street == "Flop" else 44
     note = f"Of {unknown} unseen cards, {total} can make a straight or flush on the next street."
-    note += (
-        f" At least {draws.nuts} make the verified current nuts or a tie."
-        if draws.nuts
-        else " Zero of those cards are verified to make the nuts here."
-    )
+    if draws.nuts == 1:
+        note += " At least one of those cards makes the verified current nuts or a tie."
+    elif draws.nuts:
+        note += f" At least {draws.nuts} make the verified current nuts or a tie."
+    else:
+        note += " Zero of those cards are verified to make the nuts here."
     note += (
         " The count is based on the unseen deck before weighting the opponent's range."
     )
@@ -234,19 +247,27 @@ def early_advice(snap, hero, opponents, rank, kicks):
     )
     if not (facing or snap.can_raise) or not opponents:
         return None
+    # Current nuts are handled by the caller. A made straight or better can
+    # also have a draw, but betting it is not automatically a semibluff.
+    if rank >= 4:
+        made = {
+            4: "a straight",
+            5: "a flush",
+            6: "a full house",
+            7: "four of a kind",
+            8: "a straight flush",
+        }[rank]
+        why = f"You already have {made}. Compare the worse hands that can continue with stronger hands and redraws."
+        if facing:
+            price = (
+                heads_up_price(snap)
+                if heads_up
+                else snap.to_call / (snap.pot + snap.to_call)
+            )
+            why += f" Calling costs {price:.1%} of the pot after calling, before rake."
+        return EarlyAdvice(title, (), why)
     if not heads_up and not (suited and blocker or raise_faced):
         return None
-    # Strong made hands have their own value policy. Explain pressure against
-    # non-nut hands when a raise actually occurred.
-    if rank >= 4:
-        if not raise_faced:
-            return None
-        price = snap.to_call / (snap.pot + snap.to_call)
-        return EarlyAdvice(
-            title,
-            (),
-            f"After the raise, calling costs {price:.0%} of the pot after calling. Stronger made hands are possible. Compare the opponent's stronger value hands and semibluffs before building the pot.",
-        )
     draws = next_draws(hole, board)
     note = _draw_note(draws, snap.street)
     if rank in (2, 3):
@@ -255,7 +276,7 @@ def early_advice(snap, hero, opponents, rank, kicks):
             if rank == 2
             else (
                 "a set"
-                if sum(RANK_VALUE[c[0]] == kicks[0] for c in hole) == 2
+                if sum(RANK_VALUE[c[0]] == kicks[0] for c in hole) >= 2 and not paired
                 else "trips"
             )
         )
@@ -264,7 +285,9 @@ def early_advice(snap, hero, opponents, rank, kicks):
         )
         note = f"You currently hold {hand_name}. {note}"
         if boats:
-            note += f" In addition, {boats} cards can make a full house or quads. Some of those hands can still be beaten."
+            note += f" {boats} cards can make a full house or quads. Some of those hands can still be beaten."
+            if draws.total:
+                note += " These cards may overlap the straight or flush count."
     if draws.total and paired:
         note += " On this paired board, a completed straight or flush can lose to a full house."
     if blocker:
@@ -272,15 +295,15 @@ def early_advice(snap, hero, opponents, rank, kicks):
     elif suited and len(pocket_suits) <= 1:
         note += " Using this suit for a flush requires two matching hole cards."
     if facing:
-        price = snap.to_call / (snap.pot + snap.to_call)
+        price = (
+            heads_up_price(snap)
+            if heads_up
+            else snap.to_call / (snap.pot + snap.to_call)
+        )
         cost = f"Calling costs {price:.0%} of the pot after calling, before rake."
         checked_before_bet = line.endswith("after checking")
         if raise_faced:
             why = f"{cost} After prior aggression, weigh the opponent's value hands and semibluffs again before raising. {note}"
-            if rank == 0 and not blocker and draws.total <= 4 and price >= 0.24:
-                return EarlyAdvice(
-                    title, ("fold",), why + " Fold high card at this price.", 2
-                )
             return EarlyAdvice(title, (), why)
         if (
             heads_up
@@ -289,24 +312,21 @@ def early_advice(snap, hero, opponents, rank, kicks):
             and draws.total >= 11
             and price <= 0.22
         ):
-            if checked_before_bet and snap.can_raise:
-                return EarlyAdvice(
-                    title,
-                    ("call", "raise"),
-                    f"{cost} {note} Calling keeps the draw in play. A check-raise can work as a semibluff if some better made hands fold.",
-                )
+            raise_note = ""
+            if snap.can_raise:
+                raise_name = "check-raise" if checked_before_bet else "raise"
+                raise_note = f" A {raise_name} can gain from folds or from weaker draws that call."
             return EarlyAdvice(
                 title,
-                ("call", "raise") if snap.can_raise else ("call",),
-                f"{cost} {note} Calling keeps the price low. A semibluff raise needs some better hands to fold.",
+                (),
+                f"{cost} {note} Compare the price with equity against the betting range, including ties and redraws.{raise_note}",
             )
         if checked_before_bet or "probe" in line or draws.total:
             if rank == 0 and not blocker and draws.total <= 4 and price >= 0.28:
                 return EarlyAdvice(
                     title,
-                    ("fold",),
-                    f"{cost} {note} Fold high card when the opponent's continuing range is this narrow.",
-                    2,
+                    (),
+                    f"{cost} {note} Folding saves the call against value. A bluff-heavy betting range can change the decision.",
                 )
             why = f"{cost} {note}"
             if checked_before_bet and snap.can_raise:
@@ -317,16 +337,11 @@ def early_advice(snap, hero, opponents, rank, kicks):
     if (
         snap.street == "Turn"
         and not paired
-        and any(
-            suits[c[1]] == 2
-            and c[0] == "A"
-            and sum(other[1] == c[1] for other in hole) >= 2
-            for c in hole
-        )
+        and highest_flush_draw(hole, board)
         and _straight_pairs(frozenset(RANK_VALUE[c[0]] for c in board))
         and line_context(snap, hero, opponents, actions)[3]
     ):
-        # Preserve the focused check after a large called flop bet.
+        # The previous wager gives the caller additional context for this turn.
         return None
     if blocker and rank <= 2:
         return EarlyAdvice(
@@ -375,15 +390,22 @@ def early_advice(snap, hero, opponents, rank, kicks):
             or line.startswith(("turn probe", "stab after", "turn stab", "delayed"))
         )
     ):
+        if rank == 1 and not paired and not suited:
+            pair = "An overpair" if kicks[0] > board_ranks[0] else "Your pair"
+            return EarlyAdvice(
+                title,
+                (),
+                f"{note} {pair} has showdown value. Checking keeps the pot smaller. A protection or value bet depends on which weaker pairs call and which hands with live draws fold.",
+            )
         return EarlyAdvice(
             title,
-            ("check",),
-            f"{note} Check with so few immediate ways to make a straight or flush. Taking the initiative alone offers little reason to bluff.",
+            (),
+            f"{note} Checking keeps the pot smaller. A bet can win immediately if enough better hands fold. Estimate that frequency from comparable hands.",
         )
     if draws.total and line != "opening bet":
         return EarlyAdvice(
             title,
             (),
-            f"{note} A semibluff bet depends on which hands the opponent folds. Checking preserves the price of the next card. Sizing depends on an estimate of that range.",
+            f"{note} A semibluff bet depends on which hands the opponent folds. Checking back closes this street. Checking first leaves the opponent a chance to bet.",
         )
     return None

@@ -36,6 +36,7 @@ class HandReview(ttk.Frame):
         self.current = None
         self.related_pattern = ""
         self.show_hands = False
+        self.show_study = False
         self.return_page = 0
         self.controls = ttk.Frame(self)
         self.controls.pack(fill="x", pady=(0, 4))
@@ -50,6 +51,10 @@ class HandReview(ttk.Frame):
             self.controls, text="Selected hands", command=self._switch
         )
         self.switch.pack(side="left", padx=8)
+        self.study_button = ttk.Button(
+            self.controls, text="Study spots", command=self._toggle_study
+        )
+        self.study_button.pack(side="left")
         self.back = ttk.Button(
             self.controls, text="Back to results", command=self._close_related
         )
@@ -122,6 +127,7 @@ class HandReview(ttk.Frame):
         self.current = None
         self.mode.state(["disabled"])
         self.switch.state(["disabled"])
+        self.study_button.state(["disabled"])
         self._hide_pager()
         self.back.pack_forget()
         self._clear_cards(message)
@@ -137,11 +143,19 @@ class HandReview(ttk.Frame):
         self.current = queue, pockets, empty, action
         self.mode.state(["!disabled"])
         self.switch.state(["!disabled"])
+        self.study_button.state(["!disabled"] if queue.study else ["disabled"])
+        self.show_study = self.show_study and bool(queue.study)
         self.page = 0
         self.related_pattern = ""
         self._render()
 
+    def preview(self, items):
+        self.clear("Recent decisions · preparing the complete review")
+        for item in items:
+            self._card(item, item.cards, item.position)
+
     def _change_mode(self):
+        self.show_study = False
         self.related_pattern = ""
         self.page = 0
         self._render()
@@ -150,6 +164,13 @@ class HandReview(ttk.Frame):
         self.show_hands = not self.show_hands if not self.differences.get() else False
         self.differences.set(False)
         self._change_mode()
+
+    def _toggle_study(self):
+        self.show_study = not self.show_study
+        self.differences.set(False)
+        self.related_pattern = ""
+        self.page = 0
+        self._render()
 
     def _move(self, delta):
         self.page += delta
@@ -179,12 +200,18 @@ class HandReview(ttk.Frame):
         selected = queue.items
         heading = ""
         pattern_page = False
+        self.study_button.configure(
+            text="Back to review" if self.show_study else "Study spots"
+        )
         self.switch.configure(
             text="Review patterns"
             if self.show_hands or self.differences.get()
             else "Selected hands"
         )
-        if self.related_pattern:
+        if self.show_study:
+            selected = queue.study
+            heading = "Study spots"
+        elif self.related_pattern:
             self.back.pack(side="left", padx=(9, 0))
             group = next(g for g in queue.patterns if g.key == self.related_pattern)
             selected = group.examples
@@ -227,6 +254,10 @@ class HandReview(ttk.Frame):
             )
         if pattern_page:
             summary += "\nRepeated across sessions first, then by the lower end of the difference-rate interval."
+        if self.show_study:
+            summary += "\nOrdered by pot size before Hero acted, largest first. These decisions require assumptions about ranges or future play."
+        if (pattern_page or self.differences.get()) and total:
+            summary += "  ·  Frequency measures repetition. EV is unevaluated."
         self._clear_cards(summary)
         if not n:
             box = tk.Frame(
@@ -255,10 +286,10 @@ class HandReview(ttk.Frame):
             if pattern_page:
                 self._pattern_card(item)
                 continue
+            if self.show_study:
+                item = item.card()
             cards, pos = (
-                (item.cards, item.position)
-                if item.status == "Guide"
-                else pockets[item.hand]
+                (item.cards, item.position) if item.cards else pockets[item.hand]
             )
             self._card(item, cards, pos)
         self.canvas.yview_moveto(0)
@@ -483,9 +514,12 @@ class HandReview(ttk.Frame):
                 command=lambda: self._open_related(item.pattern),
             )
             related.pack(anchor="e", pady=(5, 0))
-        label = {"Guide": "Guide", "Supported": "Supported difference"}.get(
-            item.status, "Exploratory"
-        )
+        label = {
+            "Guide": "Guide",
+            "Supported": "Supported difference",
+            "Recorded": "Recent hand",
+            "Study": "Study only",
+        }.get(item.status, "Exploratory")
         if item.status == "Guide" and not item.difference:
             label = "Within guide"
         elif item.close:

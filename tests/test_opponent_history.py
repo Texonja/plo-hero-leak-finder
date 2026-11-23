@@ -106,9 +106,10 @@ class HistoricalRiverTests(unittest.TestCase):
             self.assertEqual(
                 apply_history(snap, base, OpponentHistory(records[:10])), base
             )
-            self.assertEqual(
-                apply_history(snap, base, OpponentHistory(records)).choices, (change,)
-            )
+            adjusted = apply_history(snap, base, OpponentHistory(records))
+            self.assertEqual(adjusted.choices, (change,))
+            self.assertFalse(adjusted.rankable)
+            self.assertIsNone(adjusted.difference("raise", 12))
             unknown = [replace(row, category=None, air=False) for row in records]
             self.assertEqual(apply_history(snap, base, OpponentHistory(unknown)), base)
 
@@ -125,9 +126,10 @@ class HistoricalRiverTests(unittest.TestCase):
         rows = [
             self.stub(s, "fold", 1 + i % 4, size=size.amount, key=i) for i in range(60)
         ]
-        self.assertEqual(
-            apply_history(s, base, OpponentHistory(rows)).choices, ("bet",)
-        )
+        adjusted = apply_history(s, base, OpponentHistory(rows))
+        self.assertEqual(adjusted.choices, ("bet",))
+        self.assertFalse(adjusted.rankable)
+        self.assertIsNone(adjusted.difference("check", 0))
         raises = [replace(row, outcome="raise") for row in rows]
         self.assertEqual(apply_history(s, base, OpponentHistory(raises)), base)
 

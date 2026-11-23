@@ -4,7 +4,8 @@ import json
 import sqlite3
 import zlib
 from collections import Counter
-from dataclasses import asdict, dataclass, replace
+from dataclasses import dataclass, replace
+from typing import NamedTuple
 
 from .analysis import analyze, wilson
 from .early_postflop import next_draws
@@ -26,7 +27,7 @@ from .vendor.common import RANK_VALUE
 from .vendor.primitives import best_plo_hand
 
 REVIEW_PAGE_SIZE = 12
-GUIDE_CACHE_VERSION = 2  # All eligible decisions, with pre-action context.
+GUIDE_CACHE_VERSION = 4  # Re-evaluate all streets after the strategy audit.
 
 
 @dataclass(frozen=True)
@@ -71,6 +72,44 @@ class GuidePattern:
         return len(self.examples)
 
 
+class StudySpot(NamedTuple):
+    hand: int
+    room: str
+    number: str
+    hero: str
+    street: str
+    ref: str
+    action: str
+    position: str
+    title: str
+    explanation: str
+    pot_bb: float
+    paid_bb: float
+    cards: tuple
+
+    def card(self):
+        played = f"Played {self.action}"
+        if self.paid_bb:
+            played += f" ({self.paid_bb:g} BB put in)"
+        return ReviewItem(
+            self.hand,
+            self.room,
+            self.number,
+            self.hero,
+            "STUDY",
+            self.street,
+            self.ref,
+            self.action,
+            self.title,
+            "",
+            f"{played} · Pot before the decision: {self.pot_bb:g} BB",
+            "Study",
+            self.cards,
+            self.position,
+            explanation=self.explanation,
+        )
+
+
 @dataclass(frozen=True)
 class ReviewQueue:
     scope: str
@@ -81,12 +120,14 @@ class ReviewQueue:
     guide_items: tuple = ()
     guide_choices: int = 0
     patterns: tuple = ()
+    study: tuple = ()
 
 
 @dataclass(frozen=True)
 class GuideIndex:
     counts: dict
     items: tuple
+    study: tuple = ()
 
 
 def guide_revision(comparison_key):
@@ -101,7 +142,7 @@ def cached_guides(db, room, revision):
     if row is None:
         return None
     try:
-        counts, entries = json.loads(zlib.decompress(row[0]))
+        counts, entries, study = json.loads(zlib.decompress(row[0]))
         return GuideIndex(
             {
                 street: tuple(tuple(row) for row in rows)
@@ -111,6 +152,7 @@ def cached_guides(db, room, revision):
                 ReviewItem(**(item | {"cards": tuple(item["cards"])}))
                 for item in entries
             ),
+            tuple(StudySpot(*entry[:-1], tuple(entry[-1])) for entry in study),
         )
     except (TypeError, ValueError, IndexError, KeyError, zlib.error):
         return None
@@ -118,7 +160,11 @@ def cached_guides(db, room, revision):
 
 def save_guides(db, room, revision, index):
     payload = zlib.compress(
-        json.dumps((index.counts, [asdict(item) for item in index.items])).encode(), 1
+        json.dumps(
+            (index.counts, [vars(item) for item in index.items], index.study),
+            separators=(",", ":"),
+        ).encode(),
+        1,
     )
     timeout = db.execute("PRAGMA busy_timeout").fetchone()[0]
     try:
@@ -212,9 +258,10 @@ def _sessions(db):
     return {hand: session for session, hand in session_keys(rows)}
 
 
-def index_guides(db, room, progress=None):
+def index_guides(db, room, progress=None, *, audit=None):
     """Replay each card-known Hero hand once across all streets."""
     items = []
+    study = []
     covered = {street: [] for street in STREETS}
     history = None
     sessions = _sessions(db)
@@ -232,11 +279,35 @@ def index_guides(db, room, progress=None):
                     # it avoids SQLite schema writes while the hand cursor reads.
                     history = OpponentHistory(observations(db, room, prepared=True))
                 advice = apply_history(snap, advice, history)
-            if advice is None or not advice.choices:
+            if audit is not None:
+                audit(event, snap, advice)
+            if advice is None:
+                continue
+            position = next(s.position for s in snap.seats if s.is_hero)
+            if not advice.can_compare(snap):
+                text = advice.why
+                if advice.play:
+                    text = f"Conditional line: {advice.play}. {text}"
+                study.append(
+                    StudySpot(
+                        hid,
+                        snap.room,
+                        snap.number,
+                        hero,
+                        event.street,
+                        event.ref,
+                        event.action,
+                        position,
+                        advice.title,
+                        text,
+                        snap.pot / snap.bb,
+                        event.amount / snap.bb,
+                        snap.hero_cards,
+                    )
+                )
                 continue
             counts[event.street] += 1
             difference = advice.difference(event.action, event.amount)
-            position = next(s.position for s in snap.seats if s.is_hero)
             played = LABELS[event.action]
             if event.action == "raise":
                 played = advice.raise_label
@@ -286,7 +357,9 @@ def index_guides(db, room, progress=None):
         if progress and index % 500 == 0:
             progress(index)
     return GuideIndex(
-        {street: tuple(rows) for street, rows in covered.items()}, tuple(items)
+        {street: tuple(rows) for street, rows in covered.items()},
+        tuple(items),
+        tuple(sorted(study, key=lambda s: -s.pot_bb)),
     )
 
 
@@ -546,6 +619,50 @@ def prepare_hands(db, room, scope):
     return ("Latest import" if latest else "All hands", selected, library, source_count)
 
 
+def review_selection(db, room, scope):
+    details = prepare_hands(db, room, scope)
+    _, count, library, _ = details
+    selected = (
+        frozenset(r[0] for r in db.execute("SELECT hand FROM review_hands"))
+        if room != "Both" or count != library
+        else None
+    )
+    return (*details, selected)
+
+
+def preview_decisions(db, street):
+    """A bounded list of source decisions while the complete guide is loading."""
+    items = []
+    rows = db.execute("SELECT hand,hero FROM review_hands ORDER BY hand DESC LIMIT 80")
+    for hid, hero in rows:
+        first = next(hero_decisions(db, hid, hero, street), None)
+        if first is None:
+            continue
+        event, snap = first
+        pos = next(s.position for s in snap.seats if s.is_hero)
+        items.append(
+            ReviewItem(
+                hid,
+                snap.room,
+                snap.number,
+                hero,
+                "RECORDED",
+                event.street,
+                event.ref,
+                event.action,
+                f"{event.street} · {pos}",
+                f"Played {event.action} with {snap.pot / snap.bb:g} BB in the pot.",
+                "Recorded decision · open the table to review the hand.",
+                "Recorded",
+                snap.hero_cards,
+                pos,
+            )
+        )
+        if len(items) == REVIEW_PAGE_SIZE:
+            break
+    return tuple(items)
+
+
 def candidates(db, findings, street, limit):
     """Keep a bounded number of distinct hands for each node and evidence level."""
     nodes = [k for k, m in METRICS.items() if street in ("All streets", m.street)]
@@ -671,11 +788,14 @@ def build_queue(
     street="All streets",
     scope="Latest import",
     guide_index=None,
+    selection=None,
 ):
     """Use current library evidence; restrict displayed examples to the selected source files."""
     db.execute("SAVEPOINT read_home_queue")
     try:
-        return _read_queue(db, room, findings, limit, street, scope, guide_index)
+        return _read_queue(
+            db, room, findings, limit, street, scope, guide_index, selection
+        )
     except BaseException:
         db.execute("ROLLBACK TO read_home_queue")
         raise
@@ -683,7 +803,7 @@ def build_queue(
         db.execute("RELEASE read_home_queue")
 
 
-def _read_queue(db, room, findings, limit, street, scope, guide_index):
+def _read_queue(db, room, findings, limit, street, scope, guide_index, selection):
     if street not in ("All streets", *STREETS) or scope not in (
         "All hands",
         "Latest import",
@@ -692,22 +812,27 @@ def _read_queue(db, room, findings, limit, street, scope, guide_index):
         raise ValueError("Unknown review filter.")
     if limit < 0:
         raise ValueError("The review limit must be nonnegative.")
-    actual_scope, count, library, source_count = prepare_hands(db, room, scope)
+    actual_scope, count, library, source_count, selected = (
+        selection or review_selection(db, room, scope)
+    )
     if not count or not limit:
         return ReviewQueue(actual_scope, count, library, (), source_count)
     if findings is None:
         findings = analyze(db, room)[0]
     if not isinstance(findings, dict):
         findings = {f.node: f for f in findings}
-    selected = (
-        {row[0] for row in db.execute("SELECT hand FROM review_hands")}
-        if room != "Both" or count != library
-        else None
-    )
     if guide_index is None:
+        if selection is not None:
+            cohort(db, room)
         guide_index = index_guides(db, room)
     guide, covered = rank_guides(guide_index, street, selected)
     patterns = review_patterns(guide_index, street, selected)
+    study = tuple(
+        s
+        for s in guide_index.study
+        if (street == "All streets" or s.street == street)
+        and (selected is None or s.hand in selected)
+    )
     items = []
     used = set()
     for item in guide:
@@ -716,7 +841,25 @@ def _read_queue(db, room, findings, limit, street, scope, guide_index):
             used.add(item.hand)
         if len(items) == limit:
             break
-    fallback = candidates(db, findings, street, limit) if len(items) < limit else ()
+    fallback = ()
+    if len(items) < limit and count >= REVIEW_PAGE_SIZE:
+        # The first page offers one example per street before filling by pot.
+        unseen_streets = set(STREETS) - {i.street for i in items}
+        for diverse in (True, False):
+            for spot in study:
+                if len(items) == limit:
+                    break
+                if spot.hand in used or (diverse and spot.street not in unseen_streets):
+                    continue
+                items.append(spot.card())
+                used.add(spot.hand)
+                unseen_streets.discard(spot.street)
+                if diverse and not unseen_streets:
+                    break
+    if len(items) < limit:
+        if selection is not None:
+            prepare_hands(db, room, scope)
+        fallback = candidates(db, findings, street, limit)
     for row in fallback:
         if len(items) == limit:
             break
@@ -778,4 +921,5 @@ def _read_queue(db, room, findings, limit, street, scope, guide_index):
         guide,
         covered,
         patterns,
+        study,
     )

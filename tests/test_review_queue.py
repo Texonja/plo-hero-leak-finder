@@ -6,8 +6,9 @@ from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from leakfinder.analysis import analyze, summarize
+from leakfinder.analysis import analyze, cached_comparison, save_comparison, summarize
 from leakfinder.importers import STREETS
+from leakfinder.replay_view import load_snapshot
 from leakfinder.review_queue import (
     GuideIndex,
     ReviewItem,
@@ -16,8 +17,10 @@ from leakfinder.review_queue import (
     guide_revision,
     has_saved_batch,
     index_guides,
+    preview_decisions,
     rank_guides,
     remember_batch,
+    review_selection,
     save_guides,
 )
 from leakfinder.storage import (
@@ -99,6 +102,48 @@ class QueueTests(unittest.TestCase):
         initialize(self.db)
         self.aliases = {"CoinPoker": ["Hero"], "iPoker": ["BigNeonMax"]}
         set_profile(self.db, self.aliases)
+
+    def test_preview_opens_recorded_decisions_and_saved_scope_survives_room_switch(
+        self,
+    ):
+        coin, ip = self.both()
+        remember_batch(self.db, [coin, ip])
+        both = review_selection(self.db, "Both", "Latest import")
+        preview = preview_decisions(self.db, "Flop")
+        self.assertEqual({i.room for i in preview}, {"CoinPoker", "iPoker"})
+        for item in preview:
+            snapshot = load_snapshot(self.db, item.hand, item.hero, item.ref)
+            self.assertEqual(
+                (snapshot.street, snapshot.hero_cards), ("Flop", item.cards)
+            )
+            self.assertEqual((item.status, item.suggested), ("Recorded", ""))
+        index = index_guides(self.db, "Both")
+        direct = build_queue(self.db, findings={}, guide_index=index, street="Flop")
+        review_selection(self.db, "CoinPoker", "All hands")
+        reused = build_queue(
+            self.db, findings={}, guide_index=index, street="Flop", selection=both
+        )
+        self.assertEqual(direct, reused)
+
+    def test_cached_population_preserves_counts_and_rejects_another_profile(self):
+        self.both()
+        rows, eligible, total = analyze(self.db)
+        findings = {f.node: f for f in rows}
+        save_comparison(self.db, "Both", "current", findings, eligible, total)
+        self.assertEqual(
+            cached_comparison(self.db, "Both", "current"), (findings, eligible, total)
+        )
+        self.assertIsNone(cached_comparison(self.db, "Both", "changed"))
+        self.assertIsNone(cached_comparison(self.db, "iPoker", "current"))
+        self.db.execute("UPDATE review_comparison_cache SET payload=x'ff'")
+        self.assertIsNone(cached_comparison(self.db, "Both", "current"))
+
+    def test_stale_strategy_cache_cannot_restore_withdrawn_advice(self):
+        self.both()
+        cohort(self.db)
+        index = index_guides(self.db, "Both")
+        save_guides(self.db, "Both", '[2,"same"]', index)
+        self.assertIsNone(cached_guides(self.db, "Both", guide_revision("same")))
 
     def ingest(self, name, raw):
         path = self.folder / name

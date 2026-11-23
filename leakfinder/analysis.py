@@ -1,6 +1,8 @@
 """Observed frequencies standardized to Hero's room and public-context mix."""
 
 import json
+import sqlite3
+import zlib
 from collections import defaultdict
 from dataclasses import dataclass, field
 from math import sqrt
@@ -48,6 +50,58 @@ class Finding:
     status: str = "Exploratory"
     note: str = ""
     blocks: tuple = (0, 0)
+
+
+def cached_comparison(db, room, revision):
+    row = db.execute(
+        "SELECT payload FROM review_comparison_cache WHERE room=? AND revision=?",
+        (room, revision),
+    ).fetchone()
+    if row is None:
+        return None
+    try:
+        rows, eligible, total = json.loads(zlib.decompress(row[0]))
+        result = {}
+        for data in rows:
+            data["cells"] = {k: Cell(**v) for k, v in data["cells"].items()}
+            data["selected"] = set(data["selected"])
+            for k in ("counts", "blocks", "interval", "adjusted"):
+                if data[k] is not None:
+                    data[k] = tuple(data[k])
+            result[data["node"]] = Finding(**data)
+        return result, eligible, total
+    except (ValueError, TypeError, KeyError, zlib.error):
+        return None
+
+
+def save_comparison(db, room, revision, findings, eligible, total):
+    rows = [
+        vars(f)
+        | {
+            "cells": {k: vars(c) for k, c in f.cells.items()},
+            "selected": sorted(f.selected),
+        }
+        for f in findings.values()
+    ]
+    blob = zlib.compress(
+        json.dumps((rows, eligible, total), separators=(",", ":")).encode(), 1
+    )
+    timeout = db.execute("PRAGMA busy_timeout").fetchone()[0]
+    try:
+        db.execute("PRAGMA busy_timeout=100")
+        with db:
+            db.execute(
+                "INSERT OR REPLACE INTO review_comparison_cache VALUES(?,?,?)",
+                (room, revision, blob),
+            )
+    except sqlite3.OperationalError as exc:
+        if exc.sqlite_errorcode & 255 not in (
+            sqlite3.SQLITE_BUSY,
+            sqlite3.SQLITE_LOCKED,
+        ):
+            raise
+    finally:
+        db.execute(f"PRAGMA busy_timeout={timeout}")
 
 
 def summarize(node, cells, room):

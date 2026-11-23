@@ -15,23 +15,23 @@ from .render import _cards, _source
 MATRIX = (
     (
         "UTG and other early positions",
-        "Open AA and strong hands with useful suits and connectivity.",
+        "AA can open for value in the guide's ordinary-stack window.",
         "When opening first in, consider who can still 3-bet.",
     ),
     (
         "HJ",
-        "Open strong groups. Save weaker connected hands for later positions.",
+        "Check suit quality, gaps and players behind before opening a marginal hand.",
         "Calling an UTG open requires a different range from defending against a late open.",
     ),
     (
         "CO and BTN",
-        "Open supported KK, suited connected hands, and other playable groups.",
-        "Position gives you more room to call. Some strong groups can 3-bet against a late open.",
+        "Look for high connected ranks and nut suits. A double-suited label can also describe low, poorly connected cards.",
+        "The six-handed BTN-versus-CO pilot has its own opening-price, stack and blind conditions.",
     ),
     (
-        "SB and heads-up BTN/SB",
-        "Open strong or well-connected hands. Consider completing with marginal hands.",
-        "When facing an open, account for playing out of position postflop at tables with three or more seats.",
+        "SB",
+        "Consider completing or opening according to BB's responses. The action guide covers tables with three to six dealt-in players.",
+        "The SB plays out of position after the flop. Heads-up tables have a different button and blind structure.",
     ),
     (
         "BB",
@@ -43,11 +43,11 @@ MATRIX = (
 SITUATIONS = (
     (
         "Limpers or an open with a caller",
-        "The guide identifies clear value raises and folds. In close spots, weigh the number of players, the price, and who can still raise.",
+        "The guide distinguishes an open followed by a cold-call from a limp followed by an isolation raise. Strong supported aces can squeeze the first line.",
     ),
     (
         "Facing a 3-bet or another raise",
-        "With AA, depth and side cards guide the choice between calling and reraising. Weakly connected hands tend to fold against a high price. Consider cold 3-bets, squeezes, and 4-bets separately.",
+        "With supported AA facing a single 3-bettor, consider the fraction of the effective stack a pot-sized 4-bet can commit. Cold 3-bets, cold 4-bets and multiway raises require separate review.",
     ),
     (
         "Flop",
@@ -69,7 +69,7 @@ AUDITED_RIVER = (
         "CoinPoker",
         "9000002844",
         "Line 32",
-        "Both players checked the flop and turn. BB has a flush with Q♦ and 3♦ and needs 25% equity to call. A weaker J♦T♦ flush can bet small. A♦T♦ and K♦J♦ beat Hero. A bare A♦ can bluff when the other three cards are not diamonds. Calling is reasonable at this price.",
+        "Both players checked the flop and turn. BB has a flush with Q♦ and 3♦ and needs 25% equity to call. A weaker J♦T♦ flush can bet small. A♦T♦ and K♦J♦ beat Hero. A bare A♦ can bluff when the other three cards are not diamonds. With no ties, calling gains if Hero wins more than 25% of the time, and folding gains if the betting range is stronger. The share is unknown.",
     ),
     (
         "CoinPoker",
@@ -99,7 +99,7 @@ AUDITED_RIVER = (
         "iPoker",
         "9000005984",
         "Action 16",
-        "SB checked and can act after BTN. BB bets half pot after two checked streets. Hero has one pair. KQ can make a king-high straight, and A♠K♠ can represent a missed draw. The additional player favors folding.",
+        "SB checked and can act after BTN. BB bets half pot after two checked streets. Hero has one pair. KQ can make a king-high straight, and A♠K♠ can represent a missed draw. Calling must account for the player behind, who can also win or raise.",
     ),
     (
         "iPoker",
@@ -117,13 +117,13 @@ AUDITED_RIVER = (
         "iPoker",
         "9000009995",
         "Action 13",
-        "SB bet the turn and checked the river. Hero already beats missed hearts such as A♥T♥, and Hero's two hearts block some missed draws. A bluff would need to target better hands such as a weaker 7x. The line favors checking.",
+        "SB bet the turn and checked the river. Hero already beats missed hearts such as A♥T♥, and Hero's two hearts block some missed draws. A bluff could target a seven that makes sevens and twos, ahead of Hero's threes and twos. The line favors checking.",
     ),
     (
         "iPoker",
         "9000014007",
         "Action 16",
-        "SB called a flop raise, checked the turn, and bet one-third pot on the river. Hero's three pocket sevens make a set here. A K♦J♦ flush or a KJ Broadway straight can bet for value. A missed draw is possible. Without a flush blocker, there is a case for folding even at this price.",
+        "SB called a flop raise, checked the turn, and bet one-third pot on the river. Hero's three pocket sevens make a set here. A K♦J♦ flush or a KJ Broadway straight can bet for value. A missed draw is possible. With no ties, calling is profitable before rake if weaker bets make up more than 20% of the betting range. No observed bluff rate establishes that share here.",
     ),
 )
 
@@ -288,6 +288,15 @@ def render():
                 ),
                 None,
             )
+            if item is None:
+                item = next(
+                    (
+                        s.card()
+                        for s in queue.study
+                        if s.room == room and s.street == "Preflop"
+                    ),
+                    None,
+                )
             if item:
                 record = next(_source_records(db, item.hand))
                 _, snap = next(
@@ -295,7 +304,11 @@ def render():
                     for e, s in hero_decisions(db, item.hand, item.hero, "Preflop")
                     if e.ref == item.ref
                 )
-                samples.append(render_example(snap, item.title, item.reason, record))
+                samples.append(
+                    render_example(
+                        snap, item.title, item.reason or item.explanation, record
+                    )
+                )
     matrix = "".join(
         f"<tr><th>{escape(pos)}</th><td>{escape(rfi)}</td><td>{escape(vs_open)}</td></tr>"
         for pos, rfi, vs_open in MATRIX
@@ -319,7 +332,7 @@ article{{margin:10px 0}}.cards{{display:inline-flex;gap:4px;margin:3px 0}}.card{
 <b>Compare decisions</b> opens both differences and agreements. Select an example to replay the exact action and inspect the source.</p>
 <p>The HeroDemo guide makes a recommendation for {queue.guide_choices} decisions and flags {len(queue.guide_items)} differences. A hand can contain multiple decisions.
 Two suggested actions indicate a close spot. More complex decisions get a question for manual review.</p>
-<p>A sizing difference can qualify for review at 25 percentage points of the pot. The comparison uses amounts remaining opponents can actually match. Suggested sizing depends on plausible calls, prior action, and stacks.</p>
+<p>Suggested bet sizes illustrate a possible line given the pot, stacks and prior action. A different bet size by itself does not enter the ranked guide.</p>
 <p><a href="#river">River without the nuts</a> · <a href="#postflop">Other postflop decisions</a></p>
 <h2>Preflop by position</h2><div class="scroll"><table>
 <thead><tr><th>Position</th><th>First in</th><th>Facing an open and later action</th></tr></thead><tbody>{matrix}</tbody></table></div>

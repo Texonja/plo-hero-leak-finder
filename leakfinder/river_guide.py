@@ -15,57 +15,67 @@ class RiverAdvice:
     why: str
     priority: int = 1
     size: BetSize | None = None
+    rankable: bool = False
 
 
 def _examples(holdings, count=2):
     return ", ".join(h.text for h in holdings[:count])
 
 
-def _history(snap, opponent, river_actions):
-    """Describe the relevant seat's two streets and prior role, before its river bet."""
+def _history(snap, opponents, river_actions):
+    """Summarize public actions through the decision and identify players left to act."""
     seats = {s.name: s.position for s in snap.seats}
+    opponent_names = {s.name for s in opponents}
     raises = [a for a in snap.history if a.street == "Preflop" and a.action == "raise"]
     role = []
     if raises:
         role.append(f"The last preflop raiser was {seats[raises[-1].name]}.")
     pressure = checked = 0
-    called_raise = False
     for street in ("Flop", "Turn"):
-        line = [a for a in snap.history if a.street == street]
-        moves = [
-            a.action for a in line if a.name == opponent.name and a.action != "return"
+        actions = [
+            a
+            for a in snap.history
+            if a.street == street
+            and a.action in {"check", "bet", "call", "raise", "fold"}
         ]
-        verb = {"check": "check", "bet": "bet", "raise": "raise", "call": "call"}
-        visible = [verb[a] for a in moves if a in verb]
-        if visible:
-            role.append(f"{opponent.position} {street.lower()} {' / '.join(visible)}.")
-        pressure += any(a in {"bet", "raise", "call"} for a in moves)
-        raise_at = max(
-            (i for i, a in enumerate(line) if a.action == "raise"), default=len(line)
-        )
-        called_raise |= any(
-            a.name == opponent.name and a.action == "call" for a in line[raise_at + 1 :]
-        )
-        checked += bool(line) and all(a.action == "check" for a in line)
-    current = [
-        a
-        for a in river_actions
-        if a.name == opponent.name and a.action in {"bet", "raise", "check"}
-    ]
-    if current:
-        last = current[-1]
-        if last.action == "check":
-            role.append(f"{opponent.position} checked the river.")
-        elif last.action == "bet":
+        theirs = [a for a in actions if a.name in opponent_names]
+        if len(opponents) > 1 and actions:
             role.append(
-                f"{opponent.position} bet {last.amount / snap.bb:g} BB on the river."
+                street
+                + " · "
+                + ", ".join(f"{seats[a.name]} {a.action}" for a in actions)
+                + "."
+            )
+        elif theirs:
+            role.append(
+                f"{opponents[0].position} {street.lower()} "
+                + " / ".join(a.action for a in theirs)
+                + "."
+            )
+        pressure += any(a.action in {"bet", "raise", "call"} for a in theirs)
+        checked += bool(actions) and all(a.action == "check" for a in actions)
+    for action in river_actions:
+        if action.name not in opponent_names:
+            continue
+        pos = seats[action.name]
+        if action.action == "check":
+            role.append(f"{pos} checked the river.")
+        elif action.action in {"bet", "call"}:
+            verb = "bet" if action.action == "bet" else "called"
+            role.append(f"{pos} {verb} {action.amount / snap.bb:g} BB on the river.")
+        elif action.action == "raise":
+            total = action.raised_to or action.amount
+            role.append(f"{pos} raised to {total / snap.bb:g} BB on the river.")
+    if len(opponents) > 1 and not snap.to_call:
+        acted = {a.name for a in river_actions}
+        pending = [s.position for s in opponents if s.name not in acted and s.stack]
+        if pending:
+            role.append(
+                "If you check, " + " and ".join(pending) + " can still act after you."
             )
         else:
-            total = last.raised_to or last.amount
-            role.append(
-                f"{opponent.position} raised to {total / snap.bb:g} BB on the river."
-            )
-    return " ".join(role), pressure, checked, called_raise
+            role.append("Checking back closes the action.")
+    return " ".join(role), pressure, checked
 
 
 def advise_river(snap, hero, opponents):
@@ -78,7 +88,7 @@ def advise_river(snap, hero, opponents):
     opponent = next(
         (s for s in opponents if faced and s.name == faced.name), opponents[0]
     )
-    line, pressure, checked, called_raise = _history(snap, opponent, actions)
+    line, pressure, checked = _history(snap, opponents, actions)
     own_bet = next((a for a in reversed(aggression) if a.name == hero.name), None)
     if own_bet:
         total = own_bet.raised_to or own_bet.amount
@@ -114,7 +124,7 @@ def advise_river(snap, hero, opponents):
         and sum(c[1] == flush_suit for c in snap.hero_cards) == 1
     )
     blocked = (" " + result.blockers[0]) if result.blockers else ""
-    candidates_label = " Examples show two-card combinations from legal PLO4 holdings."
+    candidates_label = " Examples use two hole cards. The other two can improve a holding. The examples carry no range frequencies."
     texture = (6, 5, 4, 3, 2, 1, 7, 8, 0) if paired else (5, 4, 3, 2, 1, 6, 7, 8, 0)
     value_above = (
         sorted(
@@ -128,9 +138,14 @@ def advise_river(snap, hero, opponents):
         or stronger
     )
 
-    def advice(suffix, choices, why, priority=1, size=None):
+    def advice(suffix, choices, why, priority=1, size=None, rankable=False):
         return RiverAdvice(
-            f"{street} · {suffix}", choices, f"{line} {why}".strip(), priority, size
+            f"{street} · {suffix}",
+            choices,
+            f"{line} {why}".strip(),
+            priority,
+            size,
+            rankable,
         )
 
     if snap.to_call:
@@ -138,7 +153,10 @@ def advise_river(snap, hero, opponents):
             return None
         # In a heads-up short all-in the opponent's overhang is returned.
         call_pot = snap.pot - (snap.price_to_match - snap.to_call if heads_up else 0)
-        if not heads_up and any(s.all_in for s in opponents):
+        short_call = snap.price_to_match > snap.to_call
+        if (not heads_up and (short_call or any(s.all_in for s in opponents))) or (
+            short_call and any(a.action == "fold" for a in actions)
+        ):
             return advice(
                 "side pot",
                 (),
@@ -147,9 +165,7 @@ def advise_river(snap, hero, opponents):
         if call_pot <= 0:
             return None
         price = snap.to_call / (call_pot + snap.to_call)
-        raised = len(aggression) > 1 or faced.action == "raise"
-        small = price <= 0.22  # at most ~39% pot when facing one opening bet heads-up
-        large = price >= 0.28
+        raised = faced.action == "raise"
         price_text = f"Calling costs {snap.to_call / snap.bb:g} BB. The raw threshold is {price:.1%} equity before rake"
         price_text += (
             "." if heads_up else " in the current pot, before the other players act."
@@ -171,6 +187,7 @@ def advise_river(snap, hero, opponents):
                 ("call", "raise") if snap.can_raise else ("call",),
                 f"Your hand wins or ties against every legal holding. {price_text}",
                 3,
+                rankable=True,
             )
         made = (
             f"Stronger value hands can include {_examples(value_above)}."
@@ -202,110 +219,52 @@ def advise_river(snap, hero, opponents):
         )
 
         if not heads_up:
-            if rank <= 2 and (
-                price >= 0.22 or any(a.action == "call" for a in actions)
-            ):
-                return advice(
-                    "multiway fold",
-                    ("fold",),
-                    evidence
-                    + " Fold a weak bluff catcher when multiple players remain.",
-                    2,
-                )
             return advice(
                 "multiway review",
                 (),
                 evidence
-                + " Before calling, consider the player who can still call or raise behind you.",
+                + " More than one range can win this pot. Estimate your equity against all live players and account for any action behind.",
             )
-        if raised:
-            if rank <= 3 or (
-                rank == 4 and (paired or flush or (pressure and price >= 0.26))
-            ):
+        if not weaker and not result.ties:
+            if not snap.can_raise:
                 return advice(
-                    "facing a raise",
+                    "no showdown equity",
                     ("fold",),
-                    evidence
-                    + " After the earlier aggression, look for a specific reason to expect a bluff raise.",
+                    price_text
+                    + " Every available opponent pair beats Hero. Calling cannot recover any part of the pot and raising is unavailable.",
                     3,
+                    rankable=True,
                 )
             return advice(
-                "facing a raise",
+                "no showdown equity",
                 (),
-                evidence
-                + " Assess how often stronger combinations actually raise. A list of missed draws offers weak evidence here.",
+                price_text
+                + " Every available opponent pair beats Hero. A call loses. A bluff raise needs enough folds to recover the extra chips at risk.",
             )
-        strong_flush = (
-            rank == 5
-            and flush_pocket_high >= 12
-            and not paired
-            and bool(less_of_category)
-        )
-        near_top = (
-            rank >= 6 and len({h.category for h in stronger}) <= 2
-        ) or strong_flush
-        if (small and near_top and value_below) or (
-            price <= 0.25 and checked == 2 and strong_flush
-        ):
-            return advice(
-                "call a small bet",
-                ("call",),
-                evidence
-                + " Call at this price when the bet can also include weaker value hands.",
-                2,
+        if not weaker:
+            comparison = f"Hero can only tie or lose. Calling breaks even if the pot is split at least {2 * price:.1%} of the time."
+        else:
+            comparison = (
+                f"If there are no ties, calling gains over folding when Hero wins more than {price:.1%} of the time. "
+                "Count weaker value bets as wins and each tie as half a win. Folding gains over calling below that threshold."
             )
-        if (
-            small
-            and rank in {2, 3, 4}
-            and checked >= 1
-            and not (paired and rank <= 2)
-            and not flush
-            and value_below
-            and (missed or checked == 2)
-        ):
-            return advice(
-                "call a small bet",
-                ("call",),
-                evidence
-                + " The line allows thinner value bets. Lean toward calling at this price.",
-                2,
+        if raised:
+            comparison += " Estimate those shares among raises specifically. An opponent who bluffs opening bets can still raise only for value."
+        elif pressure:
+            comparison += " The earlier bet or call helps identify plausible hands. Their betting frequencies remain unknown."
+        if snap.can_raise and result.stronger_pair_count == 1:
+            pair = " ".join(stronger[0].cards)
+            comparison += (
+                f" Only one hole-card pair beats you: {pair}. A stronger four-card holding must contain both cards. "
+                "Consider a value raise if worse hands pay. Calling can save chips if only better hands continue. "
+                "The pair count gives no betting frequency."
             )
-        if (large and rank <= 2 and (pressure >= 1 or not missed)) or (
-            price >= 0.25 and rank == 4 and (flush or paired) and pressure >= 1
-        ):
-            return advice(
-                "fold to a large bet",
-                ("fold",),
-                evidence
-                + " The price and prior action favor folding unless there is a specific reason to expect enough bluffs.",
-                2,
-            )
-        if (
-            rank == 3
-            and flush
-            and called_raise
-            and not any(c[1] == flush_suit for c in snap.hero_cards)
-        ):
-            return advice(
-                "fold a set",
-                ("fold",),
-                evidence
-                + " The opponent already called a raise. Fold the set to this river bet without a flush blocker.",
-                2,
-            )
-        if rank <= 1 and not missed and not small:
-            return advice(
-                "fold",
-                ("fold",),
-                evidence
-                + " This made hand needs a better price or clearer bluff candidates.",
-                2,
-            )
+        elif snap.can_raise:
+            comparison += " A raise also depends on which better hands fold and which worse hands continue."
         return advice(
-            "close call or fold",
-            ("fold", "call"),
-            evidence
-            + " The mix of actual bluffs and value bets determines whether to call. Consider how often weaker value hands bet.",
+            "facing a raise" if raised else "call or fold review",
+            (),
+            evidence + " " + comparison,
         )
 
     if not snap.can_raise:
@@ -376,7 +335,7 @@ def advise_river(snap, hero, opponents):
         folds = tuple(h for h in stronger if h.category in {1, 2, 3, 4})
         if folds:
             size = bet_size(snap, hero, opponents, 65)
-            breakeven = size.amount / (snap.pot + size.amount)
+            breakeven = size.contestable / (snap.pot + size.contestable)
             return advice(
                 "check or bluff with a blocker",
                 ("check", "bet"),
@@ -401,4 +360,10 @@ def advise_river(snap, hero, opponents):
             + " Check unless you can identify enough weaker calls and a size they will pay."
             + blockers,
         )
-    return advice("check", ("check",), why + " Check by default." + blockers)
+    return advice(
+        "check or bet review",
+        (),
+        why
+        + " Checking keeps your showdown value. A value bet needs enough weaker calls, and a bluff needs better hands that fold."
+        + blockers,
+    )

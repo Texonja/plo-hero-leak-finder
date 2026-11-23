@@ -44,13 +44,17 @@ actions and opponent cards recorded in the source. Verified Hero results
 show net big blinds. Hidden cards are labeled as unrecorded.
 
 Guide differences only lists decisions where the guide's recommendation
-differs from the played action. A bet size difference of at least 25
-percentage points of the pot may qualify. The guide gives study
-recommendations and questions for manual review.
+differs from the played action in a supported guide situation.
+Suggested bet sizes are illustrations. Review priorities reflect
+study rules and repetition, without a solver or an estimate of EV lost.
+Study spots opens conditional and manual decisions, largest pot first.
+Each entry shows the original action and opens the table at that decision.
 Why review this first? explains the priority. Open Related hands to see
 more examples of the same pattern. Previous and Next move between pages.
-The review index is saved locally. New imports or Hero alias changes
-trigger a rebuild, with progress shown in the status bar.
+The app saves the review index and population comparisons locally.
+When rebuilding a large library, you can open recent decisions while
+the ranked review loads. The replay also explains hand structures
+that have too little evidence for an action recommendation.
 
 Range and History
 

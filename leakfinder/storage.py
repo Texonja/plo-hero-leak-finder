@@ -16,6 +16,7 @@ SCHEMA = """
 CREATE TABLE IF NOT EXISTS imports(id INTEGER PRIMARY KEY, path TEXT, digest TEXT, summary TEXT, UNIQUE(path,digest));
 CREATE TABLE IF NOT EXISTS review_batch(source INTEGER PRIMARY KEY);
 CREATE TABLE IF NOT EXISTS review_guide_cache(room TEXT PRIMARY KEY, revision TEXT NOT NULL, payload BLOB NOT NULL);
+CREATE TABLE IF NOT EXISTS review_comparison_cache(room TEXT PRIMARY KEY, revision TEXT NOT NULL, payload BLOB NOT NULL);
 CREATE TABLE IF NOT EXISTS hands(id INTEGER PRIMARY KEY, room TEXT, number TEXT, day TEXT, hint TEXT, fingerprint TEXT, cards TEXT, conflict INTEGER DEFAULT 0, UNIQUE(room,number));
 CREATE TABLE IF NOT EXISTS seats(hand INTEGER, name TEXT, PRIMARY KEY(hand,name));
 CREATE TABLE IF NOT EXISTS origins(hand INTEGER, source INTEGER, locator TEXT, raw BLOB, PRIMARY KEY(source,locator));

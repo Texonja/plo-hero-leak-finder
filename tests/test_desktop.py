@@ -86,7 +86,62 @@ class DesktopTests(unittest.TestCase):
     def test_home_has_twelve_cards_and_filtering_reuses_the_index(self):
         self.assertEqual(len(self.app.queue.items), 12)
         home = self.app.home
-        self.assertIn("Review patterns 1–12", home.summary.get())
+        self.assertIn("selected hands", home.summary.get())
+        home.study_button.invoke()
+        self.assertIn("Study spots 1–12", home.summary.get())
+        self.assertIn("largest first", home.summary.get())
+        with patch.object(home, "open_hand") as opened:
+            button = next(
+                b
+                for b in child_widgets(home.rows)
+                if isinstance(b, ttk.Button) and "Open table" in b.cget("text")
+            )
+            button.invoke()
+            self.assertEqual(opened.call_args.args[0], self.app.queue.study[0].card())
+        home.following.invoke()
+        self.assertIn("Study spots 13–", home.summary.get())
+        home.study_button.invoke()
+        with patch(
+            "leakfinder.ui.index_guides",
+            side_effect=AssertionError("rebuilt the guide index"),
+        ):
+            for room, street in (
+                ("Both", "Preflop"),
+                ("iPoker", "Flop"),
+                ("Both", "River"),
+            ):
+                self.app.room.set(room)
+                self.app.street.set(street)
+                self.app.refresh(filters_only=True)
+                self.wait()
+                self.assertTrue(self.app.queue.items)
+                self.assertTrue(
+                    all(item.street == street for item in self.app.queue.items)
+                )
+
+    def test_pattern_drilldown_and_paging_with_known_action_differences(self):
+        # Deliberate counterfactual: the BB checked after a limp holding AAKKds.
+        # Thirteen distinct records exercise both sides of the page boundary.
+        source = (
+            Path(__file__).resolve().parents[1] / "demo" / "CoinPoker-HeroDemo.txt"
+        ).read_text(encoding="utf-8")
+        record = source.split("\nCoinPoker Hand #", 1)[0].replace(
+            "Qc 9d 6h 4s", "Ac Ah Kd Ks"
+        )
+        path = Path(self.tmp.name) / "paging.txt"
+        path.write_text(
+            "\n".join(
+                record.replace("9000000001", str(9990000000 + i)) for i in range(13)
+            ),
+            encoding="utf-8",
+        )
+        self.app.switch_library(False)
+        self.wait()
+        set_profile(self.app.db, {"CoinPoker": ["HeroDemo"]})
+        self.app.import_paths([path])
+        self.wait()
+        home = self.app.home
+        self.assertIn("Review patterns 1–1", home.summary.get())
         group = self.app.queue.patterns[0]
         related = next(
             w
@@ -121,23 +176,6 @@ class DesktopTests(unittest.TestCase):
         home.following.invoke()
         self.assertIn("Differences 13–", home.summary.get())
         self.assertIn("Page 2 of", home.page_text.get())
-        with patch(
-            "leakfinder.ui.index_guides",
-            side_effect=AssertionError("rebuilt the guide index"),
-        ):
-            for room, street in (
-                ("Both", "Preflop"),
-                ("iPoker", "Flop"),
-                ("Both", "River"),
-            ):
-                self.app.room.set(room)
-                self.app.street.set(street)
-                self.app.refresh(filters_only=True)
-                self.wait()
-                self.assertTrue(self.app.queue.items)
-                self.assertTrue(
-                    all(item.street == street for item in self.app.queue.items)
-                )
 
     def test_menu_import_switches_to_personal_then_preserves_profile(self):
         raw = Path(__file__).parent / "fixtures" / "coin-30.hh"
@@ -333,7 +371,7 @@ class DesktopTests(unittest.TestCase):
             report.win.destroy()
             report.worker.join(timeout=5)
 
-    def test_import_shows_guide_difference_and_opens_exact_hero_action(self):
+    def test_import_opens_exact_manual_review_after_withdrawing_bare_ace_rule(self):
         self.app.switch_library(False)
         self.wait()
         path = Path(__file__).resolve().parents[1] / "pilots/btn_co/hands.json"
@@ -363,19 +401,16 @@ class DesktopTests(unittest.TestCase):
         self.app.street.set("Preflop")
         self.app.refresh(filters_only=True)
         self.wait()
-        item = self.app.queue.items[0]
-        self.assertEqual(
-            (item.room, item.number, item.status), ("iPoker", ip["id"], "Guide")
-        )
-        self.assertIn("Suggested fold", item.reason)
+        item = next(i for i in self.app.queue.items if i.room == "iPoker")
+        self.assertEqual((item.number, item.status), (ip["id"], "Exploratory"))
+        self.assertFalse(self.app.queue.guide_items)
         self.app.home.mode.invoke()
-        self.assertIn("Differences 1–1 of 1", self.app.home.summary.get())
         dlg = self.app.open_item(item)
         self.addCleanup(dlg.close)
         self.assertEqual(
             (dlg.snapshot.ref, dlg.snapshot.number), (ip["action_ref"], ip["id"])
         )
-        self.assertIn("Fold", dlg.timeline.get("1.0", "end"))
+        self.assertIn("Manual review", dlg.timeline.get("1.0", "end"))
         self.app.room.set("CoinPoker")
         self.app.refresh()
         self.wait()

@@ -3,7 +3,7 @@
 import re
 import xml.etree.ElementTree as ET
 import zlib
-from collections import defaultdict
+from collections import Counter, defaultdict
 from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 
@@ -100,6 +100,17 @@ def context(snap, actor, size, opening_pot):
             max(sum(c[1] == s for c in snap.board) for s in "cdhs") == 2,
             sum(effective >= limit for limit in (1, 3, 6)),
         )
+    elif snap.street == "River":
+        effective = min(s.stack + s.committed for s in order if s.live)
+        suits = Counter(c[1] for c in snap.board)
+        ranks = Counter(c[0] for c in snap.board)
+        shape += (
+            tuple(sorted(ranks.values())),
+            max(suits.values()),
+            sum(effective >= limit * opening_pot for limit in (1, 3, 6)),
+            size >= effective,
+        )
+        size = min(size, effective)
     ip = bool(active and active[-1] == actor)
     return (
         snap.currency,
@@ -428,6 +439,7 @@ def apply_history(snap, base, history):
                 title="River · opponent history",
                 choices=(action,),
                 why=note,
+                rankable=False,
             )
         return base
     if (
@@ -442,13 +454,14 @@ def apply_history(snap, base, history):
     f, c, r = responses(sample)
     n = f + c + r
     lo = wilson(f / n, n)[0]
-    threshold = base.size.amount / (snap.pot + base.size.amount)
+    threshold = base.size.contestable / (snap.pot + base.size.contestable)
     if lo > threshold + MARGIN:
-        note = f"Among {n} comparable responses to this size group there were {f} folds, {c} calls and {r} raises. The lower Wilson bound is {lo:.1%}. A pure bluff needs {threshold:.1%}folds. This supports betting if checking has negligible showdown value. Base guide · {base.play}."
+        note = f"Among {n} comparable responses to this size group there were {f} folds, {c} calls and {r} raises. The lower Wilson bound is {lo:.1%}. A pure bluff needs {threshold:.1%} folds. This supports betting if checking has negligible showdown value. Base guide · {base.play}."
         return replace(
             base,
             title="River · bluff supported by fold history",
             choices=("bet",),
             why=note,
+            rankable=False,
         )
     return base

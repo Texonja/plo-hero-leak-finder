@@ -50,7 +50,7 @@ class EarlyPostflopTests(unittest.TestCase):
         snap = snapshot_from_record(record, "HeroDemo", "Line 34")
         decision = guide(snap)
         self.assertIn("turn probe", decision.title)
-        self.assertEqual(decision.choices, ("check",))
+        self.assertFalse(decision.choices)
         self.assertIn("requires two matching hole cards", decision.why)
         self.assertEqual(snap.to_call, 0)
 
@@ -92,7 +92,7 @@ class EarlyPostflopTests(unittest.TestCase):
         flop = coin(30, "Hero", "Line 28")
         turn = coin(30, "Hero", "Line 31")
         self.assertIn("after a missed c-bet", guide(flop).title)
-        self.assertEqual(guide(flop).choices, ("check",))
+        self.assertFalse(guide(flop).choices)
         self.assertIn("turn stab", guide(turn).title)
         self.assertEqual(next_draws(turn.hero_cards, turn.board), Draws(8, 0, 0, 6))
         self.assertFalse(guide(turn).choices)
@@ -120,8 +120,10 @@ class EarlyPostflopTests(unittest.TestCase):
         s = view("As Ks 7h 8h", "BB", "Flop", "5s 6s Qd", prefix, owed=2, pot=10)
         self.assertIn("c-bet", guide(s).title)
         self.assertIn("A check-raise", guide(s).why)
-        self.assertEqual(guide(s).choices, ("call", "raise"))
-        self.assertEqual(guide(replace(s, can_raise=False)).choices, ("call",))
+        self.assertFalse(guide(s).choices)
+        closed = guide(replace(s, can_raise=False))
+        self.assertFalse(closed.choices)
+        self.assertNotIn("check-raise", closed.why)
         faced = replace(
             s,
             history=(*s.history, move("BB", "raise", 6, "Flop", to=6)),

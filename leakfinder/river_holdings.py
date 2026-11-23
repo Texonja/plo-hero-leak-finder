@@ -108,6 +108,7 @@ class RiverHoldings:
     missed_straight: tuple[PairExample, ...]
     flush_blocker_bluffs: tuple[PairExample, ...]
     blockers: tuple[str, ...]
+    stronger_pair_count: int
 
 
 def _scores(board):
@@ -143,6 +144,19 @@ def _scores(board):
 
 def _score(a, b, by_rank, by_suit):
     return (by_suit[a % 4] if a % 4 == b % 4 else by_rank)[PAIR_INDEX[a][b]]
+
+
+@lru_cache(maxsize=2048)
+def nuts(hole, board, rank, kickers):
+    """Test the current made hand against every legal opposing pair."""
+    board_ids = tuple(CARD_ID[c] for c in board)
+    blocked = set(board_ids).union(CARD_ID[c] for c in hole)
+    base, suits = _scores(board_ids)
+    target = rank * UNIT + sum(k << (16 - 4 * i) for i, k in enumerate(kickers))
+    available = (c for c in range(len(DECK)) if c not in blocked)
+    return all(
+        _score(a, b, base, suits) <= target for a, b in combinations(available, 2)
+    )
 
 
 def _straight_out_masks(turn, available):
@@ -232,6 +246,7 @@ def _analyze(hero, board):
     river_suit = board[-1] % 4
     completed_ace = 48 + river_suit if turn_suit_counts[river_suit] == 2 else -1
     by_relation = ({}, {}, {})  # weaker, tied, stronger; one example per category.
+    stronger_pairs = 0
     missed_flush = {}
     missed_straight = {}
     blocker_bluffs = {}
@@ -245,7 +260,9 @@ def _analyze(hero, board):
             river, turn = river_suits[suit][idx], turn_suits[suit][idx]
         category = river // UNIT
         best = max(best, river)
-        group = by_relation[(river >= hero_river) + (river > hero_river)]
+        beats_hero = river > hero_river
+        stronger_pairs += beats_hero
+        group = by_relation[(river >= hero_river) + beats_hero]
         if category not in group or group[category][0] < river:
             group[category] = (river, turn, a, b)
         if river >= hero_river or category >= 4:
@@ -296,6 +313,7 @@ def _analyze(hero, board):
         tuple(straight_examples),
         tuple(_example(blocker_bluffs[cat]) for cat in sorted(blocker_bluffs)),
         _blockers(hero, board),
+        stronger_pairs,
     )
 
 
