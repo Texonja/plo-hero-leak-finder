@@ -12,6 +12,7 @@ from tkinter.scrolledtext import ScrolledText
 
 from .critique import critique_for
 from .engine import replay
+from .flop_critique import flop_cbet_note
 from .home import BG, INK, MUTED, NAV, NAV_ACTIVE, ORANGE, SUITS
 from .importers import Record, decode
 from .opponent_history import (
@@ -472,6 +473,13 @@ class TableDialog:
             price_note = threebet_price_note(snap)
             if price_note:
                 box.insert("end", "\nFACING A 3-BET\n", "street")
+                box.insert("end", price_note + "\n", "amount")
+        if self.actor == self.profile and (
+            not critique or not critique.rule.startswith("flop-cbet-")
+        ):
+            price_note = flop_cbet_note(snap)
+            if price_note:
+                box.insert("end", "\nFACING A FLOP C-BET\n", "street")
                 box.insert("end", price_note + "\n", "amount")
         if suggestion is not None:
             box.insert("end", "\nGUIDE · " + suggestion.title.upper() + "\n", "street")

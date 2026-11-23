@@ -27,6 +27,8 @@ SUITS = {
     "c": ("♣", "#23715c"),
 }
 CRITIQUE_SPOTS = {
+    "Flop c-bet defense": ("flop-cbet-",),
+    "Flop value & sizing": ("flop-value-", "flop-size-"),
     "First-in opens": (
         "rfi_",
         "sb_fold_reference",
@@ -77,7 +79,7 @@ class HandReview(ttk.Frame):
         self.critique_spot = ttk.Combobox(
             self.controls,
             state="readonly",
-            width=17,
+            width=21,
             values=("All spots", *CRITIQUE_SPOTS),
         )
         self.critique_spot.current(0)

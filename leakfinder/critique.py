@@ -15,7 +15,11 @@ class Critique:
 def evidence_label(rule):
     if rule == "sb_fold_reference":
         return "Solver reference"
-    if rule in {"turn-closing-call-value-bound", "turn-fold-guaranteed-share"}:
+    if rule in {
+        "flop-cbet-stackoff-bound",
+        "turn-closing-call-value-bound",
+        "turn-fold-guaranteed-share",
+    }:
         return "Equity bound"
     if rule in {"river_flat_value", "river_check_back_value", "river_fold_near_nuts"}:
         return "River value review"
@@ -43,7 +47,10 @@ def critique_for(snap, event, advice):
         return review_common(snap, event)
     if snap.street in ("Flop", "Turn"):
         from .early_critique import review_early
+        from .flop_critique import review_flop
 
+        if snap.street == "Flop" and (critique := review_flop(snap, event)):
+            return critique
         return review_early(snap, event, advice)
     if snap.street == "River":
         from .river_critique import review_river
