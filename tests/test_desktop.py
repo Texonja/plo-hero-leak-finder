@@ -119,6 +119,25 @@ class DesktopTests(unittest.TestCase):
                     all(item.street == street for item in self.app.queue.items)
                 )
 
+    def test_ungraded_real_action_opens_at_its_critique_with_counterargument(self):
+        home = self.app.home
+        self.assertTrue(self.app.queue.critiques)
+        self.assertIn("Guide compared", home.summary.get())
+        home.critique_button.invoke()
+        self.assertIn("Action critiques 1", home.summary.get())
+        item = self.app.queue.critiques[0]
+        dialog = self.app.open_item(item)
+        self.addCleanup(dialog.close)
+        self.assertEqual(
+            (dialog.snapshot.number, dialog.snapshot.ref), (item.number, item.ref)
+        )
+        self.assertNotIn("ACTION CRITIQUE", dialog.timeline.get("1.0", "end"))
+        dialog.toggle_played()
+        text = dialog.timeline.get("1.0", "end")
+        self.assertIn(item.title, text)
+        self.assertIn(item.evidence, text)
+        self.assertIn(item.explanation, text)
+
     def test_pattern_drilldown_and_paging_with_known_action_differences(self):
         # Deliberate counterfactual: the BB checked after a limp holding AAKKds.
         # Thirteen distinct records exercise both sides of the page boundary.

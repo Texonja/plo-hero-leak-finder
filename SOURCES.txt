@@ -25,7 +25,17 @@ The detector and strength snapshots did not include a top-level license.
 This list traces the owner's source artifacts. The MIT notice applies to
 the cited MIT component. Sample derivation details are in demo/README.txt.
 
-Runtime
+Preflop reference
+
+The small-blind first-in fold reference is derived from the downloadable
+PokerData PLO4 six-max 100 BB sample, 5% rake capped at 1 BB.
+Only the first decision after four folds is used. The fold column gives
+no split between completing and raising and supplies no EV loss.
+Source: https://pokerdata.io/samples/plo6-6max-100bb-sample.zip
+Downloaded-pack terms: https://pokerdata.io/terms
+The original archive checksum and branch are in pilots/build_sb_reference.py.
+
+Windows runtime
 
 CPython for Windows x64, Tcl/Tk, SQLite and standard runtime components
 are included under runtime/. See runtime/LICENSE.txt and component notices

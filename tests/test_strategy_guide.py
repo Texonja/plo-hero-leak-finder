@@ -158,7 +158,9 @@ class StrategyTests(unittest.TestCase):
             self.assertEqual(queue.hand_count, 640)
             self.assertEqual(len(queue.items), 12)
             for item in queue.items:
-                self.assertIn(item.status, {"Guide", "Exploratory", "Study"})
+                self.assertIn(
+                    item.status, {"Guide", "Exploratory", "Study", "Critique"}
+                )
                 self.assertEqual(item.status == "Guide", item.node == "GUIDE")
                 self.assertEqual(
                     load_snapshot(db, item.hand, item.hero, item.ref).number,

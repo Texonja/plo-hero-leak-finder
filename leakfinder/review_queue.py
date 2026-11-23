@@ -8,6 +8,7 @@ from dataclasses import dataclass, replace
 from typing import NamedTuple
 
 from .analysis import analyze, wilson
+from .critique import critique_for, evidence_label
 from .early_postflop import next_draws
 from .engine import METRICS, replay
 from .explorer import session_keys
@@ -27,7 +28,7 @@ from .vendor.common import RANK_VALUE
 from .vendor.primitives import best_plo_hand
 
 REVIEW_PAGE_SIZE = 12
-GUIDE_CACHE_VERSION = 4  # Re-evaluate all streets after the strategy audit.
+GUIDE_CACHE_VERSION = 5
 
 
 @dataclass(frozen=True)
@@ -56,6 +57,7 @@ class ReviewItem:
     repeat_count: int = 0
     review_reason: str = ""
     session: str = ""
+    pot_bb: float = 0
 
 
 @dataclass(frozen=True)
@@ -121,6 +123,7 @@ class ReviewQueue:
     guide_choices: int = 0
     patterns: tuple = ()
     study: tuple = ()
+    critiques: tuple = ()
 
 
 @dataclass(frozen=True)
@@ -128,6 +131,7 @@ class GuideIndex:
     counts: dict
     items: tuple
     study: tuple = ()
+    critiques: tuple = ()
 
 
 def guide_revision(comparison_key):
@@ -142,17 +146,21 @@ def cached_guides(db, room, revision):
     if row is None:
         return None
     try:
-        counts, entries, study = json.loads(zlib.decompress(row[0]))
+        counts, entries, study, critiques = json.loads(zlib.decompress(row[0]))
+
+        def restore(entries):
+            return tuple(
+                ReviewItem(**(i | {"cards": tuple(i["cards"])})) for i in entries
+            )
+
         return GuideIndex(
             {
                 street: tuple(tuple(row) for row in rows)
                 for street, rows in counts.items()
             },
-            tuple(
-                ReviewItem(**(item | {"cards": tuple(item["cards"])}))
-                for item in entries
-            ),
+            restore(entries),
             tuple(StudySpot(*entry[:-1], tuple(entry[-1])) for entry in study),
+            restore(critiques),
         )
     except (TypeError, ValueError, IndexError, KeyError, zlib.error):
         return None
@@ -161,7 +169,12 @@ def cached_guides(db, room, revision):
 def save_guides(db, room, revision, index):
     payload = zlib.compress(
         json.dumps(
-            (index.counts, [vars(item) for item in index.items], index.study),
+            (
+                index.counts,
+                [vars(item) for item in index.items],
+                index.study,
+                [vars(item) for item in index.critiques],
+            ),
             separators=(",", ":"),
         ).encode(),
         1,
@@ -262,6 +275,7 @@ def index_guides(db, room, progress=None, *, audit=None):
     """Replay each card-known Hero hand once across all streets."""
     items = []
     study = []
+    critiques = []
     covered = {street: [] for street in STREETS}
     history = None
     sessions = _sessions(db)
@@ -281,6 +295,34 @@ def index_guides(db, room, progress=None, *, audit=None):
                 advice = apply_history(snap, advice, history)
             if audit is not None:
                 audit(event, snap, advice)
+            critique = critique_for(snap, event, advice)
+            if critique:
+                position = next(s.position for s in snap.seats if s.is_hero)
+                played = event.action
+                if event.amount:
+                    played += f" ({event.amount / snap.bb:g} BB put in)"
+                critiques.append(
+                    ReviewItem(
+                        hid,
+                        snap.room,
+                        snap.number,
+                        hero,
+                        critique.rule,
+                        event.street,
+                        event.ref,
+                        event.action,
+                        critique.title,
+                        "",
+                        "Case for the played action: " + critique.counterargument,
+                        "Critique",
+                        snap.hero_cards,
+                        position,
+                        played,
+                        critique.alternative,
+                        critique.reason,
+                        pot_bb=snap.pot / snap.bb,
+                    )
+                )
             if advice is None:
                 continue
             position = next(s.position for s in snap.seats if s.is_hero)
@@ -360,7 +402,35 @@ def index_guides(db, room, progress=None, *, audit=None):
         {street: tuple(rows) for street, rows in covered.items()},
         tuple(items),
         tuple(sorted(study, key=lambda s: -s.pot_bb)),
+        tuple(critiques),
     )
+
+
+def rank_critiques(index, street, selected):
+    """Rotate rule families, with a documented benchmark first in each round."""
+    groups = {}
+    for item in index.critiques:
+        if (street == "All streets" or item.street == street) and (
+            selected is None or item.hand in selected
+        ):
+            groups.setdefault((item.street, item.node), []).append(item)
+    rounds = []
+    order = {"Solver reference": 0, "Equity bound": 1, "River value review": 2}
+    for family in groups.values():
+        for rank, item in enumerate(
+            sorted(family, key=lambda i: (-i.pot_bb, i.hand, i.ref))
+        ):
+            rounds.append(
+                (
+                    rank,
+                    order.get(evidence_label(item.node), 3),
+                    -item.pot_bb,
+                    item.hand,
+                    item.ref,
+                    item,
+                )
+            )
+    return tuple(row[-1] for row in sorted(rounds, key=lambda row: row[:-1]))
 
 
 def rank_guides(index, street, hands=None):
@@ -826,6 +896,7 @@ def _read_queue(db, room, findings, limit, street, scope, guide_index, selection
             cohort(db, room)
         guide_index = index_guides(db, room)
     guide, covered = rank_guides(guide_index, street, selected)
+    critiques = rank_critiques(guide_index, street, selected)
     patterns = review_patterns(guide_index, street, selected)
     study = tuple(
         s
@@ -835,7 +906,7 @@ def _read_queue(db, room, findings, limit, street, scope, guide_index, selection
     )
     items = []
     used = set()
-    for item in guide:
+    for item in (*guide, *critiques):
         if item.hand not in used:
             items.append(item)
             used.add(item.hand)
@@ -922,4 +993,5 @@ def _read_queue(db, room, findings, limit, street, scope, guide_index, selection
         covered,
         patterns,
         study,
+        critiques,
     )

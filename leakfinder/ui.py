@@ -715,7 +715,8 @@ class Workspace:
         def done(result):
             sources, totals, failures = result
             if sources:
-                self.home.show_hands = False
+                self.home.show_hands = None
+                self.home.show_critiques = False
                 self.home.differences.set(False)
                 self.scope.set("Latest import")
                 self.room.set("Both")

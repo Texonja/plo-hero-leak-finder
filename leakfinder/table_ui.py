@@ -10,6 +10,7 @@ from tkinter import messagebox, ttk
 from tkinter.font import Font
 from tkinter.scrolledtext import ScrolledText
 
+from .critique import critique_for
 from .engine import replay
 from .home import BG, INK, MUTED, NAV, NAV_ACTIVE, ORANGE, SUITS
 from .importers import Record, decode
@@ -23,6 +24,7 @@ from .opponent_history import (
 )
 from .range_review import build_range_review, river_price_note
 from .replay_view import available_actions, chip_text, load_snapshot, river_result
+from .sb_reference import sb_reference
 from .storage import connect
 from .strategy_guide import advice_at
 
@@ -424,6 +426,39 @@ class TableDialog:
         suggestion = advice_at(snap) if self.actor == self.profile else None
         if eligible and suggestion and river_opponent(snap):
             suggestion = apply_history(snap, suggestion, self._opponent_history(snap))
+        if self.revealed and self.actor == self.profile:
+            critique = critique_for(snap, self.played_event, suggestion)
+            if critique:
+                box.insert(
+                    "end", "\nACTION CRITIQUE · " + critique.title + "\n", "street"
+                )
+                box.insert(
+                    "end",
+                    critique.alternative[:1].upper() + critique.alternative[1:] + "\n",
+                    "active",
+                )
+                box.insert(
+                    "end",
+                    critique.reason
+                    + "\nCase for the played action: "
+                    + critique.counterargument
+                    + "\n",
+                    "amount",
+                )
+        reference = sb_reference(snap) if self.actor == self.profile else None
+        if reference is not None:
+            weight, depth = reference
+            box.insert("end", "\nSOLVER REFERENCE · FIRST IN FROM SB\n", "street")
+            box.insert(
+                "end", f"Fold {weight:.1%} · continue {1 - weight:.1%}\n", "active"
+            )
+            box.insert(
+                "end",
+                f"PokerData 100 BB sample, six seats, no ante, 5% rake capped at 1 BB. "
+                f"This hand was {depth:g} BB effective against the big blind. The room's rake "
+                "can differ. The sample does not split completing from raising here.\n",
+                "amount",
+            )
         if suggestion is not None:
             box.insert("end", "\nGUIDE · " + suggestion.title.upper() + "\n", "street")
             box.insert(
@@ -518,6 +553,7 @@ class TableDialog:
                 e for e in streets[self.snapshot.street] if e.ref == self.snapshot.ref
             )
             amount = f" · {chip_text(event.amount)} paid" if event.amount else ""
+            self.played_event = event
             self.played_text = f"Played: {event.action}{amount}"
             if self.snapshot.street == "River":
                 if row["cards"]:

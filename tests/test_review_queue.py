@@ -19,6 +19,7 @@ from leakfinder.review_queue import (
     index_guides,
     preview_decisions,
     rank_guides,
+    rank_critiques,
     remember_batch,
     review_selection,
     save_guides,
@@ -34,6 +35,33 @@ from tests.test_library import as_copy, cell, original
 
 
 class QueueTests(unittest.TestCase):
+    def test_conditional_critiques_have_their_own_index_and_filtered_order(self):
+        a = ReviewItem(
+            1,
+            "iPoker",
+            "11",
+            "Hero",
+            "marked check",
+            "Turn",
+            "Action 1",
+            "check",
+            "Review this check",
+            "",
+            "Counterexample",
+            "Critique",
+            ("As", "Ks", "Ah", "Kh"),
+            pot_bb=15,
+        )
+        b = replace(a, hand=2, street="Flop", node="marked bet", pot_bb=30)
+        c = replace(a, hand=3, room="CoinPoker", pot_bb=20)
+        index = GuideIndex({s: () for s in STREETS}, (), (), (a, b, c))
+        self.assertEqual(rank_critiques(index, "All streets", None), (b, c, a))
+        self.assertEqual(rank_critiques(index, "Turn", {1, 2}), (a,))
+        revision = guide_revision("test")
+        save_guides(self.db, "Both", revision, index)
+        self.assertEqual(cached_guides(self.db, "Both", revision), index)
+        self.assertIsNone(cached_guides(self.db, "Both", '[4,"test"]'))
+
     def test_rank_prefers_one_example_of_repeated_actions_then_clear_and_close_spots(
         self,
     ):

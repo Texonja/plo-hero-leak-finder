@@ -4,6 +4,7 @@ import json
 import tkinter as tk
 from tkinter import ttk
 
+from .critique import evidence_label
 from .hover_help import HoverHelp
 from .preflop_guide import GROUPS
 from .review_queue import REVIEW_PAGE_SIZE
@@ -35,7 +36,8 @@ class HandReview(ttk.Frame):
         self.differences = tk.BooleanVar(value=False)
         self.current = None
         self.related_pattern = ""
-        self.show_hands = False
+        self.show_hands = None
+        self.show_critiques = False
         self.show_study = False
         self.return_page = 0
         self.controls = ttk.Frame(self)
@@ -47,6 +49,10 @@ class HandReview(ttk.Frame):
             text="Guide differences only",
         )
         self.mode.pack(side="left")
+        self.critique_button = ttk.Button(
+            self.controls, text="Action critiques", command=self._toggle_critiques
+        )
+        self.critique_button.pack(side="left", padx=(8, 0))
         self.switch = ttk.Button(
             self.controls, text="Selected hands", command=self._switch
         )
@@ -126,6 +132,7 @@ class HandReview(ttk.Frame):
     def clear(self, message):
         self.current = None
         self.mode.state(["disabled"])
+        self.critique_button.state(["disabled"])
         self.switch.state(["disabled"])
         self.study_button.state(["disabled"])
         self._hide_pager()
@@ -142,7 +149,9 @@ class HandReview(ttk.Frame):
     def paint(self, queue, pockets, empty, action=None):
         self.current = queue, pockets, empty, action
         self.mode.state(["!disabled"])
-        self.switch.state(["!disabled"])
+        self.critique_button.state(["!disabled"] if queue.critiques else ["disabled"])
+        self.show_critiques = self.show_critiques and bool(queue.critiques)
+        self.switch.state(["!disabled"] if queue.patterns else ["disabled"])
         self.study_button.state(["!disabled"] if queue.study else ["disabled"])
         self.show_study = self.show_study and bool(queue.study)
         self.page = 0
@@ -156,18 +165,37 @@ class HandReview(ttk.Frame):
 
     def _change_mode(self):
         self.show_study = False
+        self.show_critiques = False
         self.related_pattern = ""
         self.page = 0
         self._render()
 
     def _switch(self):
-        self.show_hands = not self.show_hands if not self.differences.get() else False
+        self.show_hands = (
+            not self._hands_view() if not self.differences.get() else False
+        )
         self.differences.set(False)
         self._change_mode()
 
     def _toggle_study(self):
+        self.show_critiques = False
         self.show_study = not self.show_study
         self.differences.set(False)
+        self.related_pattern = ""
+        self.page = 0
+        self._render()
+
+    def _hands_view(self):
+        return (
+            bool(self.current[0].critiques)
+            if self.show_hands is None
+            else self.show_hands
+        )
+
+    def _toggle_critiques(self):
+        self.show_critiques = not self.show_critiques
+        self.differences.set(False)
+        self.show_study = False
         self.related_pattern = ""
         self.page = 0
         self._render()
@@ -200,15 +228,23 @@ class HandReview(ttk.Frame):
         selected = queue.items
         heading = ""
         pattern_page = False
+        self.critique_button.configure(
+            text="Back to review"
+            if self.show_critiques
+            else f"Action critiques ({len(queue.critiques):,})"
+        )
         self.study_button.configure(
             text="Back to review" if self.show_study else "Study spots"
         )
         self.switch.configure(
             text="Review patterns"
-            if self.show_hands or self.differences.get()
+            if self._hands_view() or self.differences.get()
             else "Selected hands"
         )
-        if self.show_study:
+        if self.show_critiques:
+            selected = queue.critiques
+            heading = "Action critiques"
+        elif self.show_study:
             selected = queue.study
             heading = "Study spots"
         elif self.related_pattern:
@@ -220,8 +256,12 @@ class HandReview(ttk.Frame):
             selected = queue.guide_items
             heading = "Differences"
             if queue.hand_count:
-                empty = "No guide recommendations differ from the played action in this selection."
-        elif queue.patterns and not self.show_hands:
+                empty = "The guide found no differences among the actions it could compare. Other decisions remain open for review."
+                if queue.critiques:
+                    empty += " Open Action critiques for specific alternatives to your recorded plays."
+                elif queue.study:
+                    empty += " Open Study spots to inspect decisions outside those comparisons."
+        elif queue.patterns and not self._hands_view():
             selected = queue.patterns
             heading = "Review patterns"
             pattern_page = True
@@ -246,8 +286,6 @@ class HandReview(ttk.Frame):
         }.get(queue.scope, "library")
         count = f"{queue.hand_count:,} Hero hand{'s' if queue.hand_count != 1 else ''} in {basis}"
         summary = f"{n} selected hand{'s' if n != 1 else ''}   ·   {count}"
-        if queue.hand_count:
-            summary += f"   ·   Guide · {len(queue.guide_items):,} differences in {queue.guide_choices:,} decisions with recommendations"
         if heading and n:
             summary = (
                 f"{heading} {start + 1:,}–{start + n:,} of {total:,}   ·   {count}"
@@ -256,8 +294,16 @@ class HandReview(ttk.Frame):
             summary += "\nRepeated across sessions first, then by the lower end of the difference-rate interval."
         if self.show_study:
             summary += "\nOrdered by pot size before Hero acted, largest first. These decisions require assumptions about ranges or future play."
-        if (pattern_page or self.differences.get()) and total:
-            summary += "  ·  Frequency measures repetition. EV is unevaluated."
+        if queue.hand_count and not self.related_pattern:
+            total_indexed = queue.guide_choices + len(queue.study)
+            if total_indexed:
+                summary += (
+                    f"\nGuide compared {queue.guide_choices:,} of {total_indexed:,} indexed decisions "
+                    f"({queue.guide_choices / total_indexed:.1%}) · {len(queue.guide_items):,} guide differences."
+                    f"  Action critiques: {len(queue.critiques):,}."
+                )
+        if self.show_critiques:
+            summary += "\nOne per rule first: solver comparisons, equity bounds, river value, then other critiques. Larger pots first within a rule. EV is unevaluated."
         self._clear_cards(summary)
         if not n:
             box = tk.Frame(
@@ -282,6 +328,20 @@ class HandReview(ttk.Frame):
                 ttk.Button(
                     box, text=action[0], command=action[1], style="Review.TButton"
                 ).pack(anchor="w", pady=(12, 0))
+            if self.differences.get() and queue.critiques:
+                ttk.Button(
+                    box,
+                    text=f"See all {len(queue.critiques):,} action critiques",
+                    command=self._toggle_critiques,
+                ).pack(anchor="w", pady=(8, 0))
+                for item in queue.critiques[:3]:
+                    self._card(item, item.cards, item.position)
+            elif self.differences.get() and queue.study:
+                ttk.Button(
+                    box, text="See study spots", command=self._toggle_study
+                ).pack(anchor="w", pady=(8, 0))
+                item = queue.study[0].card()
+                self._card(item, item.cards, item.position)
         for item in selected:
             if pattern_page:
                 self._pattern_card(item)
@@ -445,7 +505,12 @@ class HandReview(ttk.Frame):
             for text, color in (
                 ("Played", INK),
                 (item.played, PLAYED_RED if item.difference else INK),
-                ("  ·  Suggested", INK),
+                (
+                    "  ·  Alternative"
+                    if item.status == "Critique"
+                    else "  ·  Suggested",
+                    INK,
+                ),
                 (item.suggested, SUGGESTED_GREEN),
             ):
                 tk.Label(
@@ -519,6 +584,7 @@ class HandReview(ttk.Frame):
             "Supported": "Supported difference",
             "Recorded": "Recent hand",
             "Study": "Study only",
+            "Critique": evidence_label(item.node),
         }.get(item.status, "Exploratory")
         if item.status == "Guide" and not item.difference:
             label = "Within guide"
