@@ -1,2 +1,2 @@
-/Feature-coverage.html linguist-documentation
-/pilots/btn_co/*.html linguist-documentation
+Feature-coverage.html linguist-documentation -linguist-detectable
+pilots/btn_co/*.html linguist-documentation -linguist-detectable

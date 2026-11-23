@@ -1,6 +1,6 @@
 # PLO Hero Leak Finder
 
-Offline PLO4 hand review for CoinPoker and iPoker. Import completed hand histories, select your Hero aliases, and replay decisions alongside study suggestions and reports. Hands and settings stay on your computer.
+Python desktop app for offline PLO4 hand review on CoinPoker and iPoker. Import completed hand histories, select your Hero aliases, and replay decisions alongside study suggestions and reports. Hands and settings stay on your computer.
 
 On Windows, download the portable ZIP from [Releases](https://github.com/Texonja/plo-hero-leak-finder/releases/latest), extract it, and run **PLO Hero Leak Finder.exe**. Try **Library > HeroDemo** for sample hands, or use **Import** to add your own.
 
