@@ -31,13 +31,3 @@ CPython for Windows x64, Tcl/Tk, SQLite and standard runtime components
 are included under runtime/. See runtime/LICENSE.txt and component notices
 shipped with those files. The Windows GUI launcher uses distlib. Its
 license is included in runtime/distlib-LICENSE.txt.
-
-Product research
-
-The vendor's public description of Leak Buster 3 and its public FAQ informed
-the coverage matrix. HM2's public reports and hand import documentation
-informed desktop navigation. Calculations, metric definitions and UI are
-part of this independent local application.
-https://pokerleakbuster.com/
-https://pokerleakbuster.com/faq/
-https://hm2faq.holdemmanager.com/categories/Reports/
