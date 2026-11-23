@@ -6,23 +6,27 @@ import zlib
 from collections import Counter
 from dataclasses import asdict, dataclass, replace
 
-from .analysis import analyze
+from .analysis import analyze, wilson
+from .early_postflop import next_draws
 from .engine import METRICS, replay
+from .explorer import session_keys
 from .importers import STREETS, Record, decode
 from .opponent_history import (
     OpponentHistory,
     apply_history,
     observations,
     river_opponent,
-    size_band,
 )
+from .postflop_value import STRAIGHTS
 from .replay_view import hero_decisions
-from .statistics import BITS, DEFS
+from .statistics import BITS, DEFS, tags
 from .storage import cohort
-from .strategy_guide import LABELS, advice_at
+from .strategy_guide import LABELS, advice_at, preflop_class
+from .vendor.common import RANK_VALUE
+from .vendor.primitives import best_plo_hand
 
 REVIEW_PAGE_SIZE = 12
-GUIDE_CACHE_VERSION = 1  # Bump when the indexed guide or pattern definitions change.
+GUIDE_CACHE_VERSION = 2  # All eligible decisions, with pre-action context.
 
 
 @dataclass(frozen=True)
@@ -50,6 +54,21 @@ class ReviewItem:
     pattern: str = ""
     repeat_count: int = 0
     review_reason: str = ""
+    session: str = ""
+
+
+@dataclass(frozen=True)
+class GuidePattern:
+    key: str
+    differences: int
+    sessions: int
+    difference_sessions: int
+    interval: tuple
+    examples: tuple
+
+    @property
+    def total(self):
+        return len(self.examples)
 
 
 @dataclass(frozen=True)
@@ -61,6 +80,7 @@ class ReviewQueue:
     source_count: int
     guide_items: tuple = ()
     guide_choices: int = 0
+    patterns: tuple = ()
 
 
 @dataclass(frozen=True)
@@ -117,7 +137,7 @@ def save_guides(db, room, revision, index):
         db.execute(f"PRAGMA busy_timeout={timeout}")
 
 
-def _pattern(snap, event, advice, position):
+def _pattern(snap, advice, position):
     active = [seat for seat in snap.seats if seat.live]
     effective = (
         min(
@@ -126,27 +146,70 @@ def _pattern(snap, event, advice, position):
         )
         / snap.bb
     )
+    ranks = Counter(RANK_VALUE[c[0]] for c in snap.board)
     texture = (
-        len({c[0] for c in snap.board}) < len(snap.board),
-        max((sum(c[1] == s for c in snap.board) for s in "cdhs"), default=0),
+        sorted(ranks.values()),
+        sorted(Counter(c[1] for c in snap.board).values()),
+        max(len(window.intersection(ranks)) for window in STRAIGHTS),
     )
-    return json.dumps(
+    positions = {seat.name: seat.position for seat in snap.seats}
+    line = tuple(
+        (a.street, positions[a.name], a.action)
+        for a in snap.history
+        if a.action in {"raise", "bet", "call", "check"}
+    )
+    if snap.board:
+        family = [best_plo_hand(snap.hero_cards, snap.board)[0]]
+        if len(snap.board) < 5:
+            draws = next_draws(snap.hero_cards, snap.board)
+            family.extend((bool(draws.flush), bool(draws.straight), bool(draws.nuts)))
+    else:
+        raises = [a for a in snap.history if a.action == "raise"]
+        size = raises[0].raised_to / snap.bb if len(raises) == 1 else None
+        family = preflop_class(snap.hero_cards, size)
+    first_open = next(
         (
-            snap.room,
-            event.street,
-            snap.currency,
-            snap.bb,
-            len(snap.seats),
-            len(active),
-            position,
-            advice.title,
-            event.action,
-            advice.choices,
-            texture,
-            sum(effective >= bound for bound in (40, 80, 150)),
-            size_band(snap.to_call, snap.pot) if snap.to_call else -1,
-        )
+            a.raised_to / snap.bb
+            for a in snap.history
+            if a.street == "Preflop" and a.action == "raise"
+        ),
+        None,
     )
+    context = {
+        "room": snap.room,
+        "street": snap.street,
+        "currency": snap.currency,
+        "blinds": (snap.sb, snap.bb),
+        "table": len(snap.seats),
+        "active": sorted(s.position for s in active),
+        "hero": position,
+        "spot": advice.title,
+        "line": line,
+        "family": family,
+        "choices": advice.choices,
+        "sizing": round(advice.size.amount / snap.pot, 2) if advice.size else None,
+        "board": texture,
+        "pocket": tags(snap.hero_cards) if not snap.board else None,
+        "antes": sorted(a.amount for a in snap.history if a.action == "posts_ante"),
+        "depth": sum(effective >= bound for bound in (40, 80, 150)),
+        "open_band": sum(first_open > bound for bound in (2.5, 3.5, 5))
+        if first_open is not None
+        else None,
+        "price": sum(
+            snap.to_call > threshold * (snap.pot + snap.to_call)
+            for threshold in (0.18, 0.24, 0.29, 0.35)
+        )
+        if snap.to_call
+        else None,
+    }
+    return json.dumps(context, separators=(",", ":"))
+
+
+def _sessions(db):
+    rows = db.execute("""SELECT q.hand,h.room,f.stamp FROM cohort q
+        JOIN hands h ON h.id=q.hand JOIN facts f ON f.hand=q.hand
+        ORDER BY h.room,julianday(replace(f.stamp,'/','-')),q.hand""")
+    return {hand: session for session, hand in session_keys(rows)}
 
 
 def index_guides(db, room, progress=None):
@@ -154,6 +217,7 @@ def index_guides(db, room, progress=None):
     items = []
     covered = {street: [] for street in STREETS}
     history = None
+    sessions = _sessions(db)
     rows = db.execute("""SELECT q.hand,q.hero FROM cohort q
         JOIN hands h ON h.id=q.hand
         WHERE EXISTS (SELECT 1 FROM json_each(h.cards) c WHERE c.key=q.hero)
@@ -172,8 +236,6 @@ def index_guides(db, room, progress=None):
                 continue
             counts[event.street] += 1
             difference = advice.difference(event.action, event.amount)
-            if not difference:
-                continue
             position = next(s.position for s in snap.seats if s.is_hero)
             played = LABELS[event.action]
             if event.action == "raise":
@@ -200,20 +262,23 @@ def index_guides(db, room, progress=None):
                     event.ref,
                     event.action,
                     title,
-                    f"Played {played} · Suggested {advice.play}. {advice.why}",
+                    f"Played {played} · Suggested {advice.play}. {advice.why}"
+                    if difference
+                    else "",
                     "Study recommendation",
                     "Guide",
                     snap.hero_cards,
                     position,
                     played,
                     advice.play,
-                    advice.why,
-                    difference,
+                    advice.why
+                    if difference
+                    else "The recorded action is within the guide's options for this decision.",
+                    difference or "",
                     advice.priority,
                     close,
-                    _pattern(snap, event, advice, position)
-                    if difference == "action" and not close
-                    else "",
+                    _pattern(snap, advice, position),
+                    session=sessions.get(hid, ""),
                 )
             )
         for street, count in counts.items():
@@ -237,7 +302,7 @@ def rank_guides(index, street, hands=None):
     items = [
         i
         for i in index.items
-        if i.street in wanted and (hands is None or i.hand in hands)
+        if i.difference and i.street in wanted and (hands is None or i.hand in hands)
     ]
     patterns = {}
     for i in items:
@@ -254,7 +319,7 @@ def rank_guides(index, street, hands=None):
             why = "Bet size difference · At least 25 percentage points of the pot."
         elif repeats > 1:
             tier = 0
-            why = f"The same action difference appears in {repeats:,} comparable hands."
+            why = f"The guide differs in {repeats:,} comparable hands."
         else:
             tier = 1
             why = "Action difference · The guide favors one action here."
@@ -271,6 +336,53 @@ def rank_guides(index, street, hands=None):
         for group in (representatives, followups)
         for entry in sorted(group, key=lambda item: item[:3])
     ), covered
+
+
+def review_patterns(index, street, hands=None):
+    """Use all guide-covered decisions in the selected scope for each denominator."""
+    groups = {}
+    for item in index.items:
+        if (street == "All streets" or item.street == street) and (
+            hands is None or item.hand in hands
+        ):
+            groups.setdefault(item.pattern, []).append(item)
+    patterns = []
+    for key, items in groups.items():
+        different = [i for i in items if i.difference]
+        if not key or not different:
+            continue
+        agreements = [i for i in items if not i.difference]
+        actions = Counter((i.difference, i.action) for i in different)
+        different.sort(key=lambda i: -actions[i.difference, i.action])
+        examples = (*different[:1], *agreements[:1], *different[1:], *agreements[1:])
+
+        def sessions(rows):
+            return len(
+                {
+                    i.session
+                    for i in rows
+                    if i.session and not i.session.startswith("Unknown")
+                }
+            )
+
+        x, n = len(different), len(items)
+        patterns.append(
+            GuidePattern(
+                key, x, sessions(items), sessions(different), wilson(x / n, n), examples
+            )
+        )
+    return tuple(
+        sorted(
+            patterns,
+            key=lambda g: (
+                g.difference_sessions < 2,
+                g.differences < 2,
+                -g.interval[0],
+                -g.differences,
+                g.key,
+            ),
+        )
+    )
 
 
 def has_saved_batch(db):
@@ -415,6 +527,19 @@ def prepare_hands(db, room, scope):
             CROSS JOIN origins o ON o.source=b.source
             JOIN cohort c ON c.hand=o.hand""")
         selected = db.execute("SELECT count(*) FROM review_hands").fetchone()[0]
+    elif scope == "Last 5 sessions":
+        sessions = _sessions(db)
+        recent = {}
+        for session in sessions.values():
+            if not session.startswith("Unknown"):
+                recent.setdefault(session.split(" · ")[-1], {})[session] = None
+        keep = {s for keys in recent.values() for s in list(keys)[-5:]}
+        db.executemany(
+            "INSERT INTO review_hands SELECT * FROM cohort WHERE hand=?",
+            ((hid,) for hid, session in sessions.items() if session in keep),
+        )
+        selected = db.execute("SELECT count(*) FROM review_hands").fetchone()[0]
+        return scope, selected, library, source_count
     else:
         db.execute("INSERT INTO review_hands SELECT * FROM cohort")
         selected = library
@@ -562,6 +687,7 @@ def _read_queue(db, room, findings, limit, street, scope, guide_index):
     if street not in ("All streets", *STREETS) or scope not in (
         "All hands",
         "Latest import",
+        "Last 5 sessions",
     ):
         raise ValueError("Unknown review filter.")
     if limit < 0:
@@ -575,12 +701,13 @@ def _read_queue(db, room, findings, limit, street, scope, guide_index):
         findings = {f.node: f for f in findings}
     selected = (
         {row[0] for row in db.execute("SELECT hand FROM review_hands")}
-        if room != "Both" or actual_scope == "Latest import" and count != library
+        if room != "Both" or count != library
         else None
     )
     if guide_index is None:
         guide_index = index_guides(db, room)
     guide, covered = rank_guides(guide_index, street, selected)
+    patterns = review_patterns(guide_index, street, selected)
     items = []
     used = set()
     for item in guide:
@@ -643,5 +770,12 @@ def _read_queue(db, room, findings, limit, street, scope, guide_index):
             )
         )
     return ReviewQueue(
-        actual_scope, count, library, tuple(items), source_count, guide, covered
+        actual_scope,
+        count,
+        library,
+        tuple(items),
+        source_count,
+        guide,
+        covered,
+        patterns,
     )

@@ -324,7 +324,7 @@ class Workspace:
         self.scope_box = ttk.Combobox(
             self.scope_controls,
             textvariable=self.scope,
-            values=("Latest import", "All hands"),
+            values=("Latest import", "Last 5 sessions", "All hands"),
             state="readonly",
             width=13,
         )
@@ -703,6 +703,8 @@ class Workspace:
         def done(result):
             sources, totals, failures = result
             if sources:
+                self.home.show_hands = False
+                self.home.differences.set(False)
                 self.scope.set("Latest import")
                 self.room.set("Both")
                 self.street.set("All streets")

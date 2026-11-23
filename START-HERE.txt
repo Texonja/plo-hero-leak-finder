@@ -22,10 +22,14 @@ Use Player > Personal Hero aliases to enter your exact screen names,
 one per line and under the correct network. The app analyzes hands
 with a single matching Hero.
 
-Hands to review opens after import. Latest import shows up to twelve
-example hands from the selected files. Reimporting an identical file
-makes those hands available without counting them twice. All hands
-shows the full library. Use Room and Street to narrow the view.
+Hands to review opens after import with twelve review patterns per page.
+Each fraction counts decisions that differed from the guide out of all
+comparable decisions with a recommendation. Recurring differences across
+sessions come first, then the lower end of the descriptive 95% interval.
+Compare decisions opens both differences and agreements at the original
+action. Selected hands opens the individual hand shortlist.
+Use Room, Street and Hands to filter. Last 5 sessions applies per room.
+Reimporting an identical file makes its hands available once.
 Import > Import history shows duplicates and exclusion reasons.
 
 Reviewing a decision
@@ -50,7 +54,8 @@ trigger a rebuild, with progress shown in the status bar.
 
 Range and History
 
-Open a flop, turn, or river decision and select Range and History. The
+Open Range and History on the flop or What would change this decision?
+on the turn and river. The
 display shows how observed actions change the weights of possible PLO4
 holdings. The estimates use Hero's cards and the board visible at the
 decision. On the flop and turn they also sample or enumerate later cards.
@@ -61,8 +66,12 @@ history appear side by side. The history comparison uses earlier folds,
 calls, and raises against Hero in comparable contexts. Changing a
 recommendation requires at least 30 matched responses per size group
 across three dates and a clear estimate gap. Smaller samples remain
-visible for review. The model assumes Hero folds to a raise and no
-further betting after a call. River comparisons also require at least
+visible for review. The historical sizing comparison assumes a fold to a
+raise and no further betting after a call. The heads-up turn scenarios
+also compare calling the raise and facing a half-pot river bet on the same
+possible runouts. The river call view gives the break-even equity, example
+holdings and how much the modeled range would need to change.
+River comparisons with personal history also require at least
 30 comparable decisions across three dates. Hidden cards widen the
 range of plausible outcomes. Use Open source to inspect earlier hands.
 

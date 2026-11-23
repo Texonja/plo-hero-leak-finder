@@ -21,7 +21,7 @@ from .opponent_history import (
     postflop_opponent,
     river_opponent,
 )
-from .range_review import build_range_review
+from .range_review import build_range_review, river_price_note
 from .replay_view import available_actions, chip_text, load_snapshot, river_result
 from .storage import connect
 from .strategy_guide import advice_at
@@ -379,6 +379,11 @@ class TableDialog:
             and self.actor == self.profile
         )
         self.range_button.configure(state="normal" if eligible else "disabled")
+        self.range_button.configure(
+            text="What would change this decision?"
+            if eligible and snap.street in {"Turn", "River"}
+            else "Range and History…"
+        )
         self.subtitle.configure(
             text=f"{snap.room}   ·   Hand #{snap.number}   ·   PLO4"
         )
@@ -427,6 +432,20 @@ class TableDialog:
                 "active",
             )
             box.insert("end", suggestion.why + "\nStudy recommendation.", "amount")
+            if (
+                eligible
+                and snap.street == "River"
+                and snap.to_call
+                and river_opponent(snap)
+                and not any(
+                    a.street == "River" and a.action == "fold" for a in snap.history
+                )
+            ):
+                box.insert(
+                    "end",
+                    "\n\n" + river_price_note(snap, self._opponent_history(snap)),
+                    "amount",
+                )
         if self.revealed and snap.street == "River":
             self._show_outcome(box, snap)
         box.configure(state="disabled")

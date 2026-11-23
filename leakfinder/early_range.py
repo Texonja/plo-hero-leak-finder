@@ -29,6 +29,7 @@ class Holding:
     pre: int
     streets: tuple
     outcomes: tuple
+    rivers: bytes
 
 
 @dataclass(frozen=True)
@@ -41,6 +42,7 @@ class Checkpoint:
     draws: float | None
     by_strength: tuple
     example: str
+    river_mass: tuple = ()
 
 
 @dataclass(frozen=True)
@@ -70,6 +72,7 @@ def _sample(hero, board, count):
         pairs = tuple(combinations(cards, 2))
         made = tuple(feature.evaluate(cards, pairs) for feature in features)
         outcomes = [0, 0, 0]
+        rivers = bytearray()
         if board:
             deck = tuple(c for c in remaining if c not in cards)
             if len(board) == 3:
@@ -86,17 +89,23 @@ def _sample(hero, board, count):
                     scored_boards[tail] = base, suits, own
                 base, suits, own = scored_boards[tail]
                 rival = max(_score(a, b, base, suits) for a, b in pairs)
-                outcomes[1 + (rival > own) - (rival < own)] += 1
-        holdings.append(Holding(cards, _pre_band(cards), made, tuple(outcomes)))
+                outcome = 1 + (rival > own) - (rival < own)
+                outcomes[outcome] += 1
+                if len(board) == 4:
+                    rivers.extend((add[0], 3 * int(rival // UNIT >= 4) + outcome))
+        holdings.append(
+            Holding(cards, _pre_band(cards), made, tuple(outcomes), bytes(rivers))
+        )
     return tuple(holdings)
 
 
-def _measure(holdings, weights, street, action="", rule=None):
+def _measure(holdings, weights, street, action="", rule=None, *, rivers=False):
     total = sum(weights)
     concentration = total**2 / sum(w * w for w in weights)
     classes = defaultdict(float)
     by_strength = [[0.0, 0.0, 0.0] for _ in range(5)]
     draws = 0.0
+    river_mass = defaultdict(lambda: [0.0, 0.0])
     for hand, weight in zip(holdings, weights, strict=True):
         mass = weight / total
         if street == 0:
@@ -107,6 +116,13 @@ def _measure(holdings, weights, street, action="", rule=None):
         draws += mass * made.draw
         band = max(2, made.band) if made.draw else made.band
         n = sum(hand.outcomes)
+        if rivers:
+            unit = mass / n
+            for card, code in zip(hand.rivers[::2], hand.rivers[1::2]):
+                strong, outcome = divmod(code, 3)
+                row = river_mass[card, band, strong]
+                row[0] += unit
+                row[1] += unit * (1 - outcome / 2)
         for i, outcome in enumerate(hand.outcomes):
             by_strength[band][i] += mass * outcome / n
     example = ""
@@ -123,6 +139,7 @@ def _measure(holdings, weights, street, action="", rule=None):
         draws if street else None,
         tuple(tuple(band) for band in by_strength),
         example,
+        tuple((*key, *values) for key, values in river_mass.items()),
     )
 
 
@@ -168,11 +185,23 @@ def early_ranges(snap, opponent, count=768, intensity=1, *, current_only=False):
                 continue
             for j, hand in enumerate(holdings):
                 weights[j] *= _multiplier(rule, hand, k) ** intensity
-        steps = [_measure(holdings, weights, i)]
-        for a, rule in street_actions:
+        final_turn = i == index == 2 and intensity == 1
+        steps = [
+            _measure(holdings, weights, i, rivers=final_turn and not street_actions)
+        ]
+        for j_action, (a, rule) in enumerate(street_actions):
             for j, hand in enumerate(holdings):
                 weights[j] *= _multiplier(rule, hand, i) ** intensity
-            steps.append(_measure(holdings, weights, i, a.text, rule.explain(i == 0)))
+            steps.append(
+                _measure(
+                    holdings,
+                    weights,
+                    i,
+                    a.text,
+                    rule.explain(i == 0),
+                    rivers=final_turn and j_action == len(street_actions) - 1,
+                )
+            )
         runs = (0, FLOP_RUNOUTS, 40)[i]
         uniform = (
             _measure(holdings, [1.0] * count, i) if street_actions or i else steps[0]

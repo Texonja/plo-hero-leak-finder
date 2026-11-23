@@ -315,8 +315,8 @@ dl,article{{background:white;padding:14px 18px;border:1px solid #cbd7e0;border-r
 article{{margin:10px 0}}.cards{{display:inline-flex;gap:4px;margin:3px 0}}.card{{background:#f0f4f6;border:1px solid #b7c7d3;border-radius:3px;padding:1px 5px;font-weight:700}}
 .heart,.diamond{{color:#843545}}summary{{cursor:pointer;font-weight:600}}pre{{max-height:300px;overflow:auto;white-space:pre-wrap;overflow-wrap:anywhere}}
 </style><main><header><h1>PLO4 hand guide</h1><p>Study recommendations for completed CoinPoker and iPoker hands.</p></header>
-<p>Start with <b>Import</b>. <b>Hands to review</b> prioritizes decisions where the guide suggests a different action.
-<b>Guide differences only</b> lists those spots. Open a hand to replay the exact decision and inspect the source.</p>
+<p>Start with <b>Import</b>. <b>Hands to review</b> shows how often similar decisions differ from the guide.
+<b>Compare decisions</b> opens both differences and agreements. Select an example to replay the exact action and inspect the source.</p>
 <p>The HeroDemo guide makes a recommendation for {queue.guide_choices} decisions and flags {len(queue.guide_items)} differences. A hand can contain multiple decisions.
 Two suggested actions indicate a close spot. More complex decisions get a question for manual review.</p>
 <p>A sizing difference can qualify for review at 25 percentage points of the pot. The comparison uses amounts remaining opponents can actually match. Suggested sizing depends on plausible calls, prior action, and stacks.</p>

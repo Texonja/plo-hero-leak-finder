@@ -1,9 +1,13 @@
 """The post-session hand shortlist. Each entry opens at its recorded decision."""
 
+import json
 import tkinter as tk
 from tkinter import ttk
 
+from .hover_help import HoverHelp
+from .preflop_guide import GROUPS
 from .review_queue import REVIEW_PAGE_SIZE
+from .strategy_guide import PREFLOP_CLASSES
 
 BG = "#edf2f6"
 INK = "#192f43"
@@ -31,6 +35,7 @@ class HandReview(ttk.Frame):
         self.differences = tk.BooleanVar(value=False)
         self.current = None
         self.related_pattern = ""
+        self.show_hands = False
         self.return_page = 0
         self.controls = ttk.Frame(self)
         self.controls.pack(fill="x", pady=(0, 4))
@@ -41,6 +46,10 @@ class HandReview(ttk.Frame):
             text="Guide differences only",
         )
         self.mode.pack(side="left")
+        self.switch = ttk.Button(
+            self.controls, text="Selected hands", command=self._switch
+        )
+        self.switch.pack(side="left", padx=8)
         self.back = ttk.Button(
             self.controls, text="Back to results", command=self._close_related
         )
@@ -112,6 +121,7 @@ class HandReview(ttk.Frame):
     def clear(self, message):
         self.current = None
         self.mode.state(["disabled"])
+        self.switch.state(["disabled"])
         self._hide_pager()
         self.back.pack_forget()
         self._clear_cards(message)
@@ -126,6 +136,7 @@ class HandReview(ttk.Frame):
     def paint(self, queue, pockets, empty, action=None):
         self.current = queue, pockets, empty, action
         self.mode.state(["!disabled"])
+        self.switch.state(["!disabled"])
         self.page = 0
         self.related_pattern = ""
         self._render()
@@ -134,6 +145,11 @@ class HandReview(ttk.Frame):
         self.related_pattern = ""
         self.page = 0
         self._render()
+
+    def _switch(self):
+        self.show_hands = not self.show_hands if not self.differences.get() else False
+        self.differences.set(False)
+        self._change_mode()
 
     def _move(self, delta):
         self.page += delta
@@ -162,19 +178,26 @@ class HandReview(ttk.Frame):
         self.back.pack_forget()
         selected = queue.items
         heading = ""
+        pattern_page = False
+        self.switch.configure(
+            text="Review patterns"
+            if self.show_hands or self.differences.get()
+            else "Selected hands"
+        )
         if self.related_pattern:
             self.back.pack(side="left", padx=(9, 0))
-            hands = {}
-            for item in queue.guide_items:
-                if item.pattern == self.related_pattern:
-                    hands.setdefault(item.hand, item)
-            selected = tuple(hands.values())
-            heading = "Related hands"
+            group = next(g for g in queue.patterns if g.key == self.related_pattern)
+            selected = group.examples
+            heading = "Comparable decisions"
         elif self.differences.get():
             selected = queue.guide_items
             heading = "Differences"
             if queue.hand_count:
                 empty = "No guide recommendations differ from the played action in this selection."
+        elif queue.patterns and not self.show_hands:
+            selected = queue.patterns
+            heading = "Review patterns"
+            pattern_page = True
         total = len(selected)
         if heading and total:
             pages = (total + REVIEW_PAGE_SIZE - 1) // REVIEW_PAGE_SIZE
@@ -190,7 +213,10 @@ class HandReview(ttk.Frame):
                 state="normal" if self.page + 1 < pages else "disabled"
             )
         n = len(selected)
-        basis = "latest import" if queue.scope == "Latest import" else "library"
+        basis = {
+            "Latest import": "latest import",
+            "Last 5 sessions": "last 5 sessions per room",
+        }.get(queue.scope, "library")
         count = f"{queue.hand_count:,} Hero hand{'s' if queue.hand_count != 1 else ''} in {basis}"
         summary = f"{n} selected hand{'s' if n != 1 else ''}   ·   {count}"
         if queue.hand_count:
@@ -199,6 +225,8 @@ class HandReview(ttk.Frame):
             summary = (
                 f"{heading} {start + 1:,}–{start + n:,} of {total:,}   ·   {count}"
             )
+        if pattern_page:
+            summary += "\nRepeated across sessions first, then by the lower end of the difference-rate interval."
         self._clear_cards(summary)
         if not n:
             box = tk.Frame(
@@ -224,6 +252,9 @@ class HandReview(ttk.Frame):
                     box, text=action[0], command=action[1], style="Review.TButton"
                 ).pack(anchor="w", pady=(12, 0))
         for item in selected:
+            if pattern_page:
+                self._pattern_card(item)
+                continue
             cards, pos = (
                 (item.cards, item.position)
                 if item.status == "Guide"
@@ -231,6 +262,111 @@ class HandReview(ttk.Frame):
             )
             self._card(item, cards, pos)
         self.canvas.yview_moveto(0)
+
+    def _pattern_card(self, group):
+        item = group.examples[0]
+        box = tk.Frame(
+            self.rows,
+            bg=WHITE,
+            padx=14,
+            pady=10,
+            highlightthickness=1,
+            highlightbackground=LINE,
+        )
+        box.pack(fill="x", pady=(0, 6), padx=(0, 6))
+        box.columnconfigure(0, weight=1)
+        context = json.loads(group.key)
+        depth = ("under 40", "40–<80", "80–<150", "150+")[context["depth"]]
+        family = context["family"]
+        if isinstance(family, str):
+            structure = (
+                GROUPS[family].title
+                if family in GROUPS
+                else PREFLOP_CLASSES[family].split(".")[0]
+            )
+        else:
+            structure = (
+                "High card",
+                "One pair",
+                "Two pair",
+                "Trips",
+                "Straight",
+                "Flush",
+                "Full house",
+                "Quads",
+                "Straight flush",
+            )[family[0]]
+        tk.Label(
+            box,
+            text=f"{item.street.upper()}   ·   {item.room}   ·   {depth} BB effective",
+            bg=WHITE,
+            fg=MUTED,
+        ).grid(row=0, column=0, sticky="w")
+        title = tk.Label(
+            box,
+            text=item.title.removesuffix(" · bet size") + "   ·   " + structure,
+            bg=WHITE,
+            fg=INK,
+            anchor="w",
+            justify="left",
+            font=("Segoe UI", 11, "bold"),
+        )
+        title.grid(row=1, column=0, sticky="ew")
+        self.wrapping.append(title)
+        title.configure(wraplength=max(240, self.canvas.winfo_width() - 205))
+        lo, hi = group.interval
+        tk.Label(
+            box,
+            text=f"Guide differences in {group.differences:,} of {group.total:,} comparable decisions ({group.differences / group.total:.0%})"
+            f"   ·   {group.total - group.differences:,} followed the guide",
+            bg=WHITE,
+            fg=INK,
+        ).grid(row=2, column=0, sticky="w")
+        interval_label = tk.Label(
+            box,
+            text=("Single example   ·   " if group.total == 1 else "")
+            + f"Descriptive 95% interval {lo:.0%}–{hi:.0%}   ·   Differences in {group.difference_sessions} of {group.sessions} dated sessions",
+            bg=WHITE,
+            fg=MUTED,
+        )
+        interval_label.grid(row=3, column=0, sticky="w")
+        HoverHelp(
+            interval_label,
+            lambda _: (
+                "Wilson interval for how often the played decision differs from the guide. Decisions in one session can be correlated. This does not measure the probability of a mistake."
+            ),
+        )
+        HoverHelp(
+            title,
+            lambda _: (
+                "Matched on room, stakes, positions, earlier action, stack and price bands, hand structure and guide options. Postflop also matches board texture."
+            ),
+        )
+        example = tk.Frame(box, bg=WHITE)
+        example.grid(row=4, column=0, sticky="w")
+        for label, color in (
+            ("Example · Played", INK),
+            (item.played, PLAYED_RED),
+            ("  Suggested", INK),
+            (item.suggested, SUGGESTED_GREEN),
+        ):
+            tk.Label(
+                example,
+                text=label,
+                bg=WHITE,
+                fg=color,
+                font=("Segoe UI", 9, "normal" if color == INK else "bold"),
+            ).pack(side="left")
+        ttk.Button(
+            box, text="Open example ›", command=lambda: self.open_hand(item)
+        ).grid(row=3, column=1, rowspan=2, padx=6)
+        ttk.Button(
+            box,
+            text="Compare decisions ›",
+            command=lambda: self._open_related(group.key),
+        ).grid(row=1, column=1, rowspan=2, padx=6)
+        for widget in (box, *box.winfo_children(), *example.winfo_children()):
+            widget.bind("<MouseWheel>", self._wheel, add="+")
 
     def _card(self, item, cards, pos):
         frame = tk.Frame(
@@ -277,7 +413,7 @@ class HandReview(ttk.Frame):
             comparison.grid(row=row, column=0, sticky="w", pady=(3, 0))
             for text, color in (
                 ("Played", INK),
-                (item.played, PLAYED_RED),
+                (item.played, PLAYED_RED if item.difference else INK),
                 ("  ·  Suggested", INK),
                 (item.suggested, SUGGESTED_GREEN),
             ):
@@ -340,7 +476,7 @@ class HandReview(ttk.Frame):
         )
         button.pack(anchor="e", pady=(9 if cards else 0, 0))
         related = None
-        if item.repeat_count > 1 and not self.related_pattern:
+        if item.pattern and item.repeat_count > 1 and not self.related_pattern:
             related = ttk.Button(
                 right,
                 text=f"Related hands ({item.repeat_count:,})",
@@ -350,7 +486,9 @@ class HandReview(ttk.Frame):
         label = {"Guide": "Guide", "Supported": "Supported difference"}.get(
             item.status, "Exploratory"
         )
-        if item.close:
+        if item.status == "Guide" and not item.difference:
+            label = "Within guide"
+        elif item.close:
             label = "Close decision"
         tk.Label(right, text=label, fg=MUTED, bg=WHITE, font=("Segoe UI", 8)).pack(
             anchor="e", pady=(5, 0)

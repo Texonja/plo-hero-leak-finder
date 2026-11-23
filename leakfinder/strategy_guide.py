@@ -17,6 +17,7 @@ from .postflop_value import (
     value_plan,
 )
 from .river_guide import advise_river
+from .statistics import tags
 from .vendor.common import RANK_VALUE
 from .vendor.primitives import best_plo_hand, classify_known_hand, eval_5
 
@@ -69,13 +70,24 @@ def preflop_class(cards, open_bb):
     ace_suit = any(c[0] == "A" and suits[c[1]] >= 2 for c in cards)
     if counts["A"] == 2:
         return "other_aces"
-    if max(counts.values()) >= 3:
+    if max(counts.values()) == 4:
+        return "quads"
+    if max(counts.values()) == 3:
         return "trips"
+    if flags["pairs"] == 2:
+        return "double_pair"
     if ace_suit and flags["broadways"] >= 3:
         return "suited_broadway"
     if flags["double_suited"] and flags["connected_window"] >= 3:
         return "connected_ds"
-    if len(suits) == 4 and flags["broadways"] < 2 and flags["connected_window"] < 3:
+    if flags["pairs"] and len(suits) == 4:
+        return "rainbow_pair"
+    if (
+        len(suits) == 4
+        and flags["broadways"] < 2
+        and flags["connected_window"] < 3
+        and not ("A" in counts and sum(r in counts for r in "2345") >= 2)
+    ):
         return "rainbow"
     return "review"
 
@@ -86,12 +98,42 @@ PLAYABLE = {"kings", "run", "ak_link", "connected_ds"}
 FRINGE = {"ak_link_lower_suit", "ak_split", "ak_low", "small_open"}
 WEAK = {"weak_suit", "rainbow", "trips"}
 PREFLOP_CLASSES = {
+    "double_pair": "Two starting pairs offer two ranks on which to make a set.",
+    "rainbow_pair": "One starting pair and four different suits. Hero cannot make a flush.",
+    "quads": "All four hole cards share a rank. Only two can play.",
     "other_aces": "Aces are the highest starting pair. Weak side cards reduce flexibility as the pot grows.",
     "trips": "A third card of the same rank takes up a hole-card slot and removes an out to a set.",
     "suited_broadway": "A suited ace and at least three high cards give you more ways to continue on high boards.",
-    "connected_ds": "Two suits and at least three connected cards make many playable flops, with some risk of domination.",
+    "connected_ds": "Two cards in each suit and at least three distinct ranks within one five-rank straight window.",
     "review": "The price, position and action are more informative than a general rule for this hand structure.",
 }
+
+
+@lru_cache(maxsize=1820)
+def straight_support(ranks):
+    """Straight windows use distinct hole ranks and allow the ace at either end."""
+    present = set(ranks)
+    links = [present & set(w) for w in STRAIGHTS]
+    best = max(map(len, links))
+    names = {v: r for r, v in RANK_VALUE.items()}
+    parts = []
+    if best >= 3:
+        group = max(sorted(w, reverse=True) for w in links if len(w) == best)
+        parts.append(
+            "Ranks sharing a straight window: "
+            + "-".join(names[v] for v in group)
+            + "."
+        )
+    isolated = [
+        n for n in sorted(present) if not any(n in w and len(w) >= 2 for w in links)
+    ]
+    if isolated and len(present) > 1:
+        parts.append(
+            "No straight link to another hole rank: "
+            + ", ".join(names[v] for v in isolated)
+            + "."
+        )
+    return " ".join(parts)
 
 
 def preflop_advice(snap, hero, seats):
@@ -100,7 +142,7 @@ def preflop_advice(snap, hero, seats):
     calls = [a for a in voluntary if a.action == "call"]
     faced = raises[-1] if raises else None
     size = faced.raised_to / snap.bb if faced else 0
-    hand = preflop_class(snap.hero_cards, size if faced else 3.5)
+    hand = preflop_class(snap.hero_cards, size if len(raises) == 1 else None)
     by_name = {s.name: s for s in seats}
     own = [a.action for a in voluntary if a.name == hero.name]
     pos = hero.position
@@ -110,6 +152,17 @@ def preflop_advice(snap, hero, seats):
     pot_odds = snap.to_call / (snap.pot + snap.to_call)
     pos_label = f"{pos} vs {by_name[faced.name].position}" if faced else pos
     explanation = PREFLOP_CLASSES.get(hand) or preflop_guide.GROUPS[hand].title + "."
+    ranks = tuple(sorted({RANK_VALUE[c[0]] for c in snap.hero_cards}))
+    explanation = " ".join(
+        filter(
+            None,
+            (
+                " · ".join(tags(snap.hero_cards)) + ".",
+                straight_support(ranks),
+                explanation,
+            ),
+        )
+    )
     aggression = {0: "raise", 1: "3-bet", 2: "4-bet"}.get(
         len(raises), f"{len(raises) + 2}-bet"
     )
@@ -131,6 +184,12 @@ def preflop_advice(snap, hero, seats):
             )
         return Advice(f"{spot} · {pos_label}", legal, why, aggression, priority)
 
+    if hand in {"double_pair", "rainbow_pair", "quads"}:
+        return advice(
+            "Hand structure review",
+            (),
+            explanation + " No validated action rule for this group.",
+        )
     if (
         hero.stack < 20 * snap.bb
         or any(s.all_in for s in seats)
@@ -203,7 +262,7 @@ def preflop_advice(snap, hero, seats):
             return advice(
                 "Facing an open",
                 tuple(actions[a] for a in legacy.play.lower().split(" or ")),
-                legacy.why,
+                explanation + " " + legacy.why,
             )
         if hand in PREMIUM:
             return advice(

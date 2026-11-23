@@ -56,6 +56,30 @@ def timestamp(value):
         return None
 
 
+def session_keys(rows):
+    """Group ordered room/time/hand rows on the same clock as the session report."""
+    previous = {}
+    starts = {}
+    for r in rows:
+        current = timestamp(r["stamp"])
+        room = r["room"]
+        if current is None:
+            key = "Unknown time · " + room
+        else:
+            utc = current.utcoffset() is not None
+            if utc:
+                current = current.astimezone(UTC)
+            clock = (room, utc)
+            last = previous.get(clock)
+            if last is None or current - last > timedelta(minutes=45):
+                starts[clock] = current.strftime("%Y-%m-%d %H:%M:%S") + (
+                    " UTC" if utc else ""
+                )
+            key = starts[clock] + " · " + room
+            previous[clock] = current
+        yield key, r["hand"]
+
+
 @dataclass
 class Group:
     key: str
@@ -124,31 +148,10 @@ class Reports:
     def sessions(self):
         if self.has_sessions:
             return
-        updates = []
-        previous = {}
-        starts = {}
-        # SQLite's julianday orders offset-qualified timestamps on one UTC
-        # clock. Keep local timestamps on their own clock when offsets are absent.
-        for r in self.db.execute(
+        rows = self.db.execute(
             "SELECT hand,room,stamp FROM roster ORDER BY room,julianday(replace(stamp,'/','-')),hand"
-        ):
-            current = timestamp(r["stamp"])
-            room = r["room"]
-            if current is None:
-                key = "Unknown time · " + room
-            else:
-                utc = current.utcoffset() is not None
-                if utc:
-                    current = current.astimezone(UTC)
-                clock = (room, utc)
-                last = previous.get(clock)
-                if last is None or current - last > timedelta(minutes=45):
-                    starts[clock] = current.strftime("%Y-%m-%d %H:%M:%S") + (
-                        " UTC" if utc else ""
-                    )
-                key = starts[clock] + " · " + room
-                previous[clock] = current
-            updates.append((key, r["hand"]))
+        )
+        updates = list(session_keys(rows))
         self.db.executemany("UPDATE roster SET session=? WHERE hand=?", updates)
         self.has_sessions = True
 

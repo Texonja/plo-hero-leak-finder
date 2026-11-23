@@ -95,7 +95,7 @@ GROUPS = {
         "2d 4d Tc Qd",
     ),
     "rainbow": Group(
-        "Rainbow, unpaired and poorly connected",
+        "Rainbow and unpaired, with no straight window spanning all four ranks",
         "Fold",
         "The hand cannot make a flush. Calling a CO open usually requires stronger connectivity or more high cards.",
         "Qd 7h 6s 4c",
@@ -167,6 +167,7 @@ def hand_group(cards, open_bb):
         and mid >= 10
         and top - mid == 2
         and max(suits.values()) == 2
+        and open_bb is not None
         and open_bb <= 2.5
     ):
         return "small_open"
@@ -176,6 +177,7 @@ def hand_group(cards, open_bb):
         and 6 <= mid <= 9
         and max(suits.values()) <= 2
         and not ds
+        and open_bb is not None
         and open_bb >= 3
         and (mid - lo >= 4 or (not ace_suit and high - mid >= 4))
     ):

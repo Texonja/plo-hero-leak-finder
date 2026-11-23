@@ -5,7 +5,6 @@ import json
 import time
 import tkinter as tk
 import unittest
-from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from tkinter import ttk
@@ -87,6 +86,26 @@ class DesktopTests(unittest.TestCase):
     def test_home_has_twelve_cards_and_filtering_reuses_the_index(self):
         self.assertEqual(len(self.app.queue.items), 12)
         home = self.app.home
+        self.assertIn("Review patterns 1–12", home.summary.get())
+        group = self.app.queue.patterns[0]
+        related = next(
+            w
+            for w in child_widgets(home.rows)
+            if isinstance(w, ttk.Button) and w.cget("text") == "Compare decisions ›"
+        )
+        related.invoke()
+        self.assertIn("Comparable decisions", home.summary.get())
+        self.assertEqual(len(home.rows.winfo_children()), min(12, group.total))
+        with patch.object(home, "open_hand") as open_hand:
+            example = next(
+                w
+                for w in child_widgets(home.rows)
+                if isinstance(w, ttk.Button) and "Open table" in w.cget("text")
+            )
+            example.invoke()
+            open_hand.assert_called_once_with(group.examples[0])
+        home.back.invoke()
+        home.switch.invoke()
         labels = [
             (w.cget("text"), w.cget("foreground"))
             for w in child_widgets(home.rows)
@@ -95,26 +114,6 @@ class DesktopTests(unittest.TestCase):
         self.assertTrue(any(color == PLAYED_RED for _, color in labels))
         self.assertTrue(any(color == SUGGESTED_GREEN for _, color in labels))
         self.assertTrue(any("Why review this first?" in text for text, _ in labels))
-        original_view = home.current
-        guides = {item.hand: item for item in self.app.queue.guide_items}
-        examples = tuple(
-            replace(item, pattern="test cluster", repeat_count=2)
-            for item in list(guides.values())[:2]
-        )
-        home.paint(
-            replace(self.app.queue, items=examples, guide_items=examples), {}, ""
-        )
-        related = next(
-            w
-            for w in child_widgets(home.rows)
-            if isinstance(w, ttk.Button) and w.cget("text").startswith("Related hands")
-        )
-        related.invoke()
-        self.assertIn("Related hands", home.summary.get())
-        self.assertGreater(len(home.rows.winfo_children()), 1)
-        home.back.invoke()
-        self.assertNotIn("Related hands", home.summary.get())
-        home.paint(*original_view)
         home.mode.invoke()
         self.assertIn("Differences 1–12", home.summary.get())
         self.assertIn("Page 1 of", home.page_text.get())

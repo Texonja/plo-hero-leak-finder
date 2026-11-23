@@ -20,6 +20,7 @@ from .opponent_range import condition_range
 from .postflop_value import bet_size
 from .river_holdings import river_holdings
 from .strategy_guide import advice_at, nuts
+from .turn_lines import turn_sensitivity
 from .vendor.primitives import best_plo_hand
 
 MODEL_INTENSITY = (0.75, 1.0, 1.25)
@@ -234,6 +235,20 @@ def _early_review(snap, hero, opponent, history):
             )
     else:
         before = after = ""
+    if snap.street == "Turn" and (fit_call or fit_bet):
+        lines[2:2] = [
+            "",
+            *turn_sensitivity(
+                snap,
+                hero,
+                opponent,
+                current.steps[-1],
+                amounts,
+                _response_rates,
+                fit_call,
+            ),
+            "",
+        ]
     for stage in timeline:
         board = " ".join(stage.board) or "before the flop"
         lines.append(f"{stage.street} · {board} · {stage.legal_total:,} legal holdings")
@@ -372,6 +387,64 @@ def _early_review(snap, hero, opponent, history):
     )
 
 
+def river_price_note(snap, history):
+    price = heads_up_price(snap)
+    sample = history.sample(snap)
+    n = len(sample.comparable)
+    known = sum(r.category is not None for r in sample.comparable)
+    note = f"Call {snap.to_call / snap.bb:g} BB. Break-even showdown equity {price:.1%} before rake."
+    if river_holdings(snap.hero_cards, snap.board).stronger:
+        note += f" A pure bluff-catcher needs {price:.1%} bluffs if it loses to all value, beats all bluffs and never ties."
+    if any(a.street == "River" and a.action == "raise" for a in snap.history):
+        return (
+            note
+            + " Earlier opening bets cannot establish this opponent's river raising frequency."
+        )
+    return (
+        note
+        + f" Earlier matched bets: {n}, with {known} shown and {n - known} unknown. "
+        "A mucked hand could be value or a bluff."
+    )
+
+
+def _river_pivot(snap, stage, history):
+    price = heads_up_price(snap)
+    equity = stage.weaker + stage.tied / 2
+    lines = [
+        "WHAT WOULD CHANGE THIS DECISION?",
+        river_price_note(snap, history),
+        (
+            f"Modeled betting range: Hero beats {stage.weaker:.1%}, ties {stage.tied:.1%} and loses to {stage.stronger:.1%}. "
+            f"Equity {equity:.1%}, {abs(equity - price) * 100:.1f} percentage points {'above' if equity >= price else 'below'} the call price."
+        ),
+    ]
+    needed = price * (stage.stronger + stage.tied) - stage.tied / 2
+    if stage.stronger + stage.tied == 0:
+        lines.append(
+            "Hero beats every holding in this sample. Test a range with more strong value hands."
+        )
+    elif needed <= 0:
+        lines.append(
+            "At this price the modeled ties cover the call even if weaker hands never bet."
+        )
+    elif stage.weaker > 0 and 0 < price < 1:
+        threshold = needed / ((1 - price) * stage.weaker)
+        lines.append(
+            f"Holding stronger hands and ties fixed, call breaks even when holdings Hero beats bet {threshold:.2f}× "
+            "their modeled weight. They include weaker value bets as well as bluffs."
+        )
+    for key, label in (
+        ("value", "Stronger value"),
+        ("weak_call", "Weaker made hand"),
+        ("bluff", "Possible bluff"),
+    ):
+        example = stage.examples.get(key)
+        if example:
+            lines.append(f"{label} · {example.text}.")
+    lines.extend(river_holdings(snap.hero_cards, snap.board).blockers)
+    return lines
+
+
 def build_range_review(snap, hero, opponent, history):
     if snap.street in {"Flop", "Turn"}:
         return _early_review(snap, hero, opponent, history)
@@ -397,6 +470,18 @@ def build_range_review(snap, hero, opponent, history):
     ]
     if base:
         lines.extend(("", (adjusted or base).why))
+    if heads_up and facing:
+        lines[3:3] = ["", *_river_pivot(snap, stages.stages[-1], history), ""]
+        stage = stages.stages[-1]
+        model_choice = (
+            "call" if stage.weaker + stage.tied / 2 > heads_up_price(snap) else "fold"
+        )
+        if adjusted and adjusted.choices and model_choice not in adjusted.choices:
+            lines.insert(
+                4,
+                f"Review this range assumption: the guide suggests {_play(adjusted)}; "
+                f"the modeled bet range favors {model_choice} when comparing calling with folding.",
+            )
     lines.extend(("", "EARLIER HANDS AGAINST THIS OPPONENT"))
     sources = {}
     matched = {}
@@ -557,6 +642,17 @@ def build_range_review(snap, hero, opponent, history):
                 f"{s / snap.pot:.0%} pot {ev / snap.bb:+.2f} BB" for s, ev in gains
             )
             lines.append(f"{name.capitalize()} · {choice} · {values}")
+        lines[3:3] = [
+            "",
+            "WHAT WOULD CHANGE THIS DECISION?",
+            "With the same board and range, vary how often weaker hands call the bet. "
+            + " · ".join(
+                f"{label}: {pick}"
+                for (label, _), pick in zip(RESPONSE_SCENARIOS, models)
+            ),
+            "These are bet/fold scenarios against a possible raise.",
+            "",
+        ]
         lines.append(
             "Values are relative to checking back. Responses depend on hand strength and sizing in this model. Hero folds to a raise. Actual rake and behavior can change the estimate."
         )
