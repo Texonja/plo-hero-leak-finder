@@ -24,7 +24,7 @@ from .opponent_history import (
 )
 from .preflop_spots import threebet_price_note
 from .range_review import build_range_review, river_price_note
-from .replay_view import available_actions, chip_text, load_snapshot, river_result
+from .replay_view import available_actions, chip_text, hand_result, load_snapshot
 from .sb_reference import sb_reference
 from .storage import connect
 from .strategy_guide import advice_at
@@ -195,9 +195,8 @@ class TableDialog:
         _label(sidebar, "Action history", 13, fg=INK, bg=PAPER, bold=True).grid(
             row=0, column=0, sticky="w", padx=14, pady=(14, 0)
         )
-        _label(sidebar, "Before the selected decision", 9, fg=MUTED, bg=PAPER).grid(
-            row=1, column=0, sticky="w", padx=14, pady=(1, 8)
-        )
+        self.timeline_caption = _label(sidebar, size=9, fg=MUTED, bg=PAPER)
+        self.timeline_caption.grid(row=1, column=0, sticky="w", padx=14, pady=(1, 8))
         frame = tk.Frame(sidebar, bg=PAPER)
         frame.grid(row=2, column=0, sticky="nsew", padx=(14, 4), pady=(0, 10))
         self.timeline = tk.Text(
@@ -253,7 +252,7 @@ class TableDialog:
         self.next = _button(controls, "Next decision ›", lambda: self.move(1))
         self.next.pack(side="left", padx=4)
         self.reveal = _button(
-            controls, "Reveal played action", self.toggle_played, True
+            controls, "Reveal action & outcome", self.toggle_played, True
         )
         self.reveal.pack(side="left", padx=(4, 0))
         self.revealed = False
@@ -397,8 +396,14 @@ class TableDialog:
         self.next.configure(
             state="normal" if self.index + 1 < len(self.options) else "disabled"
         )
-        label = "action & outcome" if snap.street == "River" else "played action"
-        self.reveal.configure(text=f"{'Hide' if self.revealed else 'Reveal'} {label}")
+        self.reveal.configure(
+            text=f"{'Hide' if self.revealed else 'Reveal'} action & outcome"
+        )
+        self.timeline_caption.configure(
+            text="Decision and recorded outcome"
+            if self.revealed
+            else "Before the selected decision"
+        )
         self.outcome_panel.grid_remove()
         box = self.timeline
         box.configure(state="normal")
@@ -497,7 +502,7 @@ class TableDialog:
                     "\n\n" + river_price_note(snap, self._opponent_history(snap)),
                     "amount",
                 )
-        if self.revealed and snap.street == "River":
+        if self.revealed:
             self._show_outcome(box, snap)
         box.configure(state="disabled")
         box.see("end")
@@ -528,9 +533,15 @@ class TableDialog:
         )
         self.outcome_panel.grid()
         box.insert("end", "\nHAND OUTCOME\n", "street")
+        street = snap.street
         for event in result.subsequent:
+            if event.street != street:
+                street = event.street
+                box.insert("end", street.upper() + "\n", "street")
             amount = f" · {chip_text(event.amount)} paid" if event.amount else ""
             box.insert("end", f"{event.player} {VERBS[event.action]}{amount}\n")
+        if result.board:
+            box.insert("end", f"Final board · {' '.join(result.board)}\n", "amount")
         box.insert("end", summary + "\n" + holdings, "amount")
 
     def move(self, delta):
@@ -564,12 +575,9 @@ class TableDialog:
             amount = f" · {chip_text(event.amount)} paid" if event.amount else ""
             self.played_event = event
             self.played_text = f"Played: {event.action}{amount}"
-            if self.snapshot.street == "River":
-                if row["cards"]:
-                    hand.cards.update(json.loads(row["cards"]))
-                self.result = river_result(
-                    hand, streets["River"], self.actor, self.snapshot.ref
-                )
+            if row["cards"]:
+                hand.cards.update(json.loads(row["cards"]))
+            self.result = hand_result(hand, streets, self.actor, self.snapshot.ref)
         self.revealed = not self.revealed
         self._refresh()
 
@@ -672,6 +680,8 @@ class TableDialog:
 
     def draw(self, _=None):
         c, snap = self.canvas, self.snapshot
+        result = self.result if self.revealed else None
+        board = result.board if result else snap.board
         w, h = c.winfo_width(), c.winfo_height()
         if w < 100 or h < 100:
             return
@@ -685,7 +695,7 @@ class TableDialog:
         c.create_text(
             cx,
             cy - 70,
-            text=snap.street.upper(),
+            text="FINAL BOARD" if result and board else snap.street.upper(),
             fill=INK,
             font=("Segoe UI", 10, "bold"),
         )
@@ -695,14 +705,14 @@ class TableDialog:
             self.card(
                 left + i * (cw + gap),
                 cy - 49,
-                snap.board[i] if i < len(snap.board) else None,
+                board[i] if i < len(board) else None,
                 cw,
                 ch,
             )
         c.create_text(
             cx,
             cy + 22,
-            text=f"Pot  {chip_text(snap.pot)} {snap.currency}",
+            text=f"{'Pot before decision' if result else 'Pot'}  {chip_text(snap.pot)} {snap.currency}",
             fill=NAVY,
             font=("Segoe UI", 15, "bold"),
         )
@@ -719,11 +729,7 @@ class TableDialog:
         seats = sorted(snap.seats, key=lambda s: s.seat)
         focal = next(i for i, s in enumerate(seats) if s.name == self.actor)
         seats = seats[focal:] + seats[:focal]
-        shown = (
-            dict(self.result.opponents)
-            if self.revealed and snap.street == "River"
-            else {}
-        )
+        shown = dict(result.opponents) if result else {}
         half = min(74, max(51, (w - 60) / 9))
         for i, s in enumerate(seats):
             a = math.pi / 2 + i * math.tau / len(seats)
@@ -797,11 +803,7 @@ class TableDialog:
                 c.create_text(
                     x,
                     y + 31,
-                    text=(
-                        "OUTCOME SHOWN"
-                        if self.revealed and snap.street == "River"
-                        else f"{hero} TO ACT"
-                    ),
+                    text=("OUTCOME SHOWN" if result else f"{hero} TO ACT"),
                     fill=NAVY,
                     font=("Segoe UI", 9, "bold"),
                 )

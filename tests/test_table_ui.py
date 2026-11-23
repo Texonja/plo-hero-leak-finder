@@ -118,6 +118,71 @@ class TableUITests(unittest.TestCase):
                 self.assertNotIn("HAND OUTCOME", dialog.timeline.get("1.0", "end"))
                 dialog.close()
 
+    def test_early_all_in_reveals_final_board_without_a_river_decision(self):
+        with closing(connect(self.path)) as db:
+            load_demo(db)
+            ids = dict(db.execute("SELECT number,id FROM hands"))
+        cases = (
+            (
+                "9000005616",
+                "Line 29",
+                "Flop",
+                "8d Tc 9h 2h 3h",
+                "HeroDemo collected 27.42 USDT",
+                "Ad Qd 8s 8c",
+            ),
+            (
+                "9000008019",
+                "Action 14",
+                "Turn",
+                "2c Jd Kc Ad 2h",
+                "HeroDemo collected 65.76 EUR",
+                "7d Ac 6h 3c",
+            ),
+        )
+        for number, ref, street, board, payout, cards in cases:
+            with self.subTest(street=street):
+                dialog = open_table(self.root, self.path, ids[number], ref)
+                snapshot = dialog.snapshot
+                self.assertEqual(snapshot.street, street)
+                self.assertNotIn("River", {item.street for item in dialog.options})
+                self.assertFalse(dialog.outcome_panel.winfo_manager())
+                self.assertNotIn(board, dialog.timeline.get("1.0", "end"))
+                dialog.reveal.invoke()
+                self.root.update()
+                timeline = dialog.timeline.get("1.0", "end")
+                self.assertIn(f"Final board · {board}", timeline)
+                self.assertIn(payout, dialog.outcome_summary.cget("text"))
+                self.assertIn(cards, dialog.outcome_cards.cget("text"))
+                self.assertEqual(dialog.snapshot, snapshot)
+                self.assertTrue(
+                    any(
+                        dialog.canvas.type(item) == "text"
+                        and dialog.canvas.itemcget(item, "text") == "FINAL BOARD"
+                        for item in dialog.canvas.find_all()
+                    )
+                )
+                dialog.reveal.invoke()
+                self.assertNotIn(board, dialog.timeline.get("1.0", "end"))
+                self.assertFalse(dialog.outcome_panel.winfo_manager())
+                dialog.close()
+
+    def test_reveal_from_flop_includes_later_betting_streets(self):
+        with closing(connect(self.path)) as db:
+            load_demo(db)
+            hid = db.execute(
+                "SELECT id FROM hands WHERE number='9000010026'"
+            ).fetchone()[0]
+        dialog = open_table(self.root, self.path, hid, "Action 9")
+        self.addCleanup(dialog.close)
+        dialog.reveal.invoke()
+        timeline = dialog.timeline.get("1.0", "end").split("HAND OUTCOME\n", 1)[1]
+        self.assertLess(timeline.index("TURN\n"), timeline.index("RIVER\n"))
+        self.assertIn("Final board · 5c Jc 8s 4s 9h", timeline)
+        dialog.next.invoke()
+        self.assertFalse(dialog.outcome_panel.winfo_manager())
+        self.assertNotIn("HAND OUTCOME", dialog.timeline.get("1.0", "end"))
+
     def test_imported_hero_hand_shows_guide_before_played_action(self):
         data = json.loads(
             (

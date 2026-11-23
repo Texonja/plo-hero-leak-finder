@@ -68,8 +68,9 @@ class ReplaySnapshot:
 
 
 @dataclass(frozen=True)
-class RiverResult:
+class HandResult:
     showdown: bool
+    board: tuple[str, ...]
     awards: tuple
     verified: bool
     net_bb: float | None
@@ -77,13 +78,24 @@ class RiverResult:
     subsequent: tuple
 
 
-def river_result(hand, events, actor, ref):
+def hand_result(hand, streets, actor, ref):
     """Describe the completed record separately from the pre-decision view."""
+    events = tuple(event for street in STREETS for event in streets[street])
     current = next(i for i, event in enumerate(events) if event.ref == ref)
-    relevant = set(events[current].live) | set(hand.cards)
+    showdown = len(hand.survivors) > 1
+    relevant = hand.survivors if showdown else set(events[current].live)
+    board = next(
+        (
+            tuple(hand.boards[street])
+            for street in reversed(STREETS)
+            if street in hand.boards
+        ),
+        (),
+    )
     net = settlements(hand)
-    return RiverResult(
-        len(hand.survivors) > 1,
+    return HandResult(
+        showdown,
+        board,
         tuple((name, amount) for name, amount in hand.awards.items() if amount > 0),
         bool(net),
         net.get(actor),
@@ -92,7 +104,7 @@ def river_result(hand, events, actor, ref):
             for name in hand.seats.values()
             if name != actor and name in relevant
         ),
-        tuple(events[current + 1 :]),
+        events[current + 1 :],
     )
 
 

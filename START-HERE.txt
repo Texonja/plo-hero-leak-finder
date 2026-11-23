@@ -47,12 +47,13 @@ Reviewing a decision
 
 Open a hand to see the table just before the selected decision. It shows
 the board, pot, call price, and preceding actions. An orange panel marks
-Hero. Known dealt cards are visible. Reveal played action shows what
-Hero did. Previous decision and Next decision navigate the same hand.
+Hero. Known dealt cards are visible. Previous decision and Next decision
+navigate the same hand.
 Full hand history opens the original record at the selected action.
-On the river, Reveal action & outcome shows pot awards, later river
-actions and opponent cards recorded in the source. Verified Hero results
-show net big blinds. Hidden cards are labeled as unrecorded.
+On any street, Reveal action & outcome shows what Hero did, later actions,
+the final board, pot awards and opponent cards recorded in the source.
+Verified Hero results show net big blinds. Hidden cards are labeled as
+unrecorded. Hide action & outcome returns to the pre-decision view.
 
 Guide differences only lists decisions where the guide's recommendation
 differs from the played action in a supported guide situation.
