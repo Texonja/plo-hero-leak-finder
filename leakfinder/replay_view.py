@@ -189,6 +189,106 @@ def _visible_cards(record, hand, event):
     return None
 
 
+def _apply_token(token, event, commits):
+    """Use the audited engine's incremental payments and track the live street bet."""
+    action = event.action if event else token.kind
+    amount = event.amount if event else token.amount
+    if action != "posts_ante":
+        commits[token.name] += -amount if action == "return" else amount
+    return ReplayAction(
+        token.street,
+        token.name,
+        action,
+        amount,
+        token.ref,
+        commits[token.name] if action == "raise" else None,
+        event.allin if event else False,
+    )
+
+
+@dataclass(frozen=True)
+class PlaybackFrame:
+    phase: str  # start, pockets, deal, action or result
+    street: str
+    board: tuple[str, ...]
+    seats: tuple[ReplaySeat, ...]
+    pot: int  # Includes live bets. On a verified result this is the gross awarded pot.
+    step: ReplayAction | None = None
+
+
+def playback_frames(hand, streets, actor):
+    """Build an ordered, seekable display from one validated engine replay."""
+    events = {e.ref: e for street in STREETS for e in streets[street]}
+    stacks = hand.stacks.copy()
+    live = set(stacks)
+    commits = defaultdict(int)
+    pot = 0
+    frames = []
+
+    def append(phase, street, step=None):
+        seats = tuple(
+            ReplaySeat(
+                seat,
+                name,
+                hand.pos[name],
+                stacks[name],
+                name in live,
+                name in live and stacks[name] == 0,
+                name == actor,
+                seat == hand.button,
+                commits[name],
+            )
+            for seat, name in sorted(hand.seats.items())
+        )
+        frames.append(
+            PlaybackFrame(
+                phase, street, tuple(hand.boards.get(street, ())), seats, pot, step
+            )
+        )
+
+    def apply(step):
+        nonlocal pot
+        delta = -step.amount if step.action == "return" else step.amount
+        stacks[step.name] -= delta
+        pot += delta
+        if step.action == "fold":
+            live.remove(step.name)
+        append("action", step.street, step)
+
+    append("start", "Preflop")
+    verified = bool(settlements(hand))
+    # Some iPoker exports count the last unmatched bet as paid without a
+    # return action. Only animate a refund that the settlement reconciled.
+    refund = (
+        sum(hand.spent.values()) - sum(hand.awards.values()) - hand.fees
+        if verified
+        else 0
+    )
+    by_street = defaultdict(list)
+    for token in hand.tokens:
+        by_street[token.street].append(token)
+    for street in STREETS:
+        if street != "Preflop":
+            if street not in hand.boards:
+                continue
+            commits.clear()
+            append("deal", street)
+        for token in by_street[street]:
+            if street == "Preflop" and token.ref == streets["Preflop"][0].ref:
+                append("pockets", street)
+            apply(_apply_token(token, events.get(token.ref), commits))
+        if refund and street == hand.tokens[-1].street:
+            name = max(hand.final_commits, key=hand.final_commits.get)
+            commits[name] -= refund
+            apply(ReplayAction(street, name, "return", refund, "", None, False))
+    commits.clear()
+    if verified:
+        for name, award in hand.awards.items():
+            stacks[name] += award
+    append("result", frames[-1].street)
+    return tuple(frames)
+
+
 def _build(record, hand, events, hero, ref, cards):
     event = events.get(ref)
     if not event or event.player != hero:
@@ -202,22 +302,7 @@ def _build(record, hand, events, hero, ref, cards):
             commits.clear()
         if token.ref == ref:
             break
-        previous = events.get(token.ref)
-        action = previous.action if previous else token.kind
-        amount = previous.amount if previous else token.amount
-        if action != "posts_ante":
-            commits[token.name] += -amount if action == "return" else amount
-        history.append(
-            ReplayAction(
-                street,
-                token.name,
-                action,
-                amount,
-                token.ref,
-                commits[token.name] if action == "raise" else None,
-                previous.allin if previous else False,
-            )
-        )
+        history.append(_apply_token(token, events.get(token.ref), commits))
     seats = tuple(
         ReplaySeat(
             seat,

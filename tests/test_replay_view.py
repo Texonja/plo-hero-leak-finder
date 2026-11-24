@@ -3,15 +3,19 @@ import json
 import tempfile
 import unittest
 from dataclasses import asdict
+from itertools import pairwise
 from pathlib import Path
 
-from leakfinder.importers import Record, money
+from leakfinder.engine import replay
+from leakfinder.importers import STREETS, Record, decode, money
 from leakfinder.replay_view import (
     available_actions,
     chip_text,
     load_snapshot,
+    playback_frames,
     snapshot_from_record,
 )
+from leakfinder.statistics import settlements
 from leakfinder.storage import connect, import_file, initialize
 from tests.test_engine import FIX, original
 
@@ -29,6 +33,109 @@ def ip(number, hero, ref):
 
 
 class ReplayViewTests(unittest.TestCase):
+    def test_playback_agrees_with_audited_decisions_on_both_networks(self):
+        audit = json.loads(gzip.decompress((FIX / "source-audit.json.gz").read_bytes()))
+        seen = set()
+        for row in audit:
+            room = row["room"]
+            hand = decode(
+                Record(
+                    room, row["raw"], "HM2 row 1" if room == "iPoker" else "Text hand 1"
+                )
+            )
+            _, streets = replay(hand)
+            events = {e.ref: e for street in STREETS for e in streets[street]}
+            frames = playback_frames(hand, streets, hand.hint)
+            self.assertEqual(
+                [f.step.ref for f in frames if f.step and f.step.ref],
+                [token.ref for token in hand.tokens],
+            )
+            self.assertEqual(
+                [f.street for f in frames if f.phase == "deal"],
+                [street for street in STREETS[1:] if street in hand.boards],
+            )
+            start = sum(hand.stacks.values())
+            for before, after in pairwise(frames):
+                with self.subTest(room=room, number=hand.number, step=after.step):
+                    if after.phase != "result":
+                        self.assertEqual(
+                            after.pot + sum(s.stack for s in after.seats), start
+                        )
+                        self.assertLessEqual(
+                            sum(s.committed for s in after.seats), after.pot
+                        )
+                    e = events.get(after.step.ref) if after.step else None
+                    if e:
+                        self.assertEqual(
+                            before.board, tuple(hand.boards.get(e.street, ()))
+                        )
+                        self.assertEqual(before.pot, e.pot)
+                        self.assertEqual(
+                            {s.name: s.stack for s in before.seats}, e.remaining
+                        )
+                        self.assertEqual(
+                            {s.name for s in before.seats if s.live}, set(e.live)
+                        )
+                        self.assertEqual(after.pot, e.pot + e.amount)
+                        self.assertEqual(after.step.amount, e.amount)
+                        seen.add(room)
+            if settlements(hand):
+                self.assertEqual(frames[-1].pot, sum(hand.awards.values()) + hand.fees)
+                self.assertEqual(
+                    sum(s.stack for s in frames[-1].seats) + hand.fees, start
+                )
+        self.assertEqual(seen, {"CoinPoker", "iPoker"})
+
+    def test_raises_and_explicit_or_reconciled_refunds(self):
+        for room, raw, hero, raise_ref, total, payment, refund, gross in (
+            (
+                "CoinPoker",
+                original("coin", 30),
+                "Hero",
+                "Line 24",
+                "0.75",
+                "0.65",
+                "1.70",
+                "1.70",
+            ),
+            (
+                "iPoker",
+                original("ip", 601),
+                "BigNeonMax",
+                "Action 3",
+                "1.75",
+                "1.75",
+                "3.18",
+                "4.25",
+            ),
+        ):
+            with self.subTest(room=room):
+                hand = decode(
+                    Record(
+                        room, raw, "HM2 row 1" if room == "iPoker" else "Text hand 1"
+                    )
+                )
+                _, streets = replay(hand)
+                frames = playback_frames(hand, streets, hero)
+                raised = next(f for f in frames if f.step and f.step.ref == raise_ref)
+                self.assertEqual(
+                    (raised.step.raised_to, raised.step.amount),
+                    (money(total), money(payment)),
+                )
+                back = [f for f in frames if f.step and f.step.action == "return"]
+                self.assertEqual([f.step.amount for f in back], [money(refund)])
+                self.assertEqual(frames[-1].pot, money(gross))
+                if room == "iPoker":
+                    hand.fees += 1  # inconsistent source must not generate a refund or change final stacks
+                    frames = playback_frames(hand, streets, hero)
+                    self.assertFalse(
+                        any(f.step and f.step.action == "return" for f in frames)
+                    )
+                    self.assertEqual(
+                        [s.stack for s in frames[-2].seats],
+                        [s.stack for s in frames[-1].seats],
+                    )
+
     def test_audited_source_decisions_conserve_chips_without_future_actions(self):
         audit = json.loads(gzip.decompress((FIX / "source-audit.json.gz").read_bytes()))
         counts = {"CoinPoker": 0, "iPoker": 0}

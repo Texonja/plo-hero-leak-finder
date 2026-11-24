@@ -23,6 +23,83 @@ def descendants(widget):
 
 
 class TableUITests(unittest.TestCase):
+    def wait_for_playback(self, dialog):
+        finished = tk.BooleanVar(master=self.root)
+        deadline = self.root.after(4500, finished.set, True)
+
+        def check():
+            if dialog.play_timer is None:
+                finished.set(True)
+            else:
+                self.root.after(10, check)
+
+        self.root.after(10, check)
+        self.root.wait_variable(finished)
+        self.root.after_cancel(deadline)
+
+    def test_transport_steps_through_real_actions_and_returns_to_the_decision(self):
+        for room, ref, actor, expected in (
+            ("CoinPoker", "Line 25", "Hero", "calls 0.5"),
+            ("iPoker", "Action 5", "BigNeonMax", "calls 1.75"),
+        ):
+            with self.subTest(room=room):
+                dlg = open_table(self.root, self.path, self.ids[room], ref)
+                self.root.update()
+                dlg.forward.invoke()
+                frame = dlg.frames[dlg.cursor]
+                self.assertEqual((frame.step.ref, frame.step.name), (ref, actor))
+                self.assertIn(expected, dlg.timeline.get("1.0", "end"))
+                self.assertTrue(dlg.canvas.find_withtag("wager"))
+                self.assertTrue(dlg.canvas.find_withtag("moving"))
+                dlg.back.invoke()
+                self.assertEqual(dlg.frames[dlg.cursor].pot, dlg.snapshot.pot)
+                dlg.street_buttons["Flop"].invoke()
+                self.assertEqual(dlg.frames[dlg.cursor].phase, "deal")
+                self.assertEqual(len(dlg.frames[dlg.cursor].board), 3)
+                self.assertFalse(dlg.outcome_panel.winfo_manager())
+                self.assertNotIn("TURN", dlg.timeline.get("1.0", "end"))
+                dlg.reveal.invoke()
+                self.assertIsNone(dlg.cursor)
+                self.assertEqual(dlg.snapshot.ref, ref)
+                self.assertFalse(dlg.revealed)
+                dlg.play.invoke()
+                self.assertEqual(dlg.cursor, 0)
+                self.assertIsNotNone(dlg.play_timer)
+                dlg.play.invoke()
+                self.assertIsNone(dlg.play_timer)
+                with patch.dict("leakfinder.table_ui.DELAYS", {"2×": 1}):
+                    dlg.speed.set("2×")
+                    dlg.play.invoke()
+                    # Run the real Tk timer chain through settlement.
+                    self.wait_for_playback(dlg)
+                self.assertEqual(dlg.frames[dlg.cursor].phase, "result")
+                self.assertTrue(dlg.outcome_panel.winfo_manager())
+                self.assertIn("collected", dlg.outcome_summary.cget("text"))
+                self.assertEqual(dlg.forward["state"], "disabled")
+                dlg.play.invoke()
+                dlg.close()
+                self.assertIsNone(dlg.play_timer)
+
+    def test_all_in_replay_deals_remaining_streets_before_payout(self):
+        with closing(connect(self.path)) as db:
+            load_demo(db)
+            ids = dict(db.execute("SELECT number,id FROM hands"))
+        for number, ref, river in (
+            ("9000005616", "Line 29", "3h"),
+            ("9000008019", "Action 14", "2h"),
+        ):
+            with self.subTest(ref=ref):
+                dlg = open_table(self.root, self.path, ids[number], ref)
+                dlg.street_buttons["River"].invoke()
+                self.assertEqual(dlg.frames[dlg.cursor].board[-1], river)
+                self.assertFalse(dlg.outcome_panel.winfo_manager())
+                self.assertNotIn("collected", dlg.timeline.get("1.0", "end"))
+                dlg.forward.invoke()
+                self.assertIn("HeroDemo collected", dlg.outcome_summary.cget("text"))
+                dlg.back.invoke()
+                self.assertFalse(dlg.outcome_panel.winfo_manager())
+                dlg.close()
+
     def test_early_range_dialog_uses_the_replayed_decision_in_both_rooms(self):
         for room, ref, street, preceding in (
             ("CoinPoker", "Line 28", "FLOP", "Line 27"),

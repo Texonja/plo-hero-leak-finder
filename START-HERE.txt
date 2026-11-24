@@ -50,7 +50,12 @@ Reviewing a decision
 Open a hand to see the table just before the selected decision. It shows
 the board, pot, call price, and preceding actions. An orange panel marks
 Hero. Known dealt cards are visible. Previous decision and Next decision
-navigate the same hand.
+navigate the same hand. Play hand starts at the blinds and runs to the
+result. Pause or change Speed, use the step buttons or arrow keys for a
+single action, or click a street to jump to its first frame. Back to decision
+returns to the spot you opened. Chips in front of a seat show its total live
+bet on this street. Pot includes those chips. For raises, (+amount) is the
+additional payment. Recorded payouts and known showdown cards appear at the end.
 Full hand history opens the original record at the selected action.
 On any street, Reveal action & outcome shows what Hero did, later actions,
 the final board, pot awards and opponent cards recorded in the source.

@@ -14,7 +14,7 @@ from .critique import critique_for
 from .engine import replay
 from .flop_critique import flop_cbet_note
 from .home import BG, INK, MUTED, NAV, NAV_ACTIVE, ORANGE, SUITS
-from .importers import Record, decode
+from .importers import STREETS, Record, decode
 from .opponent_history import (
     OpponentHistory,
     apply_history,
@@ -25,7 +25,13 @@ from .opponent_history import (
 )
 from .preflop_spots import threebet_price_note
 from .range_review import build_range_review, river_price_note
-from .replay_view import available_actions, chip_text, hand_result, load_snapshot
+from .replay_view import (
+    available_actions,
+    chip_text,
+    hand_result,
+    load_snapshot,
+    playback_frames,
+)
 from .sb_reference import sb_reference
 from .storage import connect
 from .strategy_guide import advice_at
@@ -45,6 +51,18 @@ VERBS = {
     "raise": "raises",
     "return": "receives refund",
 }
+DELAYS = {"0.5×": 2200, "1×": 1100, "2×": 550, "4×": 275}
+
+
+def action_text(step):
+    verb = VERBS[step.action]
+    if step.raised_to is not None:
+        verb += f" to {chip_text(step.raised_to)} (+{chip_text(step.amount)})"
+    elif step.amount:
+        verb += " " + chip_text(step.amount)
+    if step.action == "return" and not step.ref:
+        verb += " (reconciled uncalled bet)"
+    return f"{step.name}  {verb}" + ("  ·  all-in" if step.all_in else "")
 
 
 def _read_hand(room, row):
@@ -164,13 +182,26 @@ class TableDialog:
             self.snapshot = load_snapshot(
                 db, self.hand_id, self.actor, self.options[self.index].ref
             )
+            row = db.execute(
+                """SELECT o.locator,o.raw,h.cards FROM origins o JOIN hands h ON h.id=o.hand
+                   WHERE o.hand=? ORDER BY o.rowid LIMIT 1""",
+                (hand_id,),
+            ).fetchone()
+            self.hand = _read_hand(self.snapshot.room, row)
+            _, self.streets = replay(self.hand)
+            if row["cards"]:
+                self.hand.cards.update(json.loads(row["cards"]))
+        self.frames = playback_frames(self.hand, self.streets, self.actor)
+        self.cursor = None
+        self.play_timer = self.animation_timer = None
         self.win = tk.Toplevel(parent, background=BG)
         self.win.title(f"Hand {self.snapshot.number} · Table replay")
-        _size_dialog(self.win, 1090, 670, 860, 535)
+        _size_dialog(self.win, 1090, 730, 860, 580)
         self.win.columnconfigure(0, weight=1)
         self.win.rowconfigure(1, weight=1)
         self._name_font = Font(root=self.win, family="Segoe UI", size=10, weight="bold")
         self.win.bind("<Escape>", self._escape)
+        self.win.bind("<Destroy>", self._on_destroy)
         head = tk.Frame(self.win, bg=BG, padx=18, pady=12)
         head.grid(row=0, column=0, sticky="ew")
         _label(head, "Table replay", 18, bold=True).pack(side="left")
@@ -244,9 +275,42 @@ class TableDialog:
         )
         self.outcome_cards.pack(anchor="w")
         self.outcome_panel.bind("<Configure>", self._wrap_outcome)
+        bar = tk.Frame(self.win, bg=NAV, padx=9, pady=5)
+        bar.grid(row=3, column=0, sticky="ew", padx=14, pady=(5, 0))
+        self.start = _button(bar, "|◀ Start", lambda: self.seek(0))
+        self.back = _button(bar, "◀ Step", lambda: self.step(-1))
+        self.play = _button(bar, "▶ Play hand", self.toggle_playback, True)
+        self.forward = _button(bar, "Step ▶", lambda: self.step(1))
+        for button in (self.start, self.back, self.play, self.forward):
+            button.pack(side="left", padx=2)
+        self.street_buttons = {}
+        for street in STREETS:
+            index = next(
+                (
+                    i
+                    for i, f in enumerate(self.frames)
+                    if f.street == street and f.phase in {"start", "deal"}
+                ),
+                None,
+            )
+            jump = _button(bar, street, lambda n=index: self.seek(n))
+            jump.configure(padx=6, state="normal" if index is not None else "disabled")
+            jump.pack(side="left", padx=(9 if street == "Preflop" else 1, 0))
+            self.street_buttons[street] = jump
+        self.speed = ttk.Combobox(bar, state="readonly", values=tuple(DELAYS), width=5)
+        self.speed.set("1×")
+        self.speed.pack(side="right", padx=4)
+        _label(bar, "Speed", size=9, bg=NAV).pack(side="right")
+        self.speed.bind("<<ComboboxSelected>>", self._change_speed)
+        for key, operation in (
+            ("<Left>", lambda: self.step(-1)),
+            ("<Right>", lambda: self.step(1)),
+            ("<space>", self.toggle_playback),
+        ):
+            self.win.bind(key, lambda e, op=operation: self._key(e, op))
         controls = tk.Frame(self.win, bg=BG, padx=16, pady=10)
-        controls.grid(row=3, column=0, sticky="ew")
-        self.status = _label(controls, size=10, fg=MUTED, anchor="w")
+        controls.grid(row=4, column=0, sticky="ew")
+        self.status = _label(controls, size=10, fg=MUTED, anchor="w", width=1)
         self.status.pack(side="left", fill="x", expand=True)
         self.prev = _button(controls, "‹ Previous decision", lambda: self.move(-1))
         self.prev.pack(side="left", padx=(6, 4))
@@ -374,8 +438,125 @@ class TableDialog:
     def close(self):
         self.win.destroy()
 
+    def _key(self, event, operation):
+        if event.widget.winfo_toplevel() != self.win or event.widget == self.speed:
+            return
+        if event.keysym == "space" and isinstance(event.widget, tk.Button):
+            return  # Tk already invoked the focused button.
+        operation()
+        return "break"
+
+    def _on_destroy(self, event):
+        if event.widget == self.win:
+            self._cancel("play_timer")
+            self._cancel("animation_timer")
+
+    def _cancel(self, name):
+        timer = getattr(self, name)
+        if timer is not None:
+            self.win.after_cancel(timer)
+            setattr(self, name, None)
+
+    def _anchor(self):
+        return next(
+            i - 1
+            for i, f in enumerate(self.frames)
+            if f.step and f.step.ref == self.snapshot.ref
+        )
+
+    def _change_speed(self, _=None):
+        if self.play_timer is not None:
+            self._schedule()
+
+    def _schedule(self):
+        self._cancel("play_timer")
+        self.play_timer = self.win.after(DELAYS[self.speed.get()], self._tick)
+        self.play.configure(text="Ⅱ Pause")
+
+    def _tick(self):
+        self.play_timer = None
+        self._display_frame(self.cursor + 1, animate=True)
+        if self.cursor < len(self.frames) - 1:
+            self._schedule()
+
+    def toggle_playback(self):
+        if self.play_timer is not None:
+            self._cancel("play_timer")
+            self._cancel("animation_timer")
+            self.canvas.delete("moving")
+            self.play.configure(text="▶ Resume")
+            return
+        if self.cursor is None or self.cursor == len(self.frames) - 1:
+            self.seek(0)
+        self._schedule()
+
+    def step(self, delta):
+        index = self._anchor() if self.cursor is None else self.cursor
+        self.seek(index + delta, animate=delta == 1)
+
+    def seek(self, index, animate=False):
+        self._cancel("play_timer")
+        self._display_frame(max(0, min(index, len(self.frames) - 1)), animate)
+
+    def _display_frame(self, index, animate=False):
+        old = self._anchor() if self.cursor is None else self.cursor
+        self.cursor = index
+        frame = self.frames[index]
+        end = frame.phase == "result"
+        self.revealed = False
+        self.range_button.configure(state="disabled")
+        self.reveal.configure(text="Back to decision")
+        for name, jump in self.street_buttons.items():
+            jump.configure(relief="sunken" if name == frame.street else "flat")
+        self.play.configure(text="▶ Replay hand" if end else "▶ Play")
+        self.back.configure(state="normal" if index else "disabled")
+        self.forward.configure(state="disabled" if end else "normal")
+        self.timeline_caption.configure(text="Recorded actions · hand playback")
+        self.outcome_panel.grid_remove()
+        box = self.timeline
+        box.configure(state="normal")
+        box.delete("1.0", "end")
+        caption = ""
+        for i, f in enumerate(self.frames[: index + 1]):
+            style = "active" if i == index else ""
+            if f.phase in {"start", "deal"}:
+                caption = f.street + (" dealt" if f.board else " · Hand starts")
+                box.insert("end", f.street.upper() + "\n", "street")
+            elif f.phase == "pockets":
+                caption = "Hole cards dealt"
+                box.insert("end", caption + "\n", style)
+            elif f.step:
+                caption = action_text(f.step)
+                box.insert("end", caption + "\n", style)
+            else:
+                caption = "Hand complete"
+                last = next(
+                    e
+                    for street in reversed(STREETS)
+                    for e in reversed(self.streets[street])
+                )
+                self.result = hand_result(self.hand, self.streets, self.actor, last.ref)
+                self._show_outcome(box, self.snapshot, include_actions=False)
+        box.configure(state="disabled")
+        box.see("end")
+        self.status.configure(
+            text=f"{index + 1}/{len(self.frames)}   ·   {frame.street}   ·   {caption}"
+        )
+        if end:
+            self.win.update_idletasks()  # Position chips after the outcome panel opens.
+        self.draw()
+        if animate and index == old + 1:
+            self._animate(self.frames[old], frame)
+
     def _refresh(self):
         snap = self.snapshot
+        self._cancel("play_timer")
+        self.cursor = None
+        self.play.configure(text="▶ Play hand")
+        for name, jump in self.street_buttons.items():
+            jump.configure(relief="sunken" if name == snap.street else "flat")
+        self.back.configure(state="normal" if self._anchor() else "disabled")
+        self.forward.configure(state="normal")
         eligible = (
             snap.street in {"Flop", "Turn", "River"}
             and snap.hero_cards
@@ -516,7 +697,7 @@ class TableDialog:
         box.see("end")
         self.draw()
 
-    def _show_outcome(self, box, snap):
+    def _show_outcome(self, box, snap, include_actions=True):
         result = self.result
         summary = "Showdown" if result.showdown else "Hand ended by folds"
         if result.awards:
@@ -542,7 +723,7 @@ class TableDialog:
         self.outcome_panel.grid()
         box.insert("end", "\nHAND OUTCOME\n", "street")
         street = snap.street
-        for event in result.subsequent:
+        for event in result.subsequent if include_actions else ():
             if event.street != street:
                 street = event.street
                 box.insert("end", street.upper() + "\n", "street")
@@ -567,30 +748,30 @@ class TableDialog:
         self._refresh()
 
     def toggle_played(self):
+        if self.cursor is not None:
+            self.revealed = False
+            self._refresh()
+            return
         if not self.revealed:
-            with closing(connect(self.path)) as db:
-                row = db.execute(
-                    """SELECT o.locator,o.raw,h.cards FROM origins o
-                       JOIN hands h ON h.id=o.hand WHERE o.hand=?
-                       ORDER BY o.rowid LIMIT 1""",
-                    (self.hand_id,),
-                ).fetchone()
-            hand = _read_hand(self.snapshot.room, row)
-            _, streets = replay(hand)
             event = next(
-                e for e in streets[self.snapshot.street] if e.ref == self.snapshot.ref
+                e
+                for e in self.streets[self.snapshot.street]
+                if e.ref == self.snapshot.ref
             )
             amount = f" · {chip_text(event.amount)} paid" if event.amount else ""
             self.played_event = event
             self.played_text = f"Played: {event.action}{amount}"
-            if row["cards"]:
-                hand.cards.update(json.loads(row["cards"]))
-            self.result = hand_result(hand, streets, self.actor, self.snapshot.ref)
+            self.result = hand_result(
+                self.hand, self.streets, self.actor, self.snapshot.ref
+            )
         self.revealed = not self.revealed
         self._refresh()
 
     def open_source(self):
         from .explorer import source_span
+
+        if self.play_timer is not None:
+            self.toggle_playback()
 
         with closing(connect(self.path)) as db:
             rows = db.execute(
@@ -629,11 +810,13 @@ class TableDialog:
         text.pack(fill="both", expand=True)
         text.tag_configure("focus", background=ORANGE, foreground=NAVY)
         snap = self.snapshot
-        # A duplicate source can add lines or use different XML action numbers.
-        # Equivalent hands preserve the replay index of each street decision.
-        _, streets = replay(_read_hand(snap.room, rows[0]))
-        street_index = next(
-            i for i, e in enumerate(streets[snap.street]) if e.ref == snap.ref
+        # Equivalent copies can use different line/action numbers.
+        ref = snap.ref
+        if self.cursor is not None:
+            step = self.frames[self.cursor].step
+            ref = step.ref if step else None
+        token_index = next(
+            (i for i, t in enumerate(self.hand.tokens) if t.ref == ref), None
         )
 
         def show(_=None):
@@ -643,8 +826,10 @@ class TableDialog:
             text.configure(state="normal")
             text.delete("1.0", "end")
             text.insert("1.0", raw)
-            _, actions = replay(_read_hand(snap.room, row))
-            span = source_span(raw, actions[snap.street][street_index].ref)
+            span = None
+            if token_index is not None:
+                token = _read_hand(snap.room, row).tokens[token_index]
+                span = source_span(raw, token.ref)
             if span:
                 first, last = (f"1.0+{v}c" for v in span)
                 text.tag_add("focus", first, last)
@@ -686,10 +871,99 @@ class TableDialog:
             font=("Segoe UI Symbol", max(8, int(width * 0.36))),
         )
 
+    def _chips(self, x, y, label_text="", moving=False):
+        c = self.canvas
+        tag = "moving" if moving else "wager"
+        for dy, color in ((4, "#283d50"), (1, "#f27828")):
+            c.create_oval(
+                x - 10,
+                y + dy - 5,
+                x + 10,
+                y + dy + 5,
+                fill=color,
+                outline="#432a1e",
+                tags=tag,
+            )
+        for dx, dy in ((-7, 2), (0, -3), (7, 2)):
+            c.create_line(
+                x + dx,
+                y + dy,
+                x + dx * 0.7,
+                y + dy * 0.6,
+                fill="#ffefc9",
+                width=2,
+                tags=tag,
+            )
+        c.create_oval(x - 4, y - 1, x + 4, y + 3, fill="#c5501a", outline="", tags=tag)
+        if label_text:
+            label = c.create_text(
+                x,
+                y - 13,
+                text=label_text,
+                fill=NAVY,
+                font=("Segoe UI", 9, "bold"),
+                tags=tag,
+            )
+            bounds = c.bbox(label)
+            bg = c.create_rectangle(
+                bounds[0] - 2,
+                bounds[1],
+                bounds[2] + 2,
+                bounds[3],
+                fill="#e4f0e9",
+                outline="",
+                tags=tag,
+            )
+            c.tag_lower(bg, label)
+
+    def _animate(self, prev, frame):
+        if not self.seat_points:
+            return
+        pot = self.pot_point
+        paths = []
+        step = frame.step
+        if step and step.amount:
+            seat, bet = self.seat_points[step.name]
+            start, end = (bet, seat) if step.action == "return" else (seat, bet)
+            if step.action == "posts_ante":
+                end = pot
+            paths.append((start, end))
+        elif frame.phase in {"deal", "result"}:
+            paths = [
+                (self.seat_points[s.name][1], pot) for s in prev.seats if s.committed
+            ]
+        payouts = []
+        if frame.phase == "result" and self.result.verified:
+            payouts = [(pot, self.seat_points[n][0]) for n, _ in self.result.awards]
+        stages = [stage for stage in (paths, payouts) if stage]
+        if not stages:
+            return
+
+        def tick(n):
+            self.animation_timer = None
+            self.canvas.delete("moving")
+            if n >= 8 * len(stages):
+                return
+            t = (n % 8) / 7
+            for (x, y), (xx, yy) in stages[n // 8]:
+                self._chips(x + (xx - x) * t, y + (yy - y) * t, moving=True)
+            self.animation_timer = self.win.after(23, lambda: tick(n + 1))
+
+        tick(0)
+
     def draw(self, _=None):
         c, snap = self.canvas, self.snapshot
-        result = self.result if self.revealed else None
-        board = result.board if result else snap.board
+        self._cancel("animation_timer")
+        frame = self.frames[self.cursor] if self.cursor is not None else None
+        result = (
+            self.result
+            if self.revealed or (frame and frame.phase == "result")
+            else None
+        )
+        board = frame.board if frame else result.board if result else snap.board
+        seats = frame.seats if frame else snap.seats
+        pot = frame.pot if frame else snap.pot
+        self.seat_points = {}
         w, h = c.winfo_width(), c.winfo_height()
         if w < 100 or h < 100:
             return
@@ -703,7 +977,9 @@ class TableDialog:
         c.create_text(
             cx,
             cy - 70,
-            text="FINAL BOARD" if result and board else snap.street.upper(),
+            text="FINAL BOARD"
+            if result and board
+            else (frame.street if frame else snap.street).upper(),
             fill=INK,
             font=("Segoe UI", 10, "bold"),
         )
@@ -717,40 +993,81 @@ class TableDialog:
                 cw,
                 ch,
             )
-        c.create_text(
+        pot_label = "Pot"
+        if result:
+            pot_label = (
+                ("Final pot" if result.verified else "Last recorded pot")
+                if frame
+                else "Pot before decision"
+            )
+        pot_item = c.create_text(
             cx,
             cy + 22,
-            text=f"{'Pot before decision' if result else 'Pot'}  {chip_text(snap.pot)} {snap.currency}",
+            text=f"{pot_label}  {chip_text(pot)} {snap.currency}",
             fill=NAVY,
             font=("Segoe UI", 15, "bold"),
         )
+        self.pot_point = (c.bbox(pot_item)[0] - 15, cy + 22)
+        live_bets = sum(s.committed for s in seats)
+        if pot > live_bets and not (frame and result):
+            self._chips(*self.pot_point)
         price = (
             f"To call  {chip_text(snap.to_call)}" if snap.to_call else "No bet to call"
         )
+        detail = f"{price}   ·   {chip_text(snap.bb)} big blind"
+        if frame:
+            if result:
+                detail = (
+                    f"Rake and fees  {chip_text(self.hand.fees)} {snap.currency}"
+                    if result.verified
+                    else "Source-reported result"
+                )
+            else:
+                detail = f"In middle  {chip_text(pot - live_bets)}   ·   In front  {chip_text(live_bets)}"
         c.create_text(
             cx,
             cy + 46,
-            text=f"{price}   ·   {chip_text(snap.bb)} big blind",
+            text=detail,
             fill=INK,
             font=("Segoe UI", 10),
         )
-        seats = sorted(snap.seats, key=lambda s: s.seat)
+        seats = sorted(seats, key=lambda s: s.seat)
         focal = next(i for i, s in enumerate(seats) if s.name == self.actor)
         seats = seats[focal:] + seats[:focal]
         shown = dict(result.opponents) if result else {}
+        awards = dict(result.awards) if frame and result and result.verified else {}
+        last_player = frame.step.name if frame and frame.step else None
+        dealt = (
+            not frame
+            or frame.phase != "start"
+            and not (frame.step and frame.step.action.startswith("posts_"))
+        )
         half = min(74, max(51, (w - 60) / 9))
         for i, s in enumerate(seats):
             a = math.pi / 2 + i * math.tau / len(seats)
             x = cx + (cx - half - 9) * math.cos(a)
             y = cy + (cy - 56) * math.sin(a)
-            active = i == 0
+            focus = i == 0
+            active = (last_player == s.name) if frame else focus
             fill = ORANGE if active else BG if s.live else "#b4c3cd"
             edge = ORANGE if active else "#698593" if s.live else EDGE
             fg = INK
-            if cards := shown.get(s.name):
+            # Seat bets sit between the player and the common pot. Shift the
+            # bottom seat's marker clear of the four visible pocket cards.
+            bx = cx + (cx - half - 9) * 0.65 * math.cos(a)
+            by = cy + (cy - 56) * 0.66 * math.sin(a)
+            if focus:
+                bx += 96
+                by = y - 45
+            self.seat_points[s.name] = ((x, y), (bx, by))
+            if s.committed and not result:
+                self._chips(bx, by, chip_text(s.committed))
+            elif s.name in awards:
+                self._chips(bx, by, "+" + chip_text(awards[s.name]))
+            if not focus and (cards := shown.get(s.name)):
                 for ci, card in enumerate(cards):
                     self.card(x - 49 + ci * 25, y - 56, card, 23, 33)
-            elif s.live and not active:
+            elif dealt and s.live and not focus:
                 for ci in range(4):
                     card_x = x - 17 + ci * 7
                     c.create_rectangle(
@@ -803,19 +1120,35 @@ class TableDialog:
                     fill=NAVY,
                     font=("Segoe UI", 8, "bold"),
                 )
-            if active:
+            if active or focus:
                 hero = "HERO" if self.profile == self.actor else "PLAYER"
                 c.create_rectangle(
-                    x - half, y + 21, x + half, y + 41, fill=ORANGE, outline=ORANGE
+                    x - half,
+                    y + 21,
+                    x + half,
+                    y + 41,
+                    fill=ORANGE if active else NAV,
+                    outline=ORANGE if active else EDGE,
                 )
                 c.create_text(
                     x,
                     y + 31,
-                    text=("OUTCOME SHOWN" if result else f"{hero} TO ACT"),
+                    text=(
+                        VERBS[frame.step.action].upper()
+                        if frame and active
+                        else "OUTCOME SHOWN"
+                        if result
+                        else hero
+                        if frame
+                        else f"{hero} TO ACT"
+                    ),
                     fill=NAVY,
                     font=("Segoe UI", 9, "bold"),
                 )
+            if focus and dealt:
                 cards = snap.hero_cards
+                if result and result.showdown and s.name in self.hand.survivors:
+                    cards = cards or self.hand.cards.get(s.name)
                 cw, ch, gap = 32, 43, 3
                 if cards:
                     x0 = x - (len(cards) * cw + (len(cards) - 1) * gap) / 2
