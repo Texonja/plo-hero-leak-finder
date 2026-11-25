@@ -1,0 +1,4324 @@
+[
+ {
+  "board": [
+   "3d",
+   "Kd",
+   "2s",
+   "Td",
+   "Qs"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 87.52,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "As",
+    "Ac",
+    "Js",
+    "4c"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 0,
+   "family": "river_broadway_checked_to",
+   "id": "river_broadway_checked_to-00",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "6h",
+   "Kh",
+   "5c",
+   "Th",
+   "Qc"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 30.429,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ac",
+    "Ad",
+    "Jc",
+    "7d"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 1,
+   "family": "river_broadway_checked_to",
+   "id": "river_broadway_checked_to-01",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "9s",
+   "Ks",
+   "8d",
+   "Ts",
+   "Qd"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 47.628,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ad",
+    "Ac",
+    "Jd",
+    "2h"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 2,
+   "family": "river_broadway_checked_to",
+   "id": "river_broadway_checked_to-02",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "4c",
+   "Kc",
+   "3h",
+   "Tc",
+   "Qh"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 62.181,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ah",
+    "Ac",
+    "Jh",
+    "5s"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 3,
+   "family": "river_broadway_checked_to",
+   "id": "river_broadway_checked_to-03",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "8d",
+   "Kd",
+   "7s",
+   "Td",
+   "Qs"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 87.318,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "As",
+    "Ac",
+    "Jc",
+    "9c"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 4,
+   "family": "river_broadway_checked_to",
+   "id": "river_broadway_checked_to-04",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "3h",
+   "Kh",
+   "2c",
+   "Th",
+   "Qc"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 119.07,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ac",
+    "Ad",
+    "Jc",
+    "4d"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 5,
+   "family": "river_broadway_checked_to",
+   "id": "river_broadway_checked_to-05",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "6s",
+   "Ks",
+   "5d",
+   "Ts",
+   "Qd"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 178.605,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ad",
+    "Ah",
+    "Jd",
+    "7s"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 6,
+   "family": "river_broadway_checked_to",
+   "id": "river_broadway_checked_to-06",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "9c",
+   "Kc",
+   "8h",
+   "Tc",
+   "Qh"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 22.491,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ah",
+    "As",
+    "Jh",
+    "2d"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 7,
+   "family": "river_broadway_checked_to",
+   "id": "river_broadway_checked_to-07",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "5d",
+   "Kd",
+   "4s",
+   "Td",
+   "Qs"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 30.429,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ah",
+    "Ac",
+    "Js",
+    "6c"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 8,
+   "family": "river_broadway_checked_to",
+   "id": "river_broadway_checked_to-08",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "8h",
+   "Kh",
+   "7c",
+   "Th",
+   "Qc"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 47.628,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ah",
+    "Ad",
+    "Jc",
+    "9d"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 9,
+   "family": "river_broadway_checked_to",
+   "id": "river_broadway_checked_to-09",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qh",
+   "8h",
+   "7h",
+   "Qc",
+   "4h"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 74.68,
+  "tree": {
+   "bet_fractions": [
+    0.8708938120702827,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kc",
+    "Qs",
+    "Jd",
+    "6d"
+   ],
+   "path": [
+    "bet 45.6"
+   ]
+  },
+  "audit": {
+   "variant": 0,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-00",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qs",
+   "Js",
+   "Ts",
+   "Qd",
+   "7s"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 60.214,
+  "tree": {
+   "bet_fractions": [
+    0.73,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "3c",
+    "Qc",
+    "2h",
+    "9h"
+   ],
+   "path": [
+    "bet 38.2228"
+   ]
+  },
+  "audit": {
+   "variant": 1,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-01",
+   "source_hand": "9000004202",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "Qc",
+   "2c",
+   "Ac",
+   "Qh",
+   "Tc"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 94.248,
+  "tree": {
+   "bet_fractions": [
+    0.749,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "6h",
+    "Qd",
+    "5s",
+    "Ks"
+   ],
+   "path": [
+    "bet 39.21764"
+   ]
+  },
+  "audit": {
+   "variant": 2,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-02",
+   "source_hand": "9000004202",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "Qd",
+   "5d",
+   "4d",
+   "Qs",
+   "Ad"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 123.046,
+  "tree": {
+   "bet_fractions": [
+    0.75,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "9s",
+    "Qc",
+    "8c",
+    "3c"
+   ],
+   "path": [
+    "bet 39.27"
+   ]
+  },
+  "audit": {
+   "variant": 3,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-03",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qh",
+   "9h",
+   "8h",
+   "Qc",
+   "5h"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 172.788,
+  "tree": {
+   "bet_fractions": [
+    0.751,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ac",
+    "Qs",
+    "Kc",
+    "7d"
+   ],
+   "path": [
+    "bet 39.32236"
+   ]
+  },
+  "audit": {
+   "variant": 4,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-04",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qs",
+   "Ks",
+   "Js",
+   "Qd",
+   "8s"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 235.62,
+  "tree": {
+   "bet_fractions": [
+    0.78,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "4d",
+    "Qc",
+    "3c",
+    "Th"
+   ],
+   "path": [
+    "bet 40.8408"
+   ]
+  },
+  "audit": {
+   "variant": 5,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-05",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qd",
+   "6d",
+   "5d",
+   "Qs",
+   "2d"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 44.506,
+  "tree": {
+   "bet_fractions": [
+    0.85,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ts",
+    "Qh",
+    "9c",
+    "4c"
+   ],
+   "path": [
+    "bet 44.506"
+   ]
+  },
+  "audit": {
+   "variant": 7,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-07",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qh",
+   "Th",
+   "9h",
+   "Qc",
+   "6h"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 60.214,
+  "tree": {
+   "bet_fractions": [
+    0.95,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "2c",
+    "Qs",
+    "Ad",
+    "8d"
+   ],
+   "path": [
+    "bet 49.742"
+   ]
+  },
+  "audit": {
+   "variant": 8,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-08",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qs",
+   "2s",
+   "As",
+   "Qd",
+   "Ts"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 353.43,
+  "tree": {
+   "bet_fractions": [
+    0.75,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "6d",
+    "Qc",
+    "5c",
+    "Kh"
+   ],
+   "path": [
+    "bet 39.27"
+   ]
+  },
+  "audit": {
+   "variant": 13,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-13",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qc",
+   "5c",
+   "4c",
+   "Qh",
+   "Ac"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 44.506,
+  "tree": {
+   "bet_fractions": [
+    0.751,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "9h",
+    "Qd",
+    "8s",
+    "3d"
+   ],
+   "path": [
+    "bet 39.32236"
+   ]
+  },
+  "audit": {
+   "variant": 14,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-14",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qh",
+   "Kh",
+   "Jh",
+   "Qc",
+   "8h"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 94.248,
+  "tree": {
+   "bet_fractions": [
+    0.82,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "4c",
+    "Qs",
+    "3d",
+    "Td"
+   ],
+   "path": [
+    "bet 42.9352"
+   ]
+  },
+  "audit": {
+   "variant": 16,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-16",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qs",
+   "3s",
+   "2s",
+   "Qd",
+   "Js"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 123.046,
+  "tree": {
+   "bet_fractions": [
+    0.86,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "7c",
+    "Qc",
+    "6h",
+    "Ah"
+   ],
+   "path": [
+    "bet 45.0296"
+   ]
+  },
+  "audit": {
+   "variant": 17,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-17",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qh",
+   "8h",
+   "7h",
+   "Qc",
+   "4h"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 74.68,
+  "tree": {
+   "bet_fractions": [
+    0.7499999236058059,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kc",
+    "Qs",
+    "Jd",
+    "6d"
+   ],
+   "path": [
+    "bet 39.269996"
+   ]
+  },
+  "audit": {
+   "variant": 200,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-200",
+   "source_hand": "9000004202",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "Qh",
+   "8h",
+   "7h",
+   "Qc",
+   "4h"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 74.68,
+  "tree": {
+   "bet_fractions": [
+    0.75,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kc",
+    "Qs",
+    "Jd",
+    "6d"
+   ],
+   "path": [
+    "bet 39.27"
+   ]
+  },
+  "audit": {
+   "variant": 201,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-201",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qh",
+   "8h",
+   "7h",
+   "Qc",
+   "4h"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 74.68,
+  "tree": {
+   "bet_fractions": [
+    0.7500000763941941,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kc",
+    "Qs",
+    "Jd",
+    "6d"
+   ],
+   "path": [
+    "bet 39.270004"
+   ]
+  },
+  "audit": {
+   "variant": 202,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-202",
+   "source_hand": "9000004202",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qh",
+   "8h",
+   "7h",
+   "Qc",
+   "4h"
+  ],
+  "pot_bb": 52.36,
+  "effective_stack_bb": 74.68,
+  "tree": {
+   "bet_fractions": [
+    0.75,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kc",
+    "Qs",
+    "Jh",
+    "6d"
+   ],
+   "path": [
+    "bet 39.27"
+   ]
+  },
+  "audit": {
+   "variant": 203,
+   "family": "river_call_four_flush_board",
+   "id": "river_call_four_flush_board-203",
+   "source_hand": "9000004202",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "5c",
+   "Jc",
+   "8s",
+   "4s",
+   "9h"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 20.94,
+  "tree": {
+   "bet_fractions": [
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    0.7183908045977011,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "6s",
+    "7s",
+    "Qh",
+    "Qd"
+   ],
+   "path": [
+    "bet 5.94",
+    "raise 20.94"
+   ]
+  },
+  "audit": {
+   "variant": 0,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-00",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "4d",
+   "Td",
+   "7c",
+   "3c",
+   "8s"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 27.9,
+  "tree": {
+   "bet_fractions": [
+    0.45,
+    1
+   ],
+   "raise_fractions": [
+    0.48039216374269006,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "5d",
+    "6c",
+    "Js",
+    "Jh"
+   ],
+   "path": [
+    "bet 4.05",
+    "raise 12.264706"
+   ]
+  },
+  "audit": {
+   "variant": 1,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-01",
+   "source_hand": "9000010026",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "6h",
+   "Qh",
+   "9d",
+   "5d",
+   "Tc"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 33.3,
+  "tree": {
+   "bet_fractions": [
+    0.5,
+    1
+   ],
+   "raise_fractions": [
+    0.5,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "7d",
+    "8c",
+    "Kc",
+    "Ks"
+   ],
+   "path": [
+    "bet 4.5",
+    "raise 13.5"
+   ]
+  },
+  "audit": {
+   "variant": 2,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-02",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "3s",
+   "9s",
+   "6h",
+   "2h",
+   "7d"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 38.7,
+  "tree": {
+   "bet_fractions": [
+    0.65,
+    1
+   ],
+   "raise_fractions": [
+    0.504016038647343,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "4h",
+    "5h",
+    "Td",
+    "Tc"
+   ],
+   "path": [
+    "bet 5.85",
+    "raise 16.283132"
+   ]
+  },
+  "audit": {
+   "variant": 3,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-03",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7c",
+   "Kc",
+   "Ts",
+   "6s",
+   "Jh"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 22.5,
+  "tree": {
+   "bet_fractions": [
+    0.75,
+    1
+   ],
+   "raise_fractions": [
+    0.5638297777777778,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8s",
+    "9s",
+    "Ah",
+    "Ad"
+   ],
+   "path": [
+    "bet 6.75",
+    "raise 19.43617"
+   ]
+  },
+  "audit": {
+   "variant": 4,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-04",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "5d",
+   "Jd",
+   "8c",
+   "4c",
+   "9s"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 27.9,
+  "tree": {
+   "bet_fractions": [
+    0.85,
+    1
+   ],
+   "raise_fractions": [
+    0.6363636213991769,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "6c",
+    "7c",
+    "Qd",
+    "Qh"
+   ],
+   "path": [
+    "bet 7.65",
+    "raise 23.113636"
+   ]
+  },
+  "audit": {
+   "variant": 5,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-05",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "4h",
+   "Th",
+   "7d",
+   "3d",
+   "8c"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 33.3,
+  "tree": {
+   "bet_fractions": [
+    0.35,
+    1
+   ],
+   "raise_fractions": [
+    0.75,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "5d",
+    "6d",
+    "Jc",
+    "Jd"
+   ],
+   "path": [
+    "bet 3.15",
+    "raise 14.625"
+   ]
+  },
+  "audit": {
+   "variant": 6,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-06",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "6s",
+   "Qs",
+   "9h",
+   "5h",
+   "Td"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 38.7,
+  "tree": {
+   "bet_fractions": [
+    0.45,
+    1
+   ],
+   "raise_fractions": [
+    0.8157894736842105,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "7h",
+    "8h",
+    "Kd",
+    "Kc"
+   ],
+   "path": [
+    "bet 4.05",
+    "raise 18"
+   ]
+  },
+  "audit": {
+   "variant": 7,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-07",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "3c",
+   "9c",
+   "6s",
+   "2s",
+   "7h"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 22.5,
+  "tree": {
+   "bet_fractions": [
+    0.5,
+    1
+   ],
+   "raise_fractions": [
+    0.3928571111111111,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "4d",
+    "5s",
+    "Th",
+    "Td"
+   ],
+   "path": [
+    "bet 4.5",
+    "raise 11.571428"
+   ]
+  },
+  "audit": {
+   "variant": 8,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-08",
+   "source_hand": "9000010026",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "5h",
+   "Jh",
+   "8d",
+   "4d",
+   "9c"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 33.3,
+  "tree": {
+   "bet_fractions": [
+    0.75,
+    1
+   ],
+   "raise_fractions": [
+    0.5,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "6d",
+    "7c",
+    "Qc",
+    "Qs"
+   ],
+   "path": [
+    "bet 6.75",
+    "raise 18"
+   ]
+  },
+  "audit": {
+   "variant": 10,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-10",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "4s",
+   "Ts",
+   "7h",
+   "3h",
+   "8d"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 38.7,
+  "tree": {
+   "bet_fractions": [
+    0.85,
+    1
+   ],
+   "raise_fractions": [
+    0.504016049382716,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "5h",
+    "6c",
+    "Jd",
+    "Jc"
+   ],
+   "path": [
+    "bet 7.65",
+    "raise 19.89759"
+   ]
+  },
+  "audit": {
+   "variant": 11,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-11",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "6c",
+   "Qc",
+   "9s",
+   "5s",
+   "Th"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 22.5,
+  "tree": {
+   "bet_fractions": [
+    0.35,
+    1
+   ],
+   "raise_fractions": [
+    0.5638298039215687,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "7s",
+    "8s",
+    "Kc",
+    "Kd"
+   ],
+   "path": [
+    "bet 3.15",
+    "raise 11.776596"
+   ]
+  },
+  "audit": {
+   "variant": 12,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-12",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "5c",
+   "Jc",
+   "8s",
+   "4s",
+   "9h"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 20.94,
+  "tree": {
+   "bet_fractions": [
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    0.49999990421455937,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "6s",
+    "7s",
+    "Qh",
+    "Qd"
+   ],
+   "path": [
+    "bet 5.94",
+    "raise 16.379998"
+   ]
+  },
+  "audit": {
+   "variant": 200,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-200",
+   "source_hand": "9000010026",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "5c",
+   "Jc",
+   "8s",
+   "4s",
+   "9h"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 20.94,
+  "tree": {
+   "bet_fractions": [
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    0.5,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "6s",
+    "7s",
+    "Qh",
+    "Qd"
+   ],
+   "path": [
+    "bet 5.94",
+    "raise 16.38"
+   ]
+  },
+  "audit": {
+   "variant": 201,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-201",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "5c",
+   "Jc",
+   "8s",
+   "4s",
+   "9h"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 20.94,
+  "tree": {
+   "bet_fractions": [
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    0.5000000957854406,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "6s",
+    "7s",
+    "Qh",
+    "Qd"
+   ],
+   "path": [
+    "bet 5.94",
+    "raise 16.380002"
+   ]
+  },
+  "audit": {
+   "variant": 202,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-202",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "5c",
+   "Jc",
+   "8s",
+   "4s",
+   "9h"
+  ],
+  "pot_bb": 9.0,
+  "effective_stack_bb": 20.94,
+  "tree": {
+   "bet_fractions": [
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    0.5,
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "6s",
+    "7s",
+    "Ah",
+    "Qd"
+   ],
+   "path": [
+    "bet 5.94",
+    "raise 16.38"
+   ]
+  },
+  "audit": {
+   "variant": 203,
+   "family": "river_call_large_raise",
+   "id": "river_call_large_raise-203",
+   "source_hand": "9000010026",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Jc",
+   "6c",
+   "3h",
+   "As",
+   "8s"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 91.68,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ah",
+    "Qs",
+    "Jd",
+    "8c"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 0,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-00",
+   "source_hand": "9000002872",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Jd",
+   "3d",
+   "2s",
+   "Kc",
+   "7c"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 25.185,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kd",
+    "Ac",
+    "Jh",
+    "7s"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 1,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-01",
+   "source_hand": "9000002872",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "9h",
+   "4h",
+   "2c",
+   "Kd",
+   "7d"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 39.42,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kc",
+    "Ac",
+    "9s",
+    "7c"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 2,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-02",
+   "source_hand": "9000002872",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Js",
+   "4s",
+   "2d",
+   "Kh",
+   "8h"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 51.465,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kd",
+    "Ah",
+    "Jc",
+    "8d"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 3,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-03",
+   "source_hand": "9000002872",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Tc",
+   "5c",
+   "2h",
+   "Ks",
+   "8s"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 72.27,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kh",
+    "As",
+    "Td",
+    "8h"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 4,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-04",
+   "source_hand": "9000002872",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qd",
+   "6d",
+   "2s",
+   "Ac",
+   "7d"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 98.55,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "As",
+    "Kc",
+    "Qc",
+    "7s"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 5,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-05",
+   "source_hand": "9000002872",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "Qh",
+   "6h",
+   "2c",
+   "Ad",
+   "9d"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 147.825,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ac",
+    "Kd",
+    "Qs",
+    "9c"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 6,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-06",
+   "source_hand": "9000002872",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Ks",
+   "8s",
+   "2d",
+   "Ah",
+   "9h"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 18.615,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ad",
+    "Qh",
+    "Kc",
+    "9c"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 7,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-07",
+   "source_hand": "9000002872",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qc",
+   "5c",
+   "3h",
+   "Ks",
+   "8s"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 25.185,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kd",
+    "As",
+    "Qd",
+    "8h"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 8,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-08",
+   "source_hand": "9000002872",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Kd",
+   "6d",
+   "3s",
+   "Ac",
+   "9c"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 39.42,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ad",
+    "Qc",
+    "Kh",
+    "9s"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 9,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-09",
+   "source_hand": "9000002872",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Jh",
+   "6h",
+   "4c",
+   "Ad",
+   "9d"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 51.465,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ac",
+    "Kc",
+    "Js",
+    "9c"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 10,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-10",
+   "source_hand": "9000002872",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "8s",
+   "3s",
+   "2d",
+   "Kh",
+   "7s"
+  ],
+  "pot_bb": 21.9,
+  "effective_stack_bb": 72.27,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kd",
+    "Ac",
+    "8c",
+    "7d"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 11,
+   "family": "river_check_back_top_two",
+   "id": "river_check_back_top_two-11",
+   "source_hand": "9000002872",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "8c",
+   "5s",
+   "Jh",
+   "3d",
+   "Tc"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 22.491,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.39999999999999997,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Qc",
+    "9h",
+    "Kh",
+    "9s"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 0,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-00",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "8c",
+   "5h",
+   "Jd",
+   "3s",
+   "Th"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 30.429,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.39999999999999997,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Qc",
+    "9s",
+    "Ks",
+    "4s"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 1,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-01",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7d",
+   "3s",
+   "9h",
+   "4d",
+   "8c"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 47.628,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.39999999999999997,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jd",
+    "Tc",
+    "2s",
+    "5d"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 2,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-02",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qh",
+   "Qs",
+   "Js",
+   "4d",
+   "Kc"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 62.181,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Qd",
+    "Jc",
+    "Jh",
+    "2h"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 3,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-03",
+   "source_hand": "9000009999",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "2s",
+   "2d",
+   "Kc",
+   "6h",
+   "5s"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 87.318,
+  "tree": {
+   "bet_fractions": [
+    0.32999999999999996,
+    0.33,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "2c",
+    "Kd",
+    "Jc",
+    "7h"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 4,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-04",
+   "source_hand": "9000009999",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "Tc",
+   "9c",
+   "2d",
+   "3h",
+   "5c"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 119.07,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.39999999999999997,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ac",
+    "Kc",
+    "8d",
+    "4h"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 5,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-05",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7h",
+   "4d",
+   "Tc",
+   "2s",
+   "9h"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 178.605,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.39999999999999997,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jh",
+    "8c",
+    "Qc",
+    "8h"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 6,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-06",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Th",
+   "7c",
+   "Ks",
+   "5d",
+   "Qc"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 22.491,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.39999999999999997,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ah",
+    "Jd",
+    "2d",
+    "6d"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 7,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-07",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "4s",
+   "Kd",
+   "6c",
+   "As",
+   "5h"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 30.429,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.39999999999999997,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8c",
+    "7h",
+    "Qd",
+    "2s"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 8,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-08",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Kd",
+   "Ks",
+   "Jh",
+   "4c",
+   "3d"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 62.181,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.39999999999999997,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kh",
+    "Jc",
+    "9c",
+    "5c"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 10,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-10",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "9c",
+   "6s",
+   "Qh",
+   "4d",
+   "Jc"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 119.07,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.39999999999999997,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kc",
+    "Th",
+    "Ac",
+    "Ts"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 12,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-12",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7c",
+   "4h",
+   "Td",
+   "2s",
+   "9h"
+  ],
+  "pot_bb": 26.46,
+  "effective_stack_bb": 178.605,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.39999999999999997,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jc",
+    "8s",
+    "Qc",
+    "3s"
+   ],
+   "path": [
+    "check"
+   ]
+  },
+  "audit": {
+   "variant": 13,
+   "family": "river_check_back_value",
+   "id": "river_check_back_value-13",
+   "source_hand": "9000009999",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7d",
+   "Ts",
+   "4d",
+   "Qd",
+   "Ac"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 62.16,
+  "tree": {
+   "bet_fractions": [
+    0.3333333333333333,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8h",
+    "7h",
+    "7c",
+    "7s"
+   ],
+   "path": [
+    "bet 12"
+   ]
+  },
+  "audit": {
+   "variant": 0,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-00",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7h",
+   "Kc",
+   "8h",
+   "2h",
+   "4d"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 41.4,
+  "tree": {
+   "bet_fractions": [
+    0.22,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jc",
+    "7s",
+    "7d",
+    "7c"
+   ],
+   "path": [
+    "bet 7.92"
+   ]
+  },
+  "audit": {
+   "variant": 1,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-01",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7s",
+   "3d",
+   "Js",
+   "5s",
+   "8h"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 64.8,
+  "tree": {
+   "bet_fractions": [
+    0.25,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ac",
+    "7c",
+    "7h",
+    "7d"
+   ],
+   "path": [
+    "bet 9"
+   ]
+  },
+  "audit": {
+   "variant": 2,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-02",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7c",
+   "6h",
+   "Ac",
+   "9c",
+   "Js"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 84.6,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "4d",
+    "7d",
+    "7s",
+    "7h"
+   ],
+   "path": [
+    "bet 10.08"
+   ]
+  },
+  "audit": {
+   "variant": 3,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-03",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7d",
+   "Js",
+   "5d",
+   "Kd",
+   "2c"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 118.8,
+  "tree": {
+   "bet_fractions": [
+    0.3,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "9h",
+    "7h",
+    "7c",
+    "7s"
+   ],
+   "path": [
+    "bet 10.8"
+   ]
+  },
+  "audit": {
+   "variant": 4,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-04",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7h",
+   "Ac",
+   "9h",
+   "3h",
+   "5d"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 162.0,
+  "tree": {
+   "bet_fractions": [
+    0.32,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Qs",
+    "7s",
+    "7d",
+    "7c"
+   ],
+   "path": [
+    "bet 11.52"
+   ]
+  },
+  "audit": {
+   "variant": 5,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-05",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7s",
+   "4d",
+   "Qs",
+   "6s",
+   "9h"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 243.0,
+  "tree": {
+   "bet_fractions": [
+    0.3333333333333333,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "2c",
+    "7c",
+    "7h",
+    "7d"
+   ],
+   "path": [
+    "bet 12"
+   ]
+  },
+  "audit": {
+   "variant": 6,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-06",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7c",
+   "8h",
+   "2c",
+   "Tc",
+   "Qs"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 30.6,
+  "tree": {
+   "bet_fractions": [
+    0.34,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "5d",
+    "7d",
+    "7s",
+    "7h"
+   ],
+   "path": [
+    "bet 12.24"
+   ]
+  },
+  "audit": {
+   "variant": 7,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-07",
+   "source_hand": "9000014007",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "7d",
+   "Qs",
+   "6d",
+   "Ad",
+   "3c"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 41.4,
+  "tree": {
+   "bet_fractions": [
+    0.36,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Tc",
+    "7h",
+    "7c",
+    "7s"
+   ],
+   "path": [
+    "bet 12.96"
+   ]
+  },
+  "audit": {
+   "variant": 8,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-08",
+   "source_hand": "9000014007",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "7s",
+   "5d",
+   "Ks",
+   "8s",
+   "Th"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 84.6,
+  "tree": {
+   "bet_fractions": [
+    0.22,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "3c",
+    "7c",
+    "7h",
+    "7d"
+   ],
+   "path": [
+    "bet 7.92"
+   ]
+  },
+  "audit": {
+   "variant": 10,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-10",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7c",
+   "9h",
+   "3c",
+   "Jc",
+   "Ks"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 118.8,
+  "tree": {
+   "bet_fractions": [
+    0.25,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "6d",
+    "7d",
+    "7s",
+    "7h"
+   ],
+   "path": [
+    "bet 9"
+   ]
+  },
+  "audit": {
+   "variant": 11,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-11",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7d",
+   "Ks",
+   "8d",
+   "2d",
+   "4c"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 162.0,
+  "tree": {
+   "bet_fractions": [
+    0.28,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jh",
+    "7h",
+    "7c",
+    "7s"
+   ],
+   "path": [
+    "bet 10.08"
+   ]
+  },
+  "audit": {
+   "variant": 12,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-12",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7d",
+   "Ts",
+   "4d",
+   "Qd",
+   "Ac"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 62.16,
+  "tree": {
+   "bet_fractions": [
+    0.3333332222222222,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8h",
+    "7h",
+    "7c",
+    "7s"
+   ],
+   "path": [
+    "bet 11.999996"
+   ]
+  },
+  "audit": {
+   "variant": 200,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-200",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7d",
+   "Ts",
+   "4d",
+   "Qd",
+   "Ac"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 62.16,
+  "tree": {
+   "bet_fractions": [
+    0.3333333333333333,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8h",
+    "7h",
+    "7c",
+    "7s"
+   ],
+   "path": [
+    "bet 12"
+   ]
+  },
+  "audit": {
+   "variant": 201,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-201",
+   "source_hand": "9000014007",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7d",
+   "Ts",
+   "4d",
+   "Qd",
+   "Ac"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 62.16,
+  "tree": {
+   "bet_fractions": [
+    0.33333344444444446,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8h",
+    "7h",
+    "7c",
+    "7s"
+   ],
+   "path": [
+    "bet 12.000004"
+   ]
+  },
+  "audit": {
+   "variant": 202,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-202",
+   "source_hand": "9000014007",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "7d",
+   "Ts",
+   "4d",
+   "Qd",
+   "Ac"
+  ],
+  "pot_bb": 36.0,
+  "effective_stack_bb": 62.16,
+  "tree": {
+   "bet_fractions": [
+    0.3333333333333333,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8d",
+    "7h",
+    "7c",
+    "7s"
+   ],
+   "path": [
+    "bet 12"
+   ]
+  },
+  "audit": {
+   "variant": 203,
+   "family": "river_set_small_lead",
+   "id": "river_set_small_lead-203",
+   "source_hand": "9000014007",
+   "rule_active": false
+  }
+ },
+ {
+  "board": [
+   "8c",
+   "5s",
+   "Jh",
+   "3d",
+   "Tc"
+  ],
+  "pot_bb": 4.5,
+  "effective_stack_bb": 66.54,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.35000000000000003,
+    0.4,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Qc",
+    "9h",
+    "Kh",
+    "9s"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 0,
+   "family": "value_size_40",
+   "id": "value_size_40-00",
+   "source_hand": "9000005983",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7d",
+   "4c",
+   "Ts",
+   "2h",
+   "9d"
+  ],
+  "pot_bb": 4.5,
+  "effective_stack_bb": 5.175,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.375,
+    0.4,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jc",
+    "8s",
+    "Qs",
+    "8c"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 1,
+   "family": "value_size_40",
+   "id": "value_size_40-01",
+   "source_hand": "9000005983",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "9h",
+   "6d",
+   "Qc",
+   "4s",
+   "Jh"
+  ],
+  "pot_bb": 4.5,
+  "effective_stack_bb": 8.1,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.42500000000000004,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Kh",
+    "Tc",
+    "Ac",
+    "Td"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 2,
+   "family": "value_size_40",
+   "id": "value_size_40-02",
+   "source_hand": "9000005983",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "6s",
+   "3h",
+   "9d",
+   "Ac",
+   "8s"
+  ],
+  "pot_bb": 4.5,
+  "effective_stack_bb": 10.575,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.45,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ts",
+    "7s",
+    "Jd",
+    "7h"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 3,
+   "family": "value_size_40",
+   "id": "value_size_40-03",
+   "source_hand": "9000005983",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Tc",
+   "7s",
+   "Kh",
+   "5d",
+   "Qc"
+  ],
+  "pot_bb": 4.5,
+  "effective_stack_bb": 14.85,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.35000000000000003,
+    0.4,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ac",
+    "Jh",
+    "2d",
+    "Js"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 4,
+   "family": "value_size_40",
+   "id": "value_size_40-04",
+   "source_hand": "9000005983",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "8d",
+   "5c",
+   "Js",
+   "3h",
+   "Td"
+  ],
+  "pot_bb": 4.5,
+  "effective_stack_bb": 20.25,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.375,
+    0.4,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Qd",
+    "9s",
+    "Kc",
+    "9c"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 5,
+   "family": "value_size_40",
+   "id": "value_size_40-05",
+   "source_hand": "9000005983",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7h",
+   "4d",
+   "Tc",
+   "2s",
+   "9h"
+  ],
+  "pot_bb": 4.5,
+  "effective_stack_bb": 30.375,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.42500000000000004,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jh",
+    "8c",
+    "Qc",
+    "8h"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 6,
+   "family": "value_size_40",
+   "id": "value_size_40-06",
+   "source_hand": "9000005983",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "9s",
+   "6h",
+   "Qd",
+   "4c",
+   "Js"
+  ],
+  "pot_bb": 4.5,
+  "effective_stack_bb": 3.825,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.45,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ks",
+    "Td",
+    "Ad",
+    "Tc"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 7,
+   "family": "value_size_40",
+   "id": "value_size_40-07",
+   "source_hand": "9000005983",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "6c",
+   "3s",
+   "9h",
+   "Ad",
+   "8c"
+  ],
+  "pot_bb": 4.5,
+  "effective_stack_bb": 5.175,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.35000000000000003,
+    0.4,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Td",
+    "7h",
+    "Jh",
+    "7s"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 8,
+   "family": "value_size_40",
+   "id": "value_size_40-08",
+   "source_hand": "9000005983",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Td",
+   "7c",
+   "Ks",
+   "5h",
+   "Qd"
+  ],
+  "pot_bb": 4.5,
+  "effective_stack_bb": 8.1,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.375,
+    0.4,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Ad",
+    "Js",
+    "2s",
+    "Jc"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 9,
+   "family": "value_size_40",
+   "id": "value_size_40-09",
+   "source_hand": "9000005983",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "3c",
+   "2c",
+   "Kc",
+   "Js",
+   "2s"
+  ],
+  "pot_bb": 30.36,
+  "effective_stack_bb": 99.16,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.5,
+    0.55,
+    0.66,
+    0.7496706192358367,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jh",
+    "4h",
+    "Jd",
+    "4s"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 0,
+   "family": "value_size_55",
+   "id": "value_size_55-00",
+   "source_hand": "9000001429",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "8c",
+   "5s",
+   "5h",
+   "3s",
+   "2s"
+  ],
+  "pot_bb": 42.0,
+  "effective_stack_bb": 79.0,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.525,
+    0.55,
+    0.66,
+    0.8,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8d",
+    "Th",
+    "Tc",
+    "8h"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 1,
+   "family": "value_size_55",
+   "id": "value_size_55-01",
+   "source_hand": "9000000095",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qh",
+   "Th",
+   "7h",
+   "Jd",
+   "Td"
+  ],
+  "pot_bb": 30.36,
+  "effective_stack_bb": 54.648,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.55,
+    0.5750000000000001,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jc",
+    "Kc",
+    "Js",
+    "Kd"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 2,
+   "family": "value_size_55",
+   "id": "value_size_55-02",
+   "source_hand": "9000001429",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "8s",
+   "5h",
+   "5d",
+   "2h",
+   "Ah"
+  ],
+  "pot_bb": 42.0,
+  "effective_stack_bb": 98.7,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.55,
+    0.6000000000000001,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8c",
+    "9h",
+    "9s",
+    "8d"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 3,
+   "family": "value_size_55",
+   "id": "value_size_55-03",
+   "source_hand": "9000000095",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "7c",
+   "6c",
+   "3c",
+   "Js",
+   "6s"
+  ],
+  "pot_bb": 30.36,
+  "effective_stack_bb": 100.188,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.5,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jh",
+    "9h",
+    "Jd",
+    "9s"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 4,
+   "family": "value_size_55",
+   "id": "value_size_55-04",
+   "source_hand": "9000001429",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "8d",
+   "5c",
+   "5s",
+   "Qc",
+   "Tc"
+  ],
+  "pot_bb": 42.0,
+  "effective_stack_bb": 189.0,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.525,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8h",
+    "4s",
+    "4d",
+    "8s"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 5,
+   "family": "value_size_55",
+   "id": "value_size_55-05",
+   "source_hand": "9000000095",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "2h",
+   "Ah",
+   "Qh",
+   "Jd",
+   "Ad"
+  ],
+  "pot_bb": 30.36,
+  "effective_stack_bb": 204.93,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.55,
+    0.5750000000000001,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jc",
+    "3c",
+    "Js",
+    "3h"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 6,
+   "family": "value_size_55",
+   "id": "value_size_55-06",
+   "source_hand": "9000001429",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "8s",
+   "5h",
+   "5d",
+   "6h",
+   "4h"
+  ],
+  "pot_bb": 42.0,
+  "effective_stack_bb": 35.7,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.55,
+    0.6000000000000001,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8c",
+    "Kd",
+    "Ks",
+    "8d"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 7,
+   "family": "value_size_55",
+   "id": "value_size_55-07",
+   "source_hand": "9000000095",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "Qc",
+   "Tc",
+   "7c",
+   "Js",
+   "Ts"
+  ],
+  "pot_bb": 30.36,
+  "effective_stack_bb": 34.914,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.5,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "Jh",
+    "Kh",
+    "Jd",
+    "Ks"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 8,
+   "family": "value_size_55",
+   "id": "value_size_55-08",
+   "source_hand": "9000001429",
+   "rule_active": true
+  }
+ },
+ {
+  "board": [
+   "8d",
+   "5c",
+   "5s",
+   "2c",
+   "Ac"
+  ],
+  "pot_bb": 42.0,
+  "effective_stack_bb": 75.6,
+  "tree": {
+   "bet_fractions": [
+    0.33,
+    0.4,
+    0.525,
+    0.55,
+    0.66,
+    1
+   ],
+   "raise_fractions": [
+    1.0
+   ],
+   "all_in": true,
+   "max_raises": 2,
+   "min_bet_bb": 1
+  },
+  "query": {
+   "hero": [
+    "8c",
+    "9s",
+    "9d",
+    "8s"
+   ],
+   "path": []
+  },
+  "audit": {
+   "variant": 9,
+   "family": "value_size_55",
+   "id": "value_size_55-09",
+   "source_hand": "9000000095",
+   "rule_active": true
+  }
+ }
+]
