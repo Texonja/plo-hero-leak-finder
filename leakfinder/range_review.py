@@ -19,6 +19,7 @@ from .opponent_history import (
 from .opponent_range import condition_range
 from .postflop_value import bet_size
 from .river_holdings import river_holdings
+from .statistics import sizing
 from .strategy_guide import advice_at, nuts
 from .turn_lines import turn_sensitivity
 from .vendor.primitives import best_plo_hand
@@ -87,13 +88,20 @@ def _call_equity(point, size, calling):
 def _sizing_history(snap, point, baseline, responses_by_size):
     lines = []
     ready = []
+    reported_groups = set()
     for size, sample in responses_by_size.items():
-        size_label = f"Around {size / snap.pot:.0%} pot"
+        group = sizing(size / snap.pot)
         folds, calls, raises = responses(sample)
         n = folds + calls + raises
-        counts = f"{n}/{sample.broader} past opportunities · {sample.days} dates · fold {folds} · call {calls} · raise {raises}"
+        if group not in reported_groups:
+            counts = f"{n}/{sample.broader} past opportunities · {sample.days} dates · fold {folds} · call {calls} · raise {raises}"
+            interval = ""
+            if n:
+                lo, hi = wilson(folds / n, n)
+                interval = f" · fold interval {lo:.0%}–{hi:.0%}"
+            lines.append(f"Size group {group} · {counts}{interval}.")
+            reported_groups.add(group)
         if not n:
-            lines.append(f"{size_label} · {counts}.")
             continue
         equity = tuple(
             _call_equity(point, size / snap.pot, c) for _, c in RESPONSE_SCENARIOS
@@ -101,11 +109,9 @@ def _sizing_history(snap, point, baseline, responses_by_size):
         estimate = historical_estimate(
             snap.pot, size, point.equity * snap.pot, equity, sample
         )
-        fold_low, fold_high = wilson(folds / n, n)
         result = "meets the sample threshold" if sample.ready else "exploratory sample"
         lines.append(
-            f"{size_label} · {counts} · fold interval {fold_low:.0%}–{fold_high:.0%}."
-            f"\n  {result.capitalize()} · vs check {estimate.gain / snap.bb:+.2f} BB"
+            f"  {size / snap.pot:.0%} pot · {result} · vs check {estimate.gain / snap.bb:+.2f} BB"
             f" · model range {estimate.low / snap.bb:+.2f} to {estimate.high / snap.bb:+.2f} BB."
         )
         if sample.ready:
@@ -227,6 +233,10 @@ def _early_review(snap, hero, opponent, history):
                     "The personal comparison excludes all-in sizes because they have a different response context."
                 )
             picked_label = f"bet {picked / snap.pot:.0%}" if picked else "check"
+            if picked and picked != baseline:
+                group = sizing(picked / snap.pot)
+                if sum(sizing(s / snap.pot) == group for s in responses_by_size) > 1:
+                    picked_label = f"bet in the {group} group"
             hist_comparison = (after, picked_label)
             lines.extend(
                 (
@@ -371,7 +381,7 @@ def _early_review(snap, hero, opponent, history):
             "The comparison matches stakes and antes, preflop role and raise count, position, board texture, stack depth and prior action. "
             "A fold wins the pot. A call goes to showdown against a modeled calling range. A raise costs Hero the bet in this bet/fold scenario. "
             "The range combines Wilson intervals for folding and raising after continuing with three assumptions about the calling range. Actions from the same session can be correlated. "
-            "The 50% and 67% sizes share the same historical sample. The model accounts for their different prices."
+            "Sizes in the same history group share response counts. Each scenario uses its own bet amount."
         )
     links = tuple(
         sorted(
@@ -538,14 +548,21 @@ def build_range_review(snap, hero, opponent, history):
                 f"The broader sample across lines includes {sample.broader} bets, {other_known} with cards shown and {other_air} with weak made hands shown."
             )
     else:
+        effective = min(hero.stack, opponent.stack)
+        seen = set()
         for size in sizes:
+            group = sizing(size / snap.pot)
+            all_in = size >= effective
+            if (group, all_in) in seen:
+                continue
+            seen.add((group, all_in))
             sample = history.sample(snap, size)
             f, c, r = responses(sample)
             n = f + c + r
             lo, hi = wilson(f / n, n) if n else (0.0, 1.0)
             fold_interval = f" · Wilson {lo:.1%}–{hi:.1%}" if n else ""
             lines.append(
-                f"Around {size / snap.pot:.0%} pot · {n}/{sample.broader} past opportunities in this group · fold {f}, call {c}, raise {r}{fold_interval}."
+                f"Size group {group}{' · all-in' if all_in else ''} · {n}/{sample.broader} past opportunities in this group · fold {f}, call {c}, raise {r}{fold_interval}."
             )
             matched.update(((row.hand, row.ref), row) for row in sample.comparable)
             broader = sample.previous

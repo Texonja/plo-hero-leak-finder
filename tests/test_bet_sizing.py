@@ -7,6 +7,7 @@ from leakfinder.analysis import describe
 from leakfinder.bet_sizing import bet_size_key
 from leakfinder.demo import load_demo
 from leakfinder.engine import replay
+from leakfinder.explorer import SIZE_ORDER
 from leakfinder.statistics import observations, sizing
 from leakfinder.storage import connect, initialize
 from tests.test_engine import decoded, paired
@@ -15,10 +16,10 @@ from tests.test_engine import decoded, paired
 class BetSizingTests(unittest.TestCase):
     def test_each_inclusive_boundary_in_matching_and_reports(self):
         for percent, lower, upper, lower_key, upper_key in [
-            (33, "≤33% pot", ">33–50% pot", "bet-0", "bet-1"),
-            (50, ">33–50% pot", ">50–75% pot", "bet-1", "bet-2"),
-            (75, ">50–75% pot", ">75–100% pot", "bet-2", "bet-3"),
-            (100, ">75–100% pot", ">100% pot", "bet-3", "bet-4"),
+            (40, "≤40% pot", ">40–62.5% pot", "bet-0", "bet-1"),
+            (62.5, ">40–62.5% pot", ">62.5–87.5% pot", "bet-1", "bet-2"),
+            (87.5, ">62.5–87.5% pot", ">87.5–101% pot", "bet-2", "bet-3"),
+            (101, ">87.5–101% pot", ">101% pot", "bet-3", "bet-4"),
         ]:
             for offset, label, key in [
                 (-1, lower, lower_key),
@@ -30,11 +31,22 @@ class BetSizingTests(unittest.TestCase):
                     self.assertEqual(sizing(fraction), label)
                     self.assertEqual(bet_size_key(fraction), key)
         self.assertEqual(sizing(None), "No bet")
+        self.assertEqual(
+            SIZE_ORDER, tuple(sizing(x) for x in (1 / 3, 0.5, 0.75, 1, 1.2, None))
+        )
 
-    def test_recorded_half_pot_and_one_cent_more_in_both_adapters(self):
+    def test_recorded_chip_rounding_in_both_adapters(self):
         for amount, expected_key, label in [
-            (1.50, "bet-1", ">33–50% pot"),
-            (1.51, "bet-2", ">50–75% pot"),
+            (0.99, "bet-0", "≤40% pot"),
+            (1.00, "bet-0", "≤40% pot"),
+            (1.01, "bet-0", "≤40% pot"),
+            (1.49, "bet-1", ">40–62.5% pot"),
+            (1.50, "bet-1", ">40–62.5% pot"),
+            (1.51, "bet-1", ">40–62.5% pot"),
+            (2.24, "bet-2", ">62.5–87.5% pot"),
+            (2.25, "bet-2", ">62.5–87.5% pot"),
+            (2.26, "bet-2", ">62.5–87.5% pot"),
+            (3.00, "bet-3", ">87.5–101% pot"),
         ]:
             for hand in decoded(
                 paired([[("A", "check", 0), ("B", "bet", amount), ("A", "fold", 0)]])
@@ -56,7 +68,32 @@ class BetSizingTests(unittest.TestCase):
                     self.assertEqual(sizing(row[5]), label)
                     self.assertIn(label, describe(response.context))
 
-    def test_v2_demo_upgrade_atomic_idempotent_and_matches_fresh_import(self):
+    def test_standard_sizes_in_original_demo_stay_together(self):
+        with closing(connect(":memory:")) as db:
+            initialize(db)
+            load_demo(db)
+            for fraction, total, expected_key in (
+                (1 / 3, 41, "bet-0"),
+                (0.5, 92, "bet-1"),
+                (0.75, 58, "bet-2"),
+                (1, 130, "bet-3"),
+            ):
+                rows = db.execute(
+                    "SELECT h.room,o.faced FROM obs o JOIN hands h ON h.id=o.hand WHERE o.faced BETWEEN ? AND ?",
+                    (fraction - 0.01, fraction + 0.01),
+                ).fetchall()
+                self.assertEqual(len(rows), total)
+                self.assertEqual({row["room"] for row in rows}, {"CoinPoker", "iPoker"})
+                self.assertEqual(
+                    {bet_size_key(row["faced"]) for row in rows}, {expected_key}
+                )
+
+    def test_demo_upgrade_atomic_idempotent_and_matches_fresh_import(self):
+        for version in (2, 3):
+            with self.subTest(version=version):
+                self.check_upgrade(version)
+
+    def check_upgrade(self, version):
         with closing(connect(":memory:")) as db:
             initialize(db)
             load_demo(db)
@@ -76,12 +113,17 @@ class BetSizingTests(unittest.TestCase):
                 WHERE d.cell LIKE '%"bet-%'""")
             for row in priced:
                 cell = json.loads(row["cell"])
-                old_key = "bet-" + str(
-                    sum(
+                if version == 2:
+                    band = sum(
                         row["faced"] >= threshold
                         for threshold in (0.34, 0.55, 0.80, 1.01)
                     )
-                )
+                else:
+                    band = sum(
+                        row["faced"] > threshold
+                        for threshold in (0.33, 0.50, 0.75, 1.0)
+                    )
+                old_key = f"bet-{band}"
                 if old_key != cell[10]:
                     restored_rooms.add(row["room"])
                     cell[10] = old_key
@@ -95,7 +137,7 @@ class BetSizingTests(unittest.TestCase):
                 db.execute(
                     "INSERT INTO review_guide_cache VALUES('Both','guide',X'AA')"
                 )
-                db.execute("PRAGMA user_version=2")
+                db.execute(f"PRAGMA user_version={version}")
             # A failed migration must keep both the old contexts and the cache
             # version until the entire upgrade can be retried.
             db.execute("""CREATE TEMP TRIGGER fail_clear BEFORE DELETE ON review_comparison_cache
@@ -104,7 +146,7 @@ class BetSizingTests(unittest.TestCase):
                 sqlite3.IntegrityError, "injected migration failure"
             ):
                 initialize(db)
-            self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 2)
+            self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], version)
             self.assertEqual(
                 db.execute(
                     "SELECT cell FROM decisions WHERE rowid=?", (old[0][1],)
@@ -113,7 +155,7 @@ class BetSizingTests(unittest.TestCase):
             )
             db.execute("DROP TRIGGER fail_clear")
             initialize(db)
-            self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 3)
+            self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 4)
             self.assertEqual([tuple(r) for r in db.execute(query)], fresh)
             self.assertEqual(
                 [

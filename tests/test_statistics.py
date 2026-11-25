@@ -100,7 +100,7 @@ class DescriptiveStatsTests(unittest.TestCase):
             (fold_row,) = [r for r in rows if r[-2] & BITS["RIVERF"]]
             self.assertEqual(size_row[4], 0.5)
             self.assertEqual(fold_row[5], 0.5)
-            self.assertEqual(sizing(0.5), ">33–50% pot")
+            self.assertEqual(sizing(0.5), ">40–62.5% pot")
             self.assertEqual(sizing(None), "No bet")
 
     def test_tags_overlap_and_wheel_connectivity(self):

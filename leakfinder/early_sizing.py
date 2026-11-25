@@ -4,7 +4,8 @@ from dataclasses import dataclass
 from itertools import product
 
 from .analysis import wilson
-from .opponent_history import responses, size_band
+from .bet_sizing import bet_size_key
+from .opponent_history import responses
 
 CHECK_MARGIN = 0.02
 
@@ -51,35 +52,41 @@ def historical_estimate(pot, amount, check, call_equities, sample):
 def supported_sizing(pot, baseline, ready):
     """Keep the range-model choice until historical bounds support a change."""
     floor = CHECK_MARGIN * pot
-    original = next((entry for entry in ready if entry.amount == baseline), None)
-    if baseline and original is None:
+    if baseline and not any(entry.amount == baseline for entry in ready):
         return baseline, "The original size has too few comparable responses."
-    baseline_band = size_band(baseline, pot)
-    alternatives = [
-        entry
-        for entry in ready
-        if (not baseline or size_band(entry.amount, pot) != baseline_band)
-        and entry.low > floor
-        and (original is None or entry.low > original.high + floor)
-    ]
+    baseline_band = bet_size_key(baseline / pot)
+    groups = {}
+    for entry in ready:
+        groups.setdefault(bet_size_key(entry.amount / pot), []).append(entry)
+    # Prices in one group use the exact same historical responses. Compare
+    # the envelope across its offered prices, with each observation counted once.
+    bounds = {
+        key: (min(e.low for e in estimates), max(e.high for e in estimates))
+        for key, estimates in groups.items()
+    }
+    required = max(0.0, bounds[baseline_band][1]) + floor if baseline else floor
+    alternatives = {
+        key: low
+        for key, (low, _) in bounds.items()
+        if (not baseline or key != baseline_band) and low > required
+    }
     if alternatives:
-        best = max(alternatives, key=lambda entry: entry.low)
-        if baseline and any(
-            entry.high + floor >= best.low
-            and size_band(entry.amount, pot)
-            not in {size_band(best.amount, pot), baseline_band}
-            for entry in ready
+        best = max(alternatives, key=alternatives.get)
+        if any(
+            high + floor >= alternatives[best]
+            for key, (_, high) in bounds.items()
+            if key != best and (not baseline or key != baseline_band)
         ):
             return (
                 baseline,
                 "The evidence does not yet distinguish the alternative sizing groups.",
             )
-        return best.amount, "The lower estimate supports betting in this sizing group."
-    if (
-        original
-        and original.high <= floor
-        and all(entry.high <= floor for entry in ready)
-    ):
+        # The caller displays the group when several offered prices share it.
+        return (
+            groups[best][0].amount,
+            "The lower estimate supports betting in this sizing group.",
+        )
+    if baseline and all(high <= floor for _, high in bounds.values()):
         return (
             0,
             "The upper estimate stays below the betting threshold for sizes with enough history.",

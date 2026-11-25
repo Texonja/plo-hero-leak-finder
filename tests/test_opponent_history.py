@@ -75,7 +75,7 @@ class HistoricalRiverTests(unittest.TestCase):
             replace(core, end=current),
             replace(core, end=current + timedelta(seconds=1)),
             replace(core, number=s.number),
-            replace(core, case=(*core.case[:-1], 2)),
+            replace(core, case=(*core.case[:-1], "bet-4")),
         ]
         result = OpponentHistory(rows).sample(s)
         self.assertEqual(result.comparable, (core,))

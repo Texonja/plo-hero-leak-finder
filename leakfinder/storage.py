@@ -11,7 +11,10 @@ from pathlib import Path
 from .bet_sizing import bet_size_key
 from .engine import METRICS, replay
 from .importers import Excluded, Record, decode, sources
+from .library_backup import backup_before_upgrade
 from .statistics import observations, settlements, tags
+
+LIBRARY_VERSION = 4
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS imports(id INTEGER PRIMARY KEY, path TEXT, digest TEXT, summary TEXT, UNIQUE(path,digest));
@@ -42,21 +45,28 @@ def connect(path):
 
 
 def initialize(db):
-    db.execute("PRAGMA journal_mode=WAL")
     version = db.execute("PRAGMA user_version").fetchone()[0]
-    if version not in (0, 1, 2, 3):
+    if version not in (0, 1, 2, 3, LIBRARY_VERSION):
         raise ValueError("This library belongs to a different version.")
-    db.executescript(SCHEMA)
-    if version == 3:
+    if version == LIBRARY_VERSION:
+        db.execute("PRAGMA journal_mode=WAL")
         return
     with db:
         db.execute("BEGIN IMMEDIATE")
         version = db.execute("PRAGMA user_version").fetchone()[0]
-        if version == 3:
+        if version == LIBRARY_VERSION:
             return
-        if version not in (0, 1, 2):
+        if version not in (0, 1, 2, 3):
             raise ValueError("This library belongs to a different version.")
+        if version:
+            backup_before_upgrade(db, version, LIBRARY_VERSION)
+        # executescript() would commit the lock before creating these tables.
+        for statement in SCHEMA.strip().splitlines():
+            db.execute(statement)
         if version == 1:
+            # These four derived tables can be rebuilt from the v1 original records.
+            for table in ("decisions", "facts", "players", "obs"):
+                db.execute(f"DELETE FROM {table}")
             for row in db.execute("""SELECT h.id,h.room,o.raw,o.locator FROM hands h JOIN origins o ON o.rowid=
                 (SELECT min(rowid) FROM origins WHERE hand=h.id)"""):
                 hand = decode(
@@ -67,9 +77,8 @@ def initialize(db):
                     )
                 )
                 ds, events = replay(hand)
-                db.execute("DELETE FROM decisions WHERE hand=?", (row["id"],))
                 store_facts(db, row["id"], hand, ds, events)
-        elif version == 2:
+        elif version in (2, 3):
             # The exact fraction faced is already recorded alongside each
             # decision. Reclassify its context without replaying any histories.
             db.create_function("lf_bet_size_key", 1, bet_size_key, deterministic=True)
@@ -79,9 +88,10 @@ def initialize(db):
                 WHERE o.hand=d.hand AND o.actor=d.actor AND o.ref=d.ref
                 AND o.faced IS NOT NULL AND d.cell LIKE '%"bet-%'
                 AND json_extract(d.cell,'$[10]') <> lf_bet_size_key(o.faced)""")
-        if version in (1, 2):
+        if version:
             db.execute("DELETE FROM review_comparison_cache")
-        db.execute("PRAGMA user_version=3")
+        db.execute(f"PRAGMA user_version={LIBRARY_VERSION}")
+    db.execute("PRAGMA journal_mode=WAL")
 
 
 def store_facts(db, hid, h, decisions, events):

@@ -19,7 +19,6 @@ from leakfinder.postflop_value import bet_size
 from leakfinder.range_review import build_range_review
 from leakfinder.replay_view import _ledger, _source_records, load_snapshot
 from leakfinder.storage import cohort, connect, initialize
-
 from tests.test_replay_view import coin, ip
 
 
@@ -83,8 +82,12 @@ class EarlySizingTests(unittest.TestCase):
             with self.subTest(room=snap.room, street=snap.street):
                 large_fold = controls(snap, ((1, 4, 115), (1, 4, 115), (100, 15, 5)))
                 result = review(snap, large_fold)
-                self.assertEqual(result.historical_comparison, ("bet 33%", "bet 85%"))
+                self.assertEqual(
+                    result.historical_comparison,
+                    ("bet 33%", "bet in the >62.5–87.5% pot group"),
+                )
                 self.assertIn("fold 100 · call 15 · raise 5", result.text)
+                self.assertEqual(result.text.count("fold 100 · call 15 · raise 5"), 1)
                 self.assertEqual(len(result.matched_sources), 360)
                 earlier = clock(snap.stamp) - timedelta(days=7)
                 one_date = tuple(replace(r, started=earlier) for r in large_fold)
@@ -112,6 +115,34 @@ class EarlySizingTests(unittest.TestCase):
         )
         self.assertEqual(supported_sizing(100, 0, (Estimate(33, 3, 0, 6),))[0], 0)
         self.assertEqual(supported_sizing(100, 0, (Estimate(33, 8, 4, 12),))[0], 33)
+
+    def test_shared_responses_do_not_select_one_price_within_a_group(self):
+        small = Estimate(33, 5, 1, 9)
+        # Only the 85% scenario passes. Both sizes use the same historical
+        # folds, calls and raises, so the history cannot single out 85%.
+        same_history = (Estimate(67, 8, 0, 13), Estimate(85, 19, 14, 22))
+        self.assertEqual(supported_sizing(100, 33, (small, *same_history))[0], 33)
+        self.assertEqual(supported_sizing(100, 67, same_history)[0], 67)
+
+    def test_opponent_history_matches_rounded_three_quarter_bets_in_both_rooms(self):
+        for snap in (coin(30, "Hero", "Line 28"), ip(41, "BigNeonMax", "Action 8")):
+            with self.subTest(room=snap.room):
+                template = controls(snap, ((0, 0, 0), (0, 0, 0), (30, 0, 0)))
+                opp = postflop_opponent(snap)
+                rows = tuple(
+                    replace(
+                        row,
+                        case=context(
+                            snap, opp.name, round(snap.pot * fraction), snap.pot
+                        ),
+                    )
+                    for row, fraction in zip(template, (0.749, 0.751) * 15, strict=True)
+                )
+                history = OpponentHistory(rows)
+                sample = history.sample(snap, round(0.75 * snap.pot))
+                self.assertEqual(len(sample.comparable), 30)
+                self.assertTrue(sample.ready)
+                self.assertFalse(history.sample(snap, round(0.5 * snap.pot)).comparable)
 
     def test_real_response_references_match_replayed_action_on_both_networks(self):
         db = connect(":memory:")

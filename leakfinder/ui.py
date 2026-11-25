@@ -9,6 +9,7 @@ import threading
 import tkinter as tk
 import traceback
 import webbrowser
+from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
 from queue import Empty, Queue
@@ -132,6 +133,17 @@ def table(parent, cols, heights=10):
     return tv
 
 
+def open_library(path):
+    path.parent.mkdir(parents=True, exist_ok=True)
+    db = connect(path)
+    try:
+        initialize(db)
+    except Exception:
+        db.close()
+        raise
+    return db
+
+
 class Workspace:
     def __init__(self, root, path, start_demo=False):
         self.root, self.personal_path = root, Path(path).resolve()
@@ -139,9 +151,7 @@ class Workspace:
         self.path = (
             demo_path(self.personal_path) if self.is_demo else self.personal_path
         )
-        self.path.parent.mkdir(parents=True, exist_ok=True)
-        self.db = connect(self.path)
-        initialize(self.db)
+        self.db = open_library(self.path)
         self.busy = False
         self.results = {}
         self.queue = None
@@ -536,13 +546,7 @@ class Workspace:
             return False
         if self.is_demo != demo:
             path = demo_path(self.personal_path) if demo else self.personal_path
-            path.parent.mkdir(parents=True, exist_ok=True)
-            db = connect(path)
-            try:
-                initialize(db)
-            except Exception:
-                db.close()
-                raise
+            db = open_library(path)
             self.db.close()
             self.db, self.path, self.is_demo = db, path, demo
             self.room.set("Both")
@@ -902,7 +906,7 @@ class Workspace:
                     sample = preview_decisions(db, street)
                     if sample:
                         self.jobs.put(("review-preview", sample))
-            population_key = json.dumps((2, key), separators=(",", ":"))
+            population_key = json.dumps((3, key), separators=(",", ":"))
             comparison = (
                 previous_comparison[1:]
                 if previous_comparison and previous_comparison[0] == key
@@ -1087,6 +1091,7 @@ def main():
     root = None
     try:
         root = tk.Tk()
+        root.withdraw()
         root.report_callback_exception = lambda kind, err, tb: report_error(
             kind, err, tb, default.parent, root
         )
@@ -1096,9 +1101,18 @@ def main():
             start_demo=args.library is None and not default.exists(),
         )
         try:
+            root.deiconify()
             root.mainloop()
         finally:
             app.close()
     except Exception as exc:
-        report_error(type(exc), exc, exc.__traceback__, default.parent, root)
+        if root is not None:
+            with suppress(tk.TclError):
+                root.withdraw()
+        try:
+            report_error(type(exc), exc, exc.__traceback__, default.parent, root)
+        finally:
+            if root is not None:
+                with suppress(tk.TclError):
+                    root.destroy()
         raise SystemExit(1) from exc

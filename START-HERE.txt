@@ -9,9 +9,12 @@ Getting started
 
 Upgrading an existing library
 
-Close the older app before opening this build. The first launch updates
-previous sizing groups in the local library. Version 0.3.4 cannot open the
-updated library. Keep a copy of the closed library if you need to go back.
+Close the older app before opening this build. Before upgrading an existing
+library, the app saves a SQLite copy in the backups folder next to that
+library. The copy includes your private hands and aliases. Allow enough disk
+space for a copy of the database. If the backup fails, the upgrade stops.
+To use the older app again, copy its backup file to a separate folder and
+open that copy using the older app's START.BAT --library "path-to-copy".
 
 Importing completed hands
 
@@ -107,7 +110,7 @@ history appear side by side. The history comparison uses earlier folds,
 calls, and raises against Hero in comparable contexts. Changing a
 recommendation requires at least 30 matched responses per size group
 across three dates and a clear estimate gap. This individual-opponent
-model pools sizes up to 40%, over 40% through 75%, and over 75% of pot.
+model uses the same sizing groups as the cash reports.
 Smaller samples remain visible for review. The historical sizing comparison
 assumes a fold to a raise and no further betting after a call. The heads-up turn scenarios
 also compare calling the raise and facing a half-pot river bet on the same
@@ -127,8 +130,11 @@ Hover over a statistic or report cell for a short explanation. The 95%
 interval describes sampling uncertainty around the displayed estimate.
 
 Population review uses matched opponent decisions in your local library.
-Postflop matching and cash reports group bets by the pot before the bet,
-with inclusive upper bounds at 33%, 50%, 75% and 100%, then over 100%.
+Postflop sizing groups use the bet as a fraction of the pot before the bet.
+The upper bounds are 40%, 62.5%, 87.5% and 101%, followed by a group above
+101%. For example, 74.9% and 75.1% both fall in the three-quarter-pot group.
+The near-pot group includes up to 101% for rounding. The replay retains
+the recorded amount. A group cannot identify which slider button was used.
 Supported difference flags a frequency difference in similar situations.
 Exploratory also displays small samples and spots without a matched
 comparison. A frequency difference or a negative result can guide hand

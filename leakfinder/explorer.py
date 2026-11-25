@@ -12,6 +12,7 @@ from queue import Empty, Queue
 from threading import Thread
 
 from .analysis import wilson
+from .bet_sizing import LABELS as SIZE_LABELS
 from .hover_help import CONFIDENCE_HELP, HoverHelp, tree_help
 from .importers import SCALE
 from .statistics import BITS, DEFS, sizing
@@ -32,7 +33,7 @@ DIMENSIONS = (
     "Day",
     "Month",
 )
-SIZE_ORDER = [sizing(x) for x in (0, 0.4, 0.6, 0.9, 1.1, None)]
+SIZE_ORDER = (*SIZE_LABELS, "No bet")
 DEPTH_ORDER = ("<40 BB", "40–<80 BB", "80–<150 BB", "150+ BB")
 ALIASES = {
     "Sessions": "Session",

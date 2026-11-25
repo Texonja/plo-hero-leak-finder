@@ -99,15 +99,27 @@ class DesktopTests(unittest.TestCase):
 
     def test_startup_failure_shows_message_and_writes_local_traceback(self):
         directory = Path(self.tmp.name)
+        startup_root = tk.Tk()
+        visible_states = []
+
+        def observe_dialog(*_args, parent):
+            parent.update_idletasks()
+            visible_states.append((parent.state(), parent.winfo_ismapped()))
+
         with (
             patch.dict("os.environ", LOCALAPPDATA=str(directory)),
             patch("sys.argv", ["Leak Finder", "--library", str(directory)]),
-            patch("leakfinder.ui.tk.Tk", return_value=self.root),
-            patch("leakfinder.ui.messagebox.showerror") as dialog,
+            patch("leakfinder.ui.tk.Tk", return_value=startup_root),
+            patch(
+                "leakfinder.ui.messagebox.showerror", side_effect=observe_dialog
+            ) as dialog,
             self.assertRaises(SystemExit) as exited,
         ):
             main()
         self.assertEqual(exited.exception.code, 1)
+        self.assertEqual(visible_states, [("withdrawn", 0)])
+        with self.assertRaises(tk.TclError):
+            startup_root.winfo_exists()
         log = directory / "PLO Hero Leak Finder" / "errors.log"
         self.assertIn(str(log), dialog.call_args.args[1])
         self.assertIn("OperationalError", log.read_text(encoding="utf-8"))

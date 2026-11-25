@@ -28,7 +28,7 @@ from .vendor.common import RANK_VALUE
 from .vendor.primitives import best_plo_hand
 
 REVIEW_PAGE_SIZE = 12
-GUIDE_CACHE_VERSION = 8
+GUIDE_CACHE_VERSION = 9
 
 
 @dataclass(frozen=True)

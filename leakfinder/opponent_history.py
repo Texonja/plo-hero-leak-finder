@@ -8,6 +8,7 @@ from dataclasses import dataclass, replace
 from datetime import datetime, timedelta
 
 from .analysis import wilson
+from .bet_sizing import bet_size_key
 from .engine import replay
 from .importers import Record, decode
 from .replay_view import COIN_OFFSETS, _build, record_stamp
@@ -61,11 +62,6 @@ def finished_by(record, started):
     if end and (end.tzinfo is None) == (started.tzinfo is None) and end >= started:
         return end
     return None
-
-
-def size_band(amount, pot):
-    """Pool individual opponent responses at ≤40%, ≤75% and above for sample support."""
-    return 0 if 5 * amount <= 2 * pot else 1 if 4 * amount <= 3 * pot else 2
 
 
 def context(snap, actor, size, opening_pot):
@@ -123,7 +119,7 @@ def context(snap, actor, size, opening_pot):
         ip,
         turn_role,
         shape,
-        size_band(size, opening_pot),
+        bet_size_key(size / opening_pot),
     )
 
 
