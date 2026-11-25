@@ -2,7 +2,7 @@ import unittest
 from dataclasses import replace
 
 from leakfinder.preflop_spots import review_common, threebet_price_note
-from leakfinder.strategy_guide import advice_at
+from leakfinder.strategy_guide import advice_at, flush_paths
 from tests.test_strategy_guide import move, view
 
 
@@ -17,11 +17,19 @@ def threebet_position(hero, raiser, cards):
 
 
 class PreflopSpotTests(unittest.TestCase):
+    def test_ungraded_hand_identifies_its_actual_flush_paths(self):
+        self.assertIn("Qs-9s", flush_paths(("8s","9s","Qs","6c")))
+        self.assertIn("9c-4c or Ks-3s", flush_paths(("Ks","3s","4c","9c")))
+        self.assertIn("no way to make a flush", flush_paths(("As","6h","3c","9d")))
+
     def test_first_in_uses_position_and_separates_wheel_from_high_connectivity(self):
         snap = view("Qs 3h Qh 2h", "BTN")
         self.assertEqual(
             review_common(snap, move("BTN", "fold")).rule, "rfi_supported_hand"
         )
+        demo_queens = review_common(view("Qc Qs 6c 2d", "BTN"), move("BTN", "fold"))
+        self.assertIn("Neither side card can make a straight together with a queen", demo_queens.reason)
+        self.assertIn("3-bet", demo_queens.counterargument)
         self.assertIsNone(
             review_common(view("Qs 3h Qh 2h", "UTG"), move("UTG", "fold"))
         )

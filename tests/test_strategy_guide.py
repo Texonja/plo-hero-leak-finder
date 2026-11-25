@@ -244,7 +244,7 @@ class StrategyTests(unittest.TestCase):
 
             river_cases = (
                 ("CoinPoker", "9000002844", "Line 32", None, "25.0%", None),
-                ("CoinPoker", "9000001429", "Line 40", "bet", "55%", 0.55),
+                ("CoinPoker", "9000001429", "Line 40", "bet", "Compare checking", None),
                 ("CoinPoker", "9000002860", "Line 23", "check", "33%", 0.33),
                 (
                     "iPoker",
@@ -255,7 +255,7 @@ class StrategyTests(unittest.TestCase):
                     None,
                 ),
                 ("iPoker", "9000010026", "Action 17", None, "29.5%", None),
-                ("iPoker", "9000014007", "Action 16", None, "20.0%", None),
+                ("iPoker", "9000014007", "Action 16", "call", "20.0%", None),
             )
             for room, number, ref, action, phrase, fraction in river_cases:
                 hid, hero = db.execute(

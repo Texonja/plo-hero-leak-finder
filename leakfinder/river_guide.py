@@ -4,6 +4,7 @@ from collections import Counter
 from dataclasses import dataclass
 
 from .postflop_value import BetSize, bet_size
+from .river_critique import river_line_review
 from .river_holdings import river_holdings
 from .vendor.common import RANK_VALUE
 
@@ -140,7 +141,7 @@ def advise_river(snap, hero, opponents):
     value_below = tuple(h for h in less_of_category if h.category >= 1) + tuple(
         h for h in weaker if max(rank - 1, 1) <= h.category < rank
     )
-    missed_groups = (result.missed_flush, result.missed_straight, result.flush_blocker_bluffs)
+    missed_groups = (result.missed_flush, result.missed_straight)
     shown_made = {frozenset(h.holding) for h in value_below[:2]} if snap.to_call else set()
     overlap = any(frozenset(h.holding) in shown_made for group in missed_groups for h in group[:1])
     missed = []
@@ -192,6 +193,13 @@ def advise_river(snap, hero, opponents):
             size,
             rankable,
         )
+
+    study = river_line_review(snap, hero, opponents, result)
+    if study:
+        action, idea = study
+        size = bet_size(snap, hero, opponents, 33) if action == "check" else None
+        return advice(idea.title, ("bet", "check") if size else ("call", "fold"),
+                      f"{idea.reason} {idea.counterargument}", size=size)
 
     if snap.to_call:
         if faced is None:
@@ -279,6 +287,9 @@ def advise_river(snap, hero, opponents):
         )
         if overlap:
             bluff += " A weaker made hand shown above can also bluff after missing a draw. Count that holding once."
+        blocker_example = next((h for h in result.flush_blocker_bluffs if frozenset(h.holding) not in used), None)
+        if blocker_example:
+            bluff += f" A separate possible bluff uses a flush blocker: {blocker_example.text}."
         pure = ""
         if heads_up and (raised or rank <= 2):
             pure = f" If you only beat bluffs and ties are impossible, at least {price:.1%} of their bets must be bluffs."
@@ -356,12 +367,20 @@ def advise_river(snap, hero, opponents):
             else (33 if paired else 40)
         )
         worry = f" Stronger combinations such as {_examples(value_above)} can call or raise."
-        size = bet_size(snap, hero, opponents, hint)
+        size = None if hint in (40, 55) else bet_size(snap, hero, opponents, hint)
         choices = ("check", "bet") if paired and rank == 5 else ("bet", "check")
+        plan = "This size gives weaker hands room to call."
+        if rank == 6 and pressure:
+            plan = ("Bet for value against weaker boats and other made hands that can call. "
+                    + ("Checking back gives up a last chance to collect from them." if checked_to else
+                       "Checking to induce needs weaker hands that will actually bet."))
+        if size is None:
+            plan = ("Compare checking with a small to larger value bet. A small bet can keep weaker calls in. "
+                    "A larger bet gains more if those hands keep calling.")
         return advice(
             "value bet or check",
             choices,
-            f"Value targets include {_examples(made_below)}.{worry} This size gives weaker hands room to call."
+            f"Value targets include {_examples(made_below)}.{worry} {plan}"
             + blockers,
             2,
             size,
@@ -391,6 +410,16 @@ def advise_river(snap, hero, opponents):
         and made_below
     ):
         weak = _examples(made_below)
+        broadway_board = sum(r in "TJQKA" for r in ranks) >= 4
+        bottom_set = rank == 3 and result.hero_kickers[0] == min(RANK_VALUE[r] for r in ranks)
+        straights = tuple(h for h in stronger if h.category == 4)
+        if broadway_board and bottom_set and straights:
+            return advice(
+                "bottom set on a four-Broadway board", (),
+                f"Checking keeps the showdown value of bottom set. A holding such as {_examples(straights, 1)} "
+                f"already has a straight. To bet for value, identify enough weaker calls such as {weak}. "
+                "A checked street alone does not tell you how often those hands will call.",
+            )
         return advice(
             "thin value",
             ("check", "bet"),
@@ -419,6 +448,9 @@ def advise_river(snap, hero, opponents):
         why += f" Stronger hands include {_examples(value_above)}."
     if missed:
         why += f" Missed draws such as {_examples(missed)} are more likely to fold than call a value bet."
+    blocker_example = next((h for h in result.flush_blocker_bluffs if frozenset(h.holding) not in used), None)
+    if blocker_example:
+        why += f" Another possible bluff uses a flush blocker, for example {blocker_example.text}."
     if rank >= 4 and made_below:
         return advice(
             "thin value review",

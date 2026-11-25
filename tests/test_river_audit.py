@@ -8,7 +8,7 @@ from itertools import combinations
 from leakfinder.demo import load_demo
 from leakfinder.opponent_history import OpponentHistory, apply_history, context, heads_up_price
 from leakfinder.postflop_value import bet_size
-from leakfinder.replay_view import load_snapshot
+from leakfinder.replay_view import hero_decisions, load_snapshot
 from leakfinder.river_guide import _history
 from leakfinder.river_holdings import DECK, river_holdings
 from leakfinder.range_review import river_price_note
@@ -32,6 +32,55 @@ class RiverAuditTests(unittest.TestCase):
         ) as cursor:
             hid, hero = cursor.fetchone()
         return load_snapshot(self.db, hid, hero, ref)
+
+    def test_demo_opening_and_closing_blind_defense(self):
+        def first(room, number):
+            row = self.db.execute("SELECT id,hint FROM hands WHERE room=? AND number=?", (room, number)).fetchone()
+            return next(hero_decisions(self.db, *row, "Preflop"))[1]
+        aa = advice_at(first("CoinPoker", "9000007003"))
+        self.assertEqual(aa.choices, ("raise",))
+        self.assertIn("value 4-bet", aa.why)
+        weak = advice_at(first("CoinPoker", "9000005631"))
+        self.assertEqual(weak.choices, ("fold",))
+        self.assertNotIn("steal", weak.why)
+        defense = first("iPoker", "9000008031")
+        why = advice_at(defense).why
+        self.assertIn("Calling is a reasonable defense", why)
+        self.assertIn("33.3%", why)
+        self.assertNotIn("Folding is reasonable", why)
+
+    def test_a_river_blocker_is_not_automatically_a_missed_draw(self):
+        snap = self.snapshot("CoinPoker", "9000005612", "Line 31")
+        why = advice_at(snap).why
+        missed, blocker = why.split("Another possible bluff uses a flush blocker")
+        self.assertNotIn("Ad 5s 2c 3c", missed)
+        self.assertIn("Ad 5s 2c 3c", blocker)
+        turn = snap.board[:4]
+        hole = ("Ad", "5s", "2c", "3c")
+        for river in set(DECK) - set(snap.hero_cards + turn + hole):
+            self.assertNotIn(best_plo_hand(hole, (*turn, river))[0], (4,5,8))
+
+    def test_checked_through_nut_straight_and_non_nut_boats_offer_size_comparison(self):
+        for room, number, ref, text in (
+            ("iPoker", "9000005983", "Action 13", "weaker straights"),
+            ("iPoker", "9000000095", "Action 13", "Value targets"),
+            ("CoinPoker", "9000001429", "Line 40", "Value targets"),
+        ):
+            snap = self.snapshot(room, number, ref)
+            guide = advice_at(snap)
+            self.assertEqual(guide.choices[0], "bet")
+            self.assertIn(text, guide.why)
+            self.assertIn("Compare checking", guide.why)
+            self.assertIsNone(guide.size)
+
+    def test_demo_bottom_set_on_four_broadway_cards_has_no_default_bet_size(self):
+        snap = self.snapshot("iPoker", "9000012016", "Action 13")
+        guide = advice_at(snap)
+        self.assertIn("bottom set", guide.why)
+        self.assertIn("straight", guide.why)
+        self.assertEqual(guide.choices, ())
+        self.assertIsNone(guide.size)
+        self.assertFalse(guide.can_compare(snap))
 
     def test_weakest_possible_four_card_holding_can_only_split(self):
         from unittest.mock import Mock

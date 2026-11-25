@@ -97,16 +97,15 @@ def opening_comparison(cards, position, mixed, premium):
     strong, weak = opening_edges(cards, position)
     if strong or (mixed and premium):
         reason = strong or "A pair of aces can build a value pot against the field"
-        return (
-            ("raise",),
-            reason
-            + ". Frequent reraises behind and rake can reduce the return on opening.",
-        )
+        followup = ("A 3-bet can give your aces a value 4-bet. Effective depth and side cards matter to that next decision."
+                    if sum(c[0] == "A" for c in cards) == 2 else
+                    "Frequent reraises behind and rake can reduce the return on opening.")
+        return ("raise",), f"{reason}. {followup}"
     if weak and position in {"UTG", "HJ"}:
         return (
             ("fold",),
             weak
-            + ". Entering from early position leaves several players to act. Frequent folds behind can make a steal worthwhile.",
+            + ". Several players still have position or a chance to reraise. Fold first in with this limited straight and flush potential.",
         )
     return None
 
@@ -148,10 +147,12 @@ def _opening_support(ranks, distinct, tops, _trip_span, suit_count, position):
         and len(distinct) >= 2
     ):
         pair_rank = 13 if ranks.count(13) == 2 else 12
-        if not tops and len(distinct) == 3 and all(
-            abs(v - pair_rank) > 4 for v in distinct if v != pair_rank
-        ):
-            return ""
+        if len(distinct) == 3 and all(abs(v - pair_rank) > 4 for v in distinct if v != pair_rank):
+            if not tops:
+                return ""
+            pair = "king" if pair_rank == 13 else "queen"
+            return (f"Your pair can flop top set and you have position. Neither side card can make "
+                    f"a straight together with a {pair}, and you have no ace-high suit.")
         return "Your high pair can flop top set, and you will act last after the flop."
     if not tops or len(distinct) != 4 or suit_count != 2:
         return ""

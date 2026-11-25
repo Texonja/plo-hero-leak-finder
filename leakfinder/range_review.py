@@ -237,13 +237,12 @@ def _early_review(snap, hero, opponent, history):
                 group = sizing(picked / snap.pot)
                 if sum(sizing(s / snap.pot) == group for s in responses_by_size) > 1:
                     picked_label = f"bet in the {group} group"
-            hist_comparison = (after, picked_label)
-            lines.extend(
-                (
-                    f"Bet/fold scenario with no later betting · Model recommendation → recommendation with history · {after} → {picked_label}",
-                    reason,
-                )
-            )
+            if any(sample.ready for sample in responses_by_size.values()):
+                hist_comparison = (after, picked_label)
+                lines.append(f"Bet/fold model with no later betting · before and after applying opponent history · {after} → {picked_label}")
+            else:
+                lines.append(f"Hypothetical bet/fold scenario with no later betting · {after}. Opponent history is insufficient for a personal sizing recommendation.")
+            lines.append(reason)
     else:
         before = after = ""
     if snap.street == "Turn" and (fit_call or fit_bet):
@@ -497,7 +496,7 @@ def build_range_review(snap, hero, opponent, history):
         model_choice = (
             "call" if stage.weaker + stage.tied / 2 > heads_up_price(snap) else "fold"
         )
-        if adjusted and model_choice not in adjusted.choices:
+        if adjusted and adjusted.choices and model_choice not in adjusted.choices:
             lines.insert(
                 4,
                 f"Review this range assumption. The modeled bet range favors {model_choice} when comparing calling with folding. "

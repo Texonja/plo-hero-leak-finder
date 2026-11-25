@@ -42,6 +42,17 @@ def oracle_counts(hole, board):
 
 
 class EarlyPostflopTests(unittest.TestCase):
+    def test_paired_board_nut_straight_flush_respects_opposing_higher_straight_flushes(self):
+        for hole, board, card in (
+            ("Js 8s 9d 7d", "Tc Ts 3d Qs", "9s"),
+            ("As Kh Kc 4s", "2s 3s 2d", "5s"),
+        ):
+            draw = next_draws(tuple(hole.split()), tuple(board.split()))
+            self.assertEqual(draw.nut_straight_flush, (card,))
+            self.assertEqual(draw.nuts, 1)
+        weaker = next_draws(tuple("8s 7s 4d 3h".split()), tuple("Ts 9s 9c".split()))
+        self.assertNotIn("Js", weaker.nut_straight_flush)
+
     def test_actual_turn_probe_distinguishes_one_spade_from_a_flush(self):
         path = Path(__file__).resolve().parents[1] / "demo" / "CoinPoker-HeroDemo.txt"
         record = next(

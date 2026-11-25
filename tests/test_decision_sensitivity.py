@@ -58,7 +58,7 @@ class DecisionSensitivityTests(unittest.TestCase):
                 self.assertIn("Break-even showdown equity " + price, out)
                 if number == "9000010026":
                     self.assertIn("opening bets cannot establish", out)
-                    self.assertIn("Review this range assumption", out)
+                    self.assertNotIn("The guide lists Manual review", out)
                 else:
                     self.assertIn("0 shown and 0 unknown", out)
                 self.assertIn("Modeled betting range", out)

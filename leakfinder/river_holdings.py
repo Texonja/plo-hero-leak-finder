@@ -209,7 +209,7 @@ def _blockers(hero, board):
                 held = [DECK[c] for c in hero if c // 4 in (a, b)]
                 if held:
                     messages.append(
-                        f"You hold {' and '.join(held)} from the ranks {RANKS[a]}–{RANKS[b]} , which make a straight topped by a {HIGH_NAMES.get(RANKS[high], RANKS[high])}."
+                        f"You hold {' and '.join(held)} from the ranks {RANKS[a]}–{RANKS[b]} used for the {HIGH_NAMES.get(RANKS[high], RANKS[high])}-high straight."
                     )
                     return tuple(messages)
     return tuple(messages)

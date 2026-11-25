@@ -25,6 +25,7 @@ class Draws:
     flush: int
     both: int
     nuts: int
+    nut_straight_flush: tuple[str, ...] = ()
 
     @property
     def total(self):
@@ -58,7 +59,7 @@ def _straight_pairs(board_ranks):
 def next_draws(hole, board):
     """Count physical next cards, with overlapping straight/flush paths counted once.
 
-    For the confirmed-nuts subset, conservatively exclude paired boards, and
+    For ordinary straights and flushes, conservatively exclude paired boards, and
     exclude straights on three-flush boards. On a flush completion check the
     highest possible opposing flush and every legal opposing straight flush.
     This is an immediate board property, not an equity estimate.
@@ -72,6 +73,7 @@ def next_draws(hole, board):
     board_paired = len(br) != len(board)
     monotone = any(len(values) >= 3 for values in board_by_suit.values())
     straight = flush = both = nuts = 0
+    nut_straight_flush = []
     for rank_label, rank in RANK_VALUE.items():
         if used[rank] == 4:
             continue
@@ -97,17 +99,20 @@ def next_draws(hole, board):
             both += bool(made and made_flush)
             if best and not monotone and not completes:
                 nuts += 1
-            elif made_flush and safe_board:
+            elif made_flush:
                 suited = suited_board | {rank}
-                live = sorted(
-                    set(RANK_VALUE.values()) - suited - suited_hole, reverse=True
-                )
-                if (len(live) < 2 or max(suited_hole) > live[0]) and not any(
-                    a in live and b in live
-                    for (a, b), _ in _straight_pairs(frozenset(suited))
-                ):
+                live = set(RANK_VALUE.values()) - suited - suited_hole
+                flush_straights = _straight_pairs(frozenset(suited))
+                own_high = max((high for (a, b), high in flush_straights
+                                if a in suited_hole and b in suited_hole), default=0)
+                rival_high = max((high for (a, b), high in flush_straights
+                                  if a in live and b in live), default=0)
+                if own_high and own_high >= rival_high:
                     nuts += 1
-    return Draws(straight, flush, both, nuts)
+                    nut_straight_flush.append(rank_label + suit)
+                elif safe_board and not rival_high and (len(live) < 2 or max(suited_hole) > max(live)):
+                    nuts += 1
+    return Draws(straight, flush, both, nuts, tuple(nut_straight_flush))
 
 
 def _line(snap, hero, actions, heads_up):
@@ -194,6 +199,8 @@ def _draw_note(draws, street):
         note += f" At least {draws.nuts} make the verified current nuts or a tie."
     else:
         note += " Zero of those cards are verified to make the nuts here."
+    if draws.nut_straight_flush:
+        note += f" Verified straight-flush cards: {', '.join(draws.nut_straight_flush)}."
     note += (
         " The count is based on the unseen deck before weighting the opponent's range."
     )
@@ -403,9 +410,14 @@ def early_advice(snap, hero, opponents, rank, kicks):
             f"{note} Checking keeps the pot smaller. A bet can win immediately if enough better hands fold. Estimate that frequency from comparable hands.",
         )
     if draws.total and line != "opening bet":
+        checked = any(a.name == opponents[0].name and a.action == "check" for a in actions)
+        check_line = ("Checking back takes a free card." if checked
+                      else f"If you check, {opponents[0].position} can still bet.")
+        bet_line = ("Compare the worse hands that call with better hands that fold."
+                    if rank >= 2 else "A semibluff depends on which better hands fold.")
         return EarlyAdvice(
             title,
             (),
-            f"{note} A semibluff bet depends on which hands the opponent folds. Checking back closes this street. Checking first leaves the opponent a chance to bet.",
+            f"{note} {check_line} {bet_line}",
         )
     return None

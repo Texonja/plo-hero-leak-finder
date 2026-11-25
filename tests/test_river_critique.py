@@ -42,9 +42,14 @@ class RiverCritiqueTests(unittest.TestCase):
                 self.assertEqual(e.action, "call")
                 critique = self.flag(s, e)
                 self.assertEqual(critique.rule, rule)
+                self.assertEqual(critique.alternative, "Compare calling with folding")
                 self.assertIn(f"{s.to_call / (s.pot + s.to_call):.1%}", critique.reason)
                 self.verify_witness(s, critique.reason, stronger=True)
                 self.verify_witness(s, critique.counterargument)
+                if room == "CoinPoker":
+                    self.assertIn("flush)", critique.reason)
+                else:
+                    self.assertIn("Q-T straights", critique.counterargument)
                 self.assertIsNone(self.flag(s, replace(e, action="fold")))
                 cheap = replace(s, to_call=1, price_to_match=1)
                 self.assertIsNone(self.flag(cheap, e))
@@ -54,9 +59,31 @@ class RiverCritiqueTests(unittest.TestCase):
         e, s = self.decision("CoinPoker", "9000002872", "Line 35")
         c = self.flag(s, e)
         self.assertEqual(c.rule, "river_check_back_top_two")
+        guide = advice_at(s)
+        self.assertIn(f"{guide.size.amount / s.bb:.2f} BB", c.reason)
+        self.assertIn(f"{guide.size.amount / s.pot:.0%} pot", c.reason)
         self.verify_witness(s, c.reason)
         self.assertIsNone(self.flag(replace(s, history=tuple(a for a in s.history if a.street != "Turn")), e))
         self.assertIsNone(self.flag(replace(s, history=s.history[:-1]), e))  # First to speak may trap.
+
+    def test_checked_lines_and_a_small_set_fold_are_only_conditional_reviews(self):
+        cases = (
+            ("CoinPoker", "9000009999", "Line 39", "river_broadway_checked_to", "King-high straight"),
+            ("CoinPoker", "9000008585", "Line 44", "river_trips_board_boat", "BTN can still act"),
+            ("iPoker", "9000014007", "Action 16", "river_set_small_lead", "20.0%"),
+        )
+        for room, number, ref, rule, evidence in cases:
+            with self.subTest(number=number):
+                event, snap = self.decision(room, number, ref)
+                review = self.flag(snap, event)
+                self.assertEqual(review.rule, rule)
+                self.assertIn(evidence, review.reason)
+                self.assertTrue(review.counterargument)
+                self.assertFalse(advice_at(snap).can_compare(snap))
+                other = "bet" if event.action == "check" else "call"
+                self.assertIsNone(self.flag(snap, replace(event, action=other, amount=snap.to_call or snap.bb)))
+                no_line = replace(snap, history=tuple(a for a in snap.history if a.street != "Turn"))
+                self.assertIsNone(self.flag(no_line, event))
 
     def test_split_only_bluff_prices_better_folds_and_tying_folds_differently(self):
         e, s = self.decision("CoinPoker", "9000002872", "Line 35")

@@ -171,6 +171,8 @@ def value_plan(
     river = snap.street == "River"
     multiway = len(opponents) > 1
     bet_or_check = ("bet", "check")
+    compare_river_sizes = (" Compare checking with a small to larger value bet. "
+                           "The price changes which weaker hands can pay.")
     if paired and rank >= 6:
         targets, blocked = paired_targets(hole, board, rank, kicks)
         if not targets:
@@ -191,10 +193,16 @@ def value_plan(
         if blocked and not river and not contested:
             fraction = 25 if snap.street == "Flop" else 33
             choices = ("check", "bet") if snap.street == "Flop" else bet_or_check
+            checked = {a.name for a in actions if a.action == "check"}
+            last_to_act = all(s.name in checked or s.all_in for s in opponents)
+            check_line = (
+                "Checking back ends this street. A free card may give a weaker hand a reason to pay you later."
+                if last_to_act else
+                "Checking gives the players behind a chance to bluff. A free card may improve a weaker hand."
+            )
             return (
                 choices,
-                value
-                + " A small bet gives weaker hands a price to call. Checking can induce a bet or let a weaker hand improve enough to pay on a later street.",
+                value + " A small bet gives weaker hands a price to call. " + check_line,
                 bet_size(snap, hero, opponents, fraction),
             )
         if river and blocked:
@@ -206,6 +214,8 @@ def value_plan(
                 bet_size(snap, hero, opponents, fraction),
             )
         fraction = 50 if called else 40
+        if river and not multiway and fraction == 40:
+            return bet_or_check, value + compare_river_sizes, None
         return (
             bet_or_check,
             value
@@ -227,7 +237,12 @@ def value_plan(
             )
         target = "weaker straights (" + ", ".join(weaker) + ") and occasional sets"
         fraction = 50 if called else 40
-        reason = "Give weaker made hands a price to call. Checking is reasonable against a tight line."
+        checked = {a.name for a in actions if a.action == "check"}
+        if all(s.name in checked or s.all_in for s in opponents):
+            reason = "Bet for value when a lower straight or set can pay. Checking back ends the hand and collects no extra chips."
+        else:
+            reason = ("Lead for value against hands that can call but would check behind. "
+                      "Checking to induce needs an opponent who will bet often enough when checked to.")
     elif rank in (3, 4) and not river and not paired:
         two_tone = Counter(c[1] for c in board).most_common(1)[0][1] == 2
         if rank == 3:
@@ -277,6 +292,8 @@ def value_plan(
             "Before betting, identify enough weaker hands that fit the line and can still call.",
             None,
         )
+    if river and not multiway and fraction == 40:
+        return bet_or_check, f"{context} Target value calls from {target}.".strip() + compare_river_sizes, None
     return (
         bet_or_check,
         f"{context} Target value calls from {target}. {reason}".strip(),

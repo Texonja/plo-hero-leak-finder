@@ -236,9 +236,8 @@ class TableUITests(unittest.TestCase):
                     self.assertNotIn(f"[{ref}]", data)
                     self.assertIn("EARLIER HANDS AGAINST THIS OPPONENT", data)
                     if street == "FLOP":
-                        self.assertIn(
-                            "Model recommendation → recommendation with history", data
-                        )
+                        self.assertIn("Hypothetical bet/fold scenario", data)
+                        self.assertIn("insufficient for a personal sizing recommendation", data)
                         self.assertIn("Too few comparable responses", data)
                     self.assertEqual(str(content["state"]), "disabled")
                 finally:

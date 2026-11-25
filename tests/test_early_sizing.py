@@ -91,12 +91,13 @@ class EarlySizingTests(unittest.TestCase):
                 self.assertEqual(len(result.matched_sources), 360)
                 earlier = clock(snap.stamp) - timedelta(days=7)
                 one_date = tuple(replace(r, started=earlier) for r in large_fold)
-                self.assertEqual(
-                    review(snap, one_date).historical_comparison, ("bet 33%", "bet 33%")
-                )
+                sparse = review(snap, one_date)
+                self.assertEqual(sparse.historical_comparison, ())
+                self.assertEqual(sparse.history, sparse.guide)
+                self.assertIn("Hypothetical bet/fold scenario", sparse.text)
                 self.assertEqual(
                     review(snap, large_fold[0:29]).historical_comparison,
-                    ("bet 33%", "bet 33%"),
+                    (),
                 )
                 self.assertEqual(
                     review(snap, controls(snap, ((5, 110, 5),) * 3)).history, "check"

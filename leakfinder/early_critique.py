@@ -112,7 +112,7 @@ def _checked_back(snap, villain, hole, board):
     )
 
 
-def _set_raise(snap, amount, hole, board):
+def _set_raise(snap, amount, opponent, hole, board):
     if amount <= snap.to_call or amount * 2 < snap.pot:
         return None
     board_ranks = {RANK_VALUE[c[0]] for c in board}
@@ -127,7 +127,15 @@ def _set_raise(snap, amount, hole, board):
     ]
     if not examples:
         return None
-    pair = "-".join(RANK_LABEL[r] for r in reversed(max(examples)[1]))
+    high_pair = tuple(reversed(max(examples)[1]))
+    pair = "-".join(RANK_LABEL[r] for r in high_pair)
+    held = [c for c in hole if RANK_VALUE[c[0]] in high_pair]
+    blocker = (f" Holding {' and '.join(held)} reduces the available {pair} combinations."
+               if held else "")
+    matched = min(amount, snap.to_call + opponent.stack)
+    risk = (f" Only {matched / snap.bb:g} BB of that can be matched, including "
+            f"{(matched - snap.to_call) / snap.bb:g} BB beyond calling."
+            if matched < amount else "")
     boats = extra = unbeaten = 0
     for river in DECK:
         if river in hole or river in board:
@@ -148,8 +156,8 @@ def _set_raise(snap, amount, hole, board):
         "turn-set-raise-straight-possible", "Turn raise with a set on a straight board",
         "Compare calling to raising",
         f"Hero put in {amount / snap.bb:g} BB with a set. Calling cost "
-        f"{snap.to_call / snap.bb:g} BB. An opponent using {pair} can already have "
-        f"a straight. Of the 44 unseen river cards, {boats} make Hero a full house "
+        f"{snap.to_call / snap.bb:g} BB.{risk} An opponent using {pair} can already have "
+        f"a straight.{blocker} Of the 44 unseen river cards, {boats} make Hero a full house "
         f"or quads before assigning opposing cards.{redraws} Calling keeps weaker bets in "
         "and avoids putting extra chips in against that straight.",
         "Raising can collect from worse made hands or draws, or deny equity to "
@@ -206,12 +214,24 @@ def _large_weak_bet(snap, amount, opponents, hole, board):
     made = "high card" if rank == 0 else "a pair below the top board card"
     players = "one opponent" if len(opponents) == 1 else f"{len(opponents)} opponents"
     removal, strong_blocker = _bluff_blockers(hole, board)
+    line = ""
+    if snap.street == "Flop" and len(opponents) == 1:
+        raiser = next((a.name for a in reversed(snap.history) if a.street == "Preflop" and a.action == "raise"), None)
+        flop_actions = [a for a in snap.history if a.street == "Flop"]
+        if not flop_actions and raiser == opponents[0].name:
+            line = f"You led into the preflop raiser ({opponents[0].position}). Checking lets them bet or check back. "
+        elif any(a.name == opponents[0].name and a.action == "check" for a in flop_actions):
+            line = f"{opponents[0].position} checked. Checking back takes a free turn. "
+    pairs = {r for r, count in Counter(c[0] for c in hole).items() if count == 2}
+    set_cards = sum(c[0] in pairs and c not in hole + board for c in DECK)
+    improvement = (f" A pocket pair can also improve to a set on {set_cards} next cards. "
+                   "A set can still lose." if set_cards else "")
     prefix = f"{removal} " if removal else ""
     return Critique(
         "large-weak-hand-bet", "Large bet with few immediate straight or flush cards",
         "Review the blocker bluff and checking" if strong_blocker else "Compare checking to the large bet",
-        f"Hero bet {amount / snap.pot:.0%} pot into {players} with "
-        f"{made}. {draws} unseen next cards make a straight or flush for Hero. "
+        f"{line}Hero bet {amount / snap.pot:.0%} pot into {players} with "
+        f"{made}. {draws} unseen next cards make a straight or flush for Hero.{improvement} "
         f"{prefix}If every continuation beats Hero and no more chips go in, everyone must "
         f"fold {required:.1%} of the time to break even before rake.",
         "Folds from better hands, later barrels and equity when called can favor the bet. "
@@ -237,7 +257,7 @@ def review_early(snap, event, advice):
         return _turn_response(snap, event.action, hero, opponents[0], hole, board)
     if (event.action == "raise" and snap.to_call and snap.can_raise and
             snap.street == "Turn" and len(opponents) == 1 and not opponents[0].all_in):
-        return _set_raise(snap, event.amount, hole, board)
+        return _set_raise(snap, event.amount, opponents[0], hole, board)
     if snap.to_call or not snap.can_raise:
         return None
     if event.action == "check" and len(opponents) == 1 and not opponents[0].all_in:

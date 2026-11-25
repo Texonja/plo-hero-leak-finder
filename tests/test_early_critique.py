@@ -35,6 +35,12 @@ class EarlyCritiqueTests(unittest.TestCase):
                 "turn-set-raise-straight-possible", "raise", "22.5 BB", "10 make Hero"),
         }
         found = set()
+        line_evidence = {
+            "9000009975": ("BB checked", "set on 4 next cards"),
+            "9000005995": ("led into the preflop raiser (BTN)",),
+            "9000000016": ("61.64 BB of that can be matched", "44.64 BB beyond calling", "Holding Ad reduces"),
+            "9000008012": ("Holding 5c reduces",),
+        }
         for file in (SAMPLES / "CoinPoker-HeroDemo.txt", SAMPLES / "iPoker-HeroDemo.sql"):
             for record in sources(file):
                 hand, events = _ledger(record)
@@ -50,6 +56,8 @@ class EarlyCritiqueTests(unittest.TestCase):
                         self.assertEqual(item.rule, rule)
                         self.assertIn(text, item.reason)
                         self.assertIn(cards, item.reason)
+                        for detail in line_evidence[key[1]]:
+                            self.assertIn(detail, item.reason)
                         self.assertTrue(item.counterargument)
                         self.assertIsNone(review(snap, "call" if snap.to_call else "check", snap.to_call))
                     found.add(key)

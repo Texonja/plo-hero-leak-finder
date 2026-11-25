@@ -6,7 +6,7 @@ from functools import lru_cache
 from itertools import combinations
 
 from . import preflop_guide
-from .early_postflop import early_advice, highest_flush_draw
+from .early_postflop import early_advice, highest_flush_draw, next_draws
 from .importers import STREETS
 from .opponent_history import heads_up_price
 from .postflop_value import (
@@ -116,8 +116,19 @@ PREFLOP_CLASSES = {
     "trips": "A third card of the same rank takes up a hole-card slot and removes an out to a set.",
     "suited_broadway": "A suited ace and at least three high cards give you more ways to continue on high boards.",
     "connected_ds": "Two cards in each suit and at least three distinct ranks within one five-rank straight window.",
-    "review": "The price, position and action are more informative than a general rule for this hand structure.",
+    "review": "No validated default action for this starting-hand group.",
 }
+
+
+def flush_paths(cards):
+    paths = []
+    for suit in "cdhs":
+        suited = sorted((c for c in cards if c[1] == suit), key=lambda c: RANK_VALUE[c[0]], reverse=True)
+        if len(suited) >= 2:
+            paths.append("-".join(suited[:2]))
+    if not paths:
+        return "Four different suits leave no way to make a flush."
+    return "For an ordinary flush your highest suited cards are " + " or ".join(paths) + "."
 
 
 @lru_cache(maxsize=1820)
@@ -165,6 +176,8 @@ def preflop_advice(snap, hero, seats):
     pot_odds = snap.to_call / (snap.pot + snap.to_call)
     pos_label = f"{pos} vs {by_name[faced.name].position}" if faced else pos
     explanation = PREFLOP_CLASSES.get(hand) or preflop_guide.GROUPS[hand].title + "."
+    if hand == "review":
+        explanation = flush_paths(snap.hero_cards)
     ranks = tuple(sorted({RANK_VALUE[c[0]] for c in snap.hero_cards}))
     if hand == "double_pair":
         link = (
@@ -386,7 +399,13 @@ def preflop_advice(snap, hero, seats):
                 note += " Folding is reasonable."
         elif max(tops) <= 9:
             note = "Both suits have low top cards, so higher flushes are a concern."
-            if snap.to_call:
+            if (pos == "BB" and len(seats) == 2 and len(raises) == 1 and not calls
+                    and not own and 2 <= size <= 3.5 and len(tops) == 2 and len(ranks) == 4
+                    and ranks[-1] >= 8 and ranks[-1] - ranks[-3] == 2):
+                note = (f"Calling is a reasonable defense against the single {by_name[faced.name].position} open. "
+                        "You close the action with three consecutive ranks and two suits. "
+                        "Both flushes can be dominated. A tight opener and high rake reduce the value of calling out of position.")
+            elif snap.to_call:
                 note += " Folding is reasonable."
         elif hand == "connected_ds" and max(ranks) >= 12 and ranks[-2] <= 7:
             if ranks[-1] == 14 and ranks[0] <= 5:
@@ -459,11 +478,13 @@ def preflop_advice(snap, hero, seats):
                 "a raise but can invite several players into the pot. Folding can save "
                 "chips when reraises and rake make these side cards hard to play.",
             )
+        remaining = [s.position for s in seats if s.name != hero.name]
+        position_note = " You will act last postflop if called." if pos == "BTN" else ""
         return advice(
             "First in",
             (),
-            explanation
-            + " Consider the ranks and suits together, who can still raise, and whether Hero will have position.",
+            f"{explanation} The unopened pot is {snap.pot / snap.bb:g} BB. "
+            f"{', '.join(remaining)} can still call or reraise an open.{position_note}",
         )
     if not raises:
         if hand == "aces":
@@ -843,7 +864,12 @@ def postflop_advice(snap, hero, seats):
                 stronger = "Straights, sets and two pair can continue."
             else:
                 stronger = "Sets, two pair and strong draws can continue."
-            draw_note = " Your weaker flush draw can be dominated." if draw else ""
+            draw_note = ""
+            if draw:
+                draw_note = " Your weaker flush draw can be dominated."
+                straight_flush = next_draws(cards, board).nut_straight_flush
+                if straight_flush:
+                    draw_note += f" Verified straight-flush cards that make the current nuts: {', '.join(straight_flush)}."
             plan = (
                 "Checking keeps the pot smaller. A bet as a bluff needs enough better hands to fold across all remaining opponents."
                 if rank == 0 or paired or flush_on_board
@@ -909,9 +935,13 @@ def postflop_advice(snap, hero, seats):
             (),
             f"You have the nut flush draw. Check for extra outs and consider how much more you can win when you hit. Calling costs {price:.0%} of the pot after calling.",
         )
+    last_wager = max(s.committed for s in seats)
+    pending = [s.position for s in opponents if s.stack and s.committed < last_wager]
+    behind = f" {' and '.join(pending)} still have to respond to the wager." if pending else ""
     return advice(
         (),
-        f"Estimate your clean outs and how often you will have to pay again. Calling requires about {price:.0%} equity before rake and future betting.",
+        f"Calling costs {price:.1%} of the pot after calling, before rake.{behind} "
+        "Estimate how often you can reach showdown and what another bet would cost.",
     )
 
 

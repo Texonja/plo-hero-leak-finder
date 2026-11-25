@@ -268,6 +268,9 @@ class EarlyAuditTests(unittest.TestCase):
             )
 
     def test_multiway_value_targets_follow_board_and_hero_strength(self):
+        for ref in ("Action 14", "Action 20"):
+            public = self.snapshots["iPoker", "9000011994", ref]
+            self.assertIn("current nuts: 6d", advice_at(public).why)
         pair = view("Kh Qh 9s 8s", street="Flop", board="5d Ac Ad", owed=0, pot=10)
         self.assertIn("the board's pair", advice_at(pair).why)
         self.assertIn("trips or a full house", advice_at(pair).why)
@@ -288,7 +291,8 @@ class EarlyAuditTests(unittest.TestCase):
             "Neither a straight nor a flush can complete", advice_at(unconnected).why
         )
         quads = spot("Qh Qd Kc 9s", "Qs Qc 8h")
-        self.assertIn("can induce a bet", advice_at(quads).why)
+        self.assertIn("Checking back ends this street", advice_at(quads).why)
+        self.assertIn("chance to bluff", advice_at(replace(quads, history=quads.history[:-1])).why)
 
     def test_overpair_can_value_bet_after_a_missed_cbet_with_few_outs(self):
         prior = [move(p, "fold") for p in ("UTG", "CO", "SB", "BB")]
