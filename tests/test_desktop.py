@@ -12,6 +12,7 @@ from tkinter.scrolledtext import ScrolledText
 from types import SimpleNamespace
 from unittest.mock import patch
 from xml.etree import ElementTree as ET
+from zipfile import ZIP_DEFLATED, ZipFile
 
 from leakfinder import __version__
 from leakfinder.demo import demo_path
@@ -342,6 +343,35 @@ class DesktopTests(unittest.TestCase):
             menu.invoke("BTN vs CO · public CPU pilot")
         opened.assert_called_once_with(report.as_uri())
         self.assertTrue(self.app.is_demo)
+
+    def test_import_files_menu_shows_only_additions_from_updated_zip(self):
+        self.app.switch_library(False)
+        self.wait()
+        set_profile(self.app.db, {"CoinPoker": ["Hero"], "iPoker": ["BigNeonMax"]})
+        packed = Path(self.tmp.name) / "sessions.zip"
+        with ZipFile(packed, "w", ZIP_DEFLATED) as archive:
+            archive.writestr("CoinPoker/03/22/session.txt", original("coin-30.hh"))
+        with patch("leakfinder.ui.filedialog.askopenfilenames", return_value=(packed,)):
+            self.app.import_menu.invoke("Import files…")
+            self.wait()
+            self.assertEqual(
+                [item.room for item in self.app.queue.items], ["CoinPoker"]
+            )
+            with ZipFile(packed, "a", ZIP_DEFLATED) as archive:
+                archive.writestr(
+                    "iPoker/03/23/session.xml",
+                    ET.tostring(repaired_session(original("ip-601.hh"))),
+                )
+            self.app.import_menu.invoke("Import files…")
+            self.wait()
+        self.assertEqual(self.app.queue.scope, "Latest import")
+        self.assertEqual(self.app.queue.hand_count, 1)
+        self.assertEqual(self.app.queue.library_hands, 2)
+        self.assertEqual([item.room for item in self.app.queue.items], ["iPoker"])
+        self.assertIn("1 known hands skipped", self.app.notice.get())
+        self.assertEqual(
+            self.app.db.execute("SELECT count(*) FROM origins").fetchone()[0], 2
+        )
 
     def test_import_from_report_lands_on_latest_hero_hands_and_opens_exact_table(self):
         self.app.switch_library(False)

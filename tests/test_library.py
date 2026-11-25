@@ -103,9 +103,14 @@ class LibraryTests(unittest.TestCase):
         backup = self.folder / "packed.pghembk"
         with ZipFile(backup, "w", ZIP_DEFLATED) as archive:
             archive.writestr("db/HoldemManager2.sql", dump)
+        zip_dump = self.folder / "sql-export.zip"
+        with ZipFile(zip_dump, "w", ZIP_DEFLATED) as archive:
+            archive.writestr("docs/README.txt", "Saved HM2 hand histories")
+            archive.writestr("backup/export.sql", dump)
         self.assertEqual(import_file(self.db, xml)["new hands"], 2)
-        self.assertEqual(import_file(self.db, sql), {"duplicate origins": 2})
-        self.assertEqual(import_file(self.db, backup), {"known hands skipped": 2})
+        self.assertEqual(import_file(self.db, backup), {"duplicate origins": 2})
+        self.assertEqual(import_file(self.db, sql), {"known hands skipped": 2})
+        self.assertEqual(import_file(self.db, zip_dump), {"known hands skipped": 2})
         self.assertEqual(
             self.db.execute("select count(*) from origins").fetchone()[0], 4
         )
@@ -129,6 +134,86 @@ class LibraryTests(unittest.TestCase):
         ):
             raw = zlib.decompress(origin["raw"]).decode()
             self.assertRegex(raw, r'<action\s+[^>]*no="10"[^>]*type="4"')
+
+    def test_nested_native_zip_round_trip_and_deduplication(self):
+        coin_1 = original("coin-1.hh")
+        coin_30 = original("coin-30.hh")
+        xml = ET.tostring(repaired_session(original("ip-601.hh")))
+        packed = self.folder / "sessions.zip"
+        with ZipFile(packed, "w", ZIP_DEFLATED) as archive:
+            archive.writestr("CoinPoker/2025/01/01/Session.TXT", coin_1)
+            archive.writestr("CoinPoker/2025/01/02/Session.TXT", coin_30)
+            archive.writestr("iPoker/2025/02/03/session.XML", xml)
+            archive.writestr("iPoker/copy.xml", xml)
+            archive.writestr("readme.txt", "Archived histories")
+            archive.writestr("notes.sql", "SELECT 1;")
+
+        loose = self.save("before-zip.txt", coin_1)
+        self.assertEqual(import_file(self.db, loose), {"new hands": 1})
+        before = data_revision(self.db)
+        with patch("leakfinder.storage.replay", wraps=replay) as checked:
+            counts, source = import_file_with_source(self.db, packed)
+            self.assertEqual(checked.call_count, 2)
+        self.assertEqual(counts, {"new hands": 2, "known hands skipped": 2})
+        remember_batch(self.db, [source], after_revision=before)
+        set_profile(self.db, {"CoinPoker": ["Hero"], "iPoker": ["BigNeonMax"]})
+        self.assertEqual(prepare_hands(self.db, "Both", "Latest import")[1:3], (2, 3))
+        self.db.commit()
+
+        archive_revision = data_revision(self.db)
+        with patch("leakfinder.storage.replay", wraps=replay) as checked:
+            self.assertEqual(import_file(self.db, packed), {"already imported": 1})
+            self.assertEqual(
+                import_file(self.db, self.save("after-zip.XML", xml)),
+                {"known hands skipped": 1},
+            )
+            self.assertEqual(
+                import_file(self.db, self.save("after-zip.txt", coin_30)),
+                {"known hands skipped": 1},
+            )
+            checked.assert_not_called()
+        self.assertEqual(data_revision(self.db), archive_revision)
+        self.assertEqual(
+            self.db.execute("SELECT count(*) FROM origins").fetchone()[0], 3
+        )
+
+        rows = list(
+            self.db.execute(
+                "SELECT hand,locator FROM origins WHERE source=? ORDER BY hand",
+                (source,),
+            )
+        )
+        self.assertEqual(len(rows), 2)
+        self.assertIn("CoinPoker/2025/01/02/Session.TXT", rows[0]["locator"])
+        self.assertIn("iPoker/2025/02/03/session.XML", rows[1]["locator"])
+        packed.unlink()
+        self.assertTrue(
+            list(hero_decisions(self.db, rows[0]["hand"], "Hero", "All streets"))
+        )
+        self.assertTrue(
+            list(hero_decisions(self.db, rows[1]["hand"], "BigNeonMax", "All streets"))
+        )
+
+    def test_malformed_xml_in_zip_does_not_block_valid_sibling(self):
+        packed = self.folder / "partially-completed.zip"
+        with ZipFile(packed, "w", ZIP_DEFLATED) as archive:
+            archive.writestr("old/incomplete.xml", "<session><game")
+            archive.writestr("new/complete.txt", original("coin-30.hh"))
+        self.assertEqual(import_file(self.db, packed), {"excluded": 1, "new hands": 1})
+        row = self.db.execute("SELECT locator,reason FROM rejected").fetchone()
+        self.assertIn("old/incomplete.xml", row["locator"])
+        self.assertTrue(row["reason"])
+
+    def test_zip_without_supported_histories_does_not_create_import(self):
+        packed = self.folder / "empty-of-histories.zip"
+        with ZipFile(packed, "w", ZIP_DEFLATED) as archive:
+            archive.writestr("readme.txt", "No histories here")
+            archive.writestr("avatars/avatar.jpg", b"")
+        with self.assertRaisesRegex(ValueError, "No hand histories found"):
+            import_file(self.db, packed)
+        self.assertEqual(
+            self.db.execute("SELECT count(*) FROM imports").fetchone()[0], 0
+        )
 
     def test_room_namespaces_identity_conflict_and_cached_evidence(self):
         cp = self.save("coin.txt", original("coin-1.hh"))

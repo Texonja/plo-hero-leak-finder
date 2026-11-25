@@ -11,10 +11,10 @@ import zipfile
 from dataclasses import dataclass, field
 from decimal import Decimal
 from functools import lru_cache
-from pathlib import Path
+from pathlib import Path, PurePosixPath
 
 from .vendor.common import assign_positions, parse_header, split_hand_history
-from .vendor.hm2_backup import iter_hm2_handhistories
+from .vendor.hm2_backup import MissingHandhistories, iter_hm2_handhistories
 from .vendor.primitives import (
     ACTION_PATTERNS,
     BUTTON_RE,
@@ -132,20 +132,63 @@ class Record:
 
 def sources(path):
     path = Path(path)
-    if path.suffix.lower() in {".pghembk", ".sql"} or zipfile.is_zipfile(path):
-        for row in iter_hm2_handhistories(path):
-            reason = "Tournament" if row.tourneynumber else ""
-            if not row.handhistory.lstrip().startswith("<"):
-                reason = "Unsupported HM2 hand-history dialect"
-            yield Record(
-                "iPoker",
-                row.handhistory,
-                f"HM2 row {row.handhistory_id}",
-                str(row.gamenumber),
-                reason,
-            )
-        return
-    data = path.read_bytes()
+    if zipfile.is_zipfile(path):
+        with zipfile.ZipFile(path) as archive:
+            yield from _zip_sources(path, archive)
+    elif path.suffix.lower() in {".pghembk", ".sql"}:
+        yield from _hm2_sources(path)
+    else:
+        yield from _native_sources(path.read_bytes())
+
+
+def _hm2_sources(path):
+    for row in iter_hm2_handhistories(path):
+        reason = "Tournament" if row.tourneynumber else ""
+        if not row.handhistory.lstrip().startswith("<"):
+            reason = "Unsupported HM2 hand-history dialect"
+        yield Record(
+            "iPoker",
+            row.handhistory,
+            f"HM2 row {row.handhistory_id}",
+            str(row.gamenumber),
+            reason,
+        )
+
+
+def _zip_sources(path, archive):
+    native = []
+    has_sql = False
+    for index, member in enumerate(archive.infolist(), 1):
+        name = PurePosixPath(member.filename.replace("\\", "/"))
+        if member.is_dir() or "__MACOSX" in name.parts or name.name.startswith("._"):
+            continue
+        suffix = name.suffix.lower()
+        if suffix in {".txt", ".xml"}:
+            native.append((index, member))
+        elif suffix == ".sql":
+            has_sql = True
+
+    # Keep the backup reader and its existing locators for HM2 archives.
+    if has_sql or (not native and path.suffix.lower() == ".pghembk"):
+        try:
+            yield from _hm2_sources(path)
+        except MissingHandhistories:
+            if not native:
+                raise
+        else:
+            return
+
+    for index, member in native:
+        locator = f"ZIP entry {index}: {member.filename}"
+        data = archive.read(member)
+        try:
+            yield from _native_sources(data, locator=locator)
+        except (ET.ParseError, ValueError, LookupError) as exc:
+            # Isolate malformed histories from other files in the same archive.
+            yield Record("", "", locator, skip=str(exc))
+
+
+def _native_sources(data, *, locator=""):
     enc = (
         "utf-16"
         if data.startswith((codecs.BOM_UTF16_LE, codecs.BOM_UTF16_BE))
@@ -156,6 +199,7 @@ def sources(path):
         if decl:
             enc = decl[1].decode("ascii")
     text = data.decode(enc)
+    suffix = f" · {locator}" if locator else ""
     if text.lstrip().startswith("<"):
         root = ET.fromstring(text)
         if root.tag != "session":
@@ -168,12 +212,12 @@ def sources(path):
             yield Record(
                 "iPoker",
                 header + match.group() + "\n</session>",
-                f"XML game {i}",
+                f"XML game {i}{suffix}",
                 game.get("gamecode", ""),
             )
-    else:
+    elif not locator or "CoinPoker Hand #" in text:
         for i, block in enumerate(split_hand_history(text), 1):
-            yield Record("CoinPoker", block, f"Text hand {i}")
+            yield Record("CoinPoker", block, f"Text hand {i}{suffix}")
 
 
 def remember(cards, name, pocket):

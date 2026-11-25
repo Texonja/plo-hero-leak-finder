@@ -28,6 +28,9 @@ Importing from HeroDemo opens your personal library.
 
 CoinPoker uses native text. iPoker uses XML with one or more hands or
 an HM2 .pghembk or .sql export containing native iPoker histories.
+You can select a .zip of native .txt and .xml histories directly.
+The app reads histories in its subfolders and skips hands already imported.
+ZIPs containing an HM2 hand-history dump also work.
 HUD summaries lack the original actions required for analysis.
 
 Use Player > Personal Hero aliases to enter your exact screen names,

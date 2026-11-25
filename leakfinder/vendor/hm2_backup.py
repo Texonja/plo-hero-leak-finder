@@ -33,6 +33,10 @@ class HM2BackupError(RuntimeError):
     pass
 
 
+class MissingHandhistories(HM2BackupError):
+    pass
+
+
 def _open_dump_from_zip(path: Path) -> TextIO:
     zf = zipfile.ZipFile(path)
     names = zf.namelist()
@@ -153,4 +157,6 @@ def iter_hm2_handhistories(
                 break
 
     if not in_copy:
-        raise HM2BackupError("Could not find COPY block for HM2 handhistories table")
+        raise MissingHandhistories(
+            "Could not find COPY block for HM2 handhistories table"
+        )

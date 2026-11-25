@@ -408,9 +408,10 @@ def import_file_with_source(db, path, progress=lambda n: None, *, retry_source=N
             if old and not record.skip and _same_record(db, old["id"], record):
                 count["known hands skipped"] += 1
                 continue
-            record_key = _record_digest(record)
+            record_key = _record_digest(record) if record.raw else None
             if (
                 retry is None
+                and record_key is not None
                 and db.execute(
                     "SELECT 1 FROM excluded_records WHERE digest=?", (record_key,)
                 ).fetchone()
@@ -428,7 +429,7 @@ def import_file_with_source(db, path, progress=lambda n: None, *, retry_source=N
                     "INSERT INTO rejected VALUES(?,?,?,?)",
                     (src, record.locator, reason, record.expected),
                 )
-                if reason != "Fold with no price":
+                if record_key is not None and reason != "Fold with no price":
                     db.execute(
                         "INSERT OR IGNORE INTO excluded_records VALUES(?)",
                         (record_key,),
