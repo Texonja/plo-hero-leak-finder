@@ -7,7 +7,7 @@ from .vendor.common import RANK_VALUE
 from .vendor.primitives import classify_known_hand
 
 
-def _strong_shape(cards, position):
+def strong_shape(cards, position):
     ranks = sorted(RANK_VALUE[c[0]] for c in cards)
     suits = Counter(c[1] for c in cards)
     suited = max(suits.values()) >= 2
@@ -253,7 +253,7 @@ def review_preflop(snap, event, advice):
             return challenge
     if not entries and pos in {"UTG", "HJ", "CO", "BTN"} and snap.to_call == snap.bb:
         if played == "fold":
-            shape = _strong_shape(cards, pos)
+            shape = strong_shape(cards, pos)
             if shape:
                 return Critique(
                     "preflop_fold_supported_open",
@@ -283,7 +283,7 @@ def review_preflop(snap, event, advice):
         limp = entries[0]
         other = live.get(limp.name)
         if limp.action == "call" and other and other.position in {"SB", "BTN", "CO"}:
-            shape = _strong_shape(cards, pos)
+            shape = strong_shape(cards, pos)
             if shape:
                 return Critique(
                     "preflop_checked_supported_limp",

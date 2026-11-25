@@ -64,6 +64,7 @@ def finished_by(record, started):
 
 
 def size_band(amount, pot):
+    """Pool individual opponent responses at ≤40%, ≤75% and above for sample support."""
     return 0 if 5 * amount <= 2 * pot else 1 if 4 * amount <= 3 * pot else 2
 
 

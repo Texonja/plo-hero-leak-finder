@@ -5,10 +5,12 @@ import unittest
 from dataclasses import replace
 from pathlib import Path
 
+from leakfinder.demo import load_demo
 from leakfinder.importers import Record, decode
 from leakfinder.preflop_guide import at_decision, hand_group
-from leakfinder.replay_view import snapshot_from_record
+from leakfinder.replay_view import load_snapshot, snapshot_from_record
 from leakfinder.statistics import tags
+from leakfinder.storage import connect, initialize
 from leakfinder.strategy_guide import advice_at, preflop_class
 from tests.test_strategy_guide import move, view
 
@@ -52,6 +54,66 @@ class PreflopAudit(unittest.TestCase):
                 else:
                     self.assertEqual(pilot.play, "Manual review")
                     self.assert_manual(snap)
+
+    def test_opening_guidelines_on_original_demo_actions(self):
+        db = connect(":memory:")
+        self.addCleanup(db.close)
+        initialize(db)
+        load_demo(db)
+        for room, number, ref, cards, position, play in (
+            ("CoinPoker", "9000007020", "Line 26", "Ac Kc Th 9h", "CO", "raise"),
+            ("iPoker", "9000002046", "Action 3", "Tc Qc As Ks", "UTG", "raise"),
+            ("CoinPoker", "9000005631", "Line 21", "Kd 9c 7h 3c", "UTG", "fold"),
+        ):
+            with self.subTest(room=room, number=number):
+                hid = db.execute(
+                    "SELECT id FROM hands WHERE room=? AND number=?", (room, number)
+                ).fetchone()[0]
+                snap = load_snapshot(db, hid, "HeroDemo", ref)
+                self.assertEqual(set(snap.hero_cards), set(cards.split()))
+                self.assertEqual(
+                    next(s.position for s in snap.seats if s.is_hero), position
+                )
+                self.assertEqual(advice_at(snap).choices, (play,))
+                self.assertTrue(advice_at(snap).can_compare(snap))
+
+    def test_mixed_stack_does_not_discard_an_unopened_pot_or_ignore_a_short_opener(
+        self,
+    ):
+        def short_stack(snap, position):
+            return replace(
+                snap,
+                seats=tuple(
+                    replace(s, stack=15 * snap.bb - s.committed)
+                    if s.position == position
+                    else s
+                    for s in snap.seats
+                ),
+            )
+
+        opening = short_stack(view("Ac Kc Th 9h", "CO"), "BB")
+        self.assertEqual(advice_at(opening).choices, ("raise",))
+        self.assertIn("BB", advice_at(opening).why)
+        self.assert_manual(replace(opening, hero_cards=("8h", "2c", "4c", "5h")))
+        facing = view(
+            "As Ah Ks Kh", "BTN", prior=[move("HJ", "raise", 3, to=3)], owed=3, pot=4.5
+        )
+        self.assertIn(
+            "Effective stack", self.assert_manual(short_stack(facing, "HJ")).title
+        )
+        self.assert_manual(short_stack(opening, "CO"))
+
+    def test_opener_range_can_change_a_high_suited_hand_defense(self):
+        snap = view(
+            "Ks As Qh Jc",
+            "BTN",
+            prior=[move("HJ", "raise", 3.5, to=3.5)],
+            owed=3.5,
+            pot=5,
+        )
+        guide = self.assert_manual(snap)
+        self.assertIn("41.2%", guide.why)
+        self.assertIn("opener", guide.why)
 
     def test_suit_quality_tripled_ranks_and_adjacent_ranks(self):
         for number in ("9000006096", "9000006911"):
@@ -216,9 +278,9 @@ class PreflopAudit(unittest.TestCase):
         self.assertNotIn("Opening", limped.why)
 
     def test_study_defaults_depend_on_structure_and_price_and_do_not_rank(self):
-        for cards in ("Ad Td Js 9s", "Ah Qh Jc Tc"):
-            first_in = self.assert_manual(view(cards, "UTG"))
-            self.assertIn("Raising is a reasonable starting point", first_in.why)
+        first_in = self.assert_manual(view("Ad Td Js 9s", "UTG"))
+        self.assertIn("Raising is a reasonable starting point", first_in.why)
+        self.assertEqual(advice_at(view("Ah Qh Jc Tc", "UTG")).choices, ("raise",))
         for cards in ("Ad Td Js 9c", "Ad Kh Jd 2h"):
             self.assertNotIn(
                 "Raising is a reasonable starting point",

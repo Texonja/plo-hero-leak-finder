@@ -54,17 +54,24 @@ def sb_reference(snap):
     return fold_weights()[hand_key(snap.hero_cards)], depth
 
 
+def reference_choices(fold):
+    """Compare only near-pure fold/continue frequencies in this particular model."""
+    if fold <= 0.01:
+        return ("call", "raise")
+    if fold >= 0.99:
+        return ("fold",)
+    return ()
+
+
 def compare_sb(snap, event):
     reference = sb_reference(snap)
     if reference is None:
         return None
     fold, depth = reference
-    if event.action == "fold" and fold <= 0.01:
-        alternative = "continue (complete or raise)"
-    elif event.action in {"call", "raise"} and fold >= 0.99:
-        alternative = "fold"
-    else:
+    choices = reference_choices(fold)
+    if not choices or event.action in choices:
         return None
+    alternative = "fold" if choices == ("fold",) else "continue (complete or raise)"
     return Critique(
         "sb_fold_reference",
         "Small blind first in · 100 BB solver reference",

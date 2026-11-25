@@ -13,6 +13,8 @@ class Critique:
 
 
 def evidence_label(rule):
+    if rule == "fold_free_check":
+        return "Recorded free check option"
     if rule == "sb_fold_reference":
         return "Solver reference"
     if rule in {
@@ -28,6 +30,21 @@ def evidence_label(rule):
 
 def critique_for(snap, event, advice):
     """Evaluate only the current Hero action and information preceding it."""
+    if (
+        event.action == "fold"
+        and event.amount == 0
+        and snap.to_call == 0
+        and snap.price_to_match == 0
+    ):
+        return Critique(
+            "fold_free_check",
+            "Folded when checking was free",
+            "Check for free",
+            "The history records a fold on your turn with no chips owed. Checking keeps "
+            "your claim to the pot and commits no additional chips.",
+            "A disconnect, timeout or automatic fold could produce the same record. "
+            "Check whether you actually chose to fold.",
+        )
     if not snap.hero_cards or len(snap.hero_cards) != 4 or snap.bb <= 0:
         return None
     if snap.street == "Preflop":

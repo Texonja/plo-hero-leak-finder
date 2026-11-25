@@ -4,6 +4,7 @@ from collections import Counter, defaultdict
 from dataclasses import dataclass
 from itertools import pairwise
 
+from .bet_sizing import MATCH_LABELS, bet_size_key
 from .engine import METRICS
 from .importers import STREETS
 
@@ -280,17 +281,7 @@ def tags(cards):
 
 
 def sizing(fraction):
-    if fraction is None:
-        return "No bet"
-    if fraction <= 0.33:
-        return "≤33% pot"
-    if fraction <= 0.50:
-        return ">33–50% pot"
-    if fraction <= 0.75:
-        return ">50–75% pot"
-    if fraction <= 1.0:
-        return ">75–100% pot"
-    return ">100% pot"
+    return "No bet" if fraction is None else MATCH_LABELS[bet_size_key(fraction)]
 
 
 def settlements(h):

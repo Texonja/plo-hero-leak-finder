@@ -4,6 +4,7 @@ import json
 from collections import defaultdict
 from dataclasses import dataclass
 
+from .bet_sizing import bet_size_key
 from .importers import STREETS, Excluded
 from .vendor.nodes import postflop
 from .vendor.primitives import board_bucket
@@ -113,6 +114,10 @@ def replay(h):
         )
 
     def emit(node, e, opponent):
+        # These comparison nodes model bet/check or a response to a live price.
+        # Keep an explicit fold at a free option in the ledger for review.
+        if e.action == "fold" and e.owed == 0:
+            return
         pool = [n for n in e.live if n != e.player]
         relevant = e.remaining.get(
             opponent, max((e.remaining[n] for n in pool), default=0)
@@ -243,8 +248,12 @@ def replay(h):
                 raise Excluded("Above pot-limit size")
         if action in {"check", "fold"} and delta:
             raise Excluded("Unexpected chip payment")
-        if action == "fold" and not owed:
-            raise Excluded("Fold with no price")
+        if (
+            action == "fold"
+            and not owed
+            and not any(stacks[n] > 0 for n in live if n != name)
+        ):
+            raise Excluded("No betting option against all-in opponents")
         e = Event(
             len(events[street]) + 1,
             street,
@@ -300,7 +309,7 @@ def replay(h):
             if street == "Preflop":
                 faced = f"open-{band(new / h.bb, (2.25, 3, 4))}"
             else:
-                faced = f"bet-{band(delta / e.pot, (0.34, 0.55, 0.8, 1.01))}"
+                faced = bet_size_key(delta / e.pot)
             pending = [
                 n for n in after(name) if n != name and n in live and stacks[n] > 0
             ]

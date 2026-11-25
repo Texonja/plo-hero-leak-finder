@@ -17,8 +17,10 @@ from .postflop_value import (
     paired_targets,
     value_plan,
 )
+from .preflop_spots import opening_comparison, opening_edges, stack_context
 from .river_guide import advise_river
 from .river_holdings import nuts
+from .sb_reference import reference_choices, sb_reference
 from .statistics import tags
 from .vendor.common import RANK_VALUE
 from .vendor.primitives import best_plo_hand, classify_known_hand
@@ -197,11 +199,6 @@ def preflop_advice(snap, hero, seats):
             (),
             "Check the price, effective stack and possible side pots. The opening guidelines assume enough stack depth to play.",
         )
-    effective = [
-        min(hero.stack + hero.committed, s.stack + s.committed) / snap.bb
-        for s in seats
-        if s.name != hero.name
-    ]
     if not 3 <= len(snap.seats) <= 6:
         return advice(
             "Table size review",
@@ -209,12 +206,12 @@ def preflop_advice(snap, hero, seats):
             explanation
             + " The action guide covers three to six dealt-in players. Heads-up and full-ring ranges need separate review.",
         )
-    if min(effective) < 40 or max(effective) > 150:
+    depth, depth_note = stack_context(snap, hero, seats, raises + calls)
+    if depth == "outside":
         return advice(
             "Effective stack review",
             (),
-            explanation
-            + " An effective starting stack against a live player falls outside the guide's 40–150 BB study window.",
+            explanation + " " + depth_note,
         )
     antes = [a for a in snap.history if a.action == "posts_ante"]
     if antes and (
@@ -229,6 +226,56 @@ def preflop_advice(snap, hero, seats):
             explanation
             + " These antes change the price of entering the pot beyond the guide's scope.",
         )
+    reference = sb_reference(snap)
+    if reference is not None:
+        fold, _ = reference
+        choices = reference_choices(fold)
+        note = f"The six-max 100 BB reference folds {fold:.1%} for this exact hand class. Continuing includes both completing and raising. The model assumes 5% rake capped at 1 BB. Actual rake and blind play can change the decision."
+        if not choices:
+            note += " The model mixes folding and continuing. Review both lines."
+        return advice("SB first-in solver reference", choices, note)
+
+    note = " " + depth_note if depth_note else ""
+    if not calls and not raises and pos in {"UTG", "HJ", "CO", "BTN"}:
+        comparison = opening_comparison(
+            snap.hero_cards, pos, depth == "mixed", hand in PREMIUM
+        )
+        if comparison:
+            choices, reason = comparison
+            return advice("First in", choices, reason + note)
+    if depth == "mixed":
+        return advice(
+            "Mixed stack depths",
+            (),
+            explanation
+            + note
+            + " The ordinary-depth guide does not compare marginal lines here.",
+        )
+    if (
+        len(raises) == 1
+        and not calls
+        and not own
+        and 2 <= size <= 3.5
+        and pos in {"CO", "BTN"}
+        and hand not in PREMIUM | WEAK | {"highrun"}
+        and not (
+            len(snap.seats) == 6
+            and pos == "BTN"
+            and by_name[faced.name].position == "CO"
+        )
+    ):
+        strong, weak = opening_edges(snap.hero_cards, pos)
+        if strong or weak:
+            line = (
+                "Compare calling with a 3-bet"
+                if strong
+                else "Compare folding with defending"
+            )
+            return advice(
+                "Facing an open",
+                (),
+                f"{strong or weak}. {by_name[faced.name].position} opened to {size:g} BB. Calling costs {pot_odds:.1%} of the pot after calling. {line} against this opener's range, accounting for rake, future betting and players behind.",
+            )
     if (
         not raises
         and not calls

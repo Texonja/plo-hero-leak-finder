@@ -32,8 +32,17 @@ at the table. The guide coverage count shows how often its rules could compare
 actions. Agreement with a rule does not establish optimal play.
 The small-blind solver reference covers six seats, four folds, no ante and
 95–105 BB effective blinds. Its 100 BB reference uses 5% rake capped at 1 BB.
-Only the fold weight at this node is available. Other critiques use independent
-poker rules and conditional calculations. Pot size orders examples within a rule.
+The guide compares fold versus continue when the model chooses one at least
+99% of the time. With mixed frequencies it shows the percentage for study.
+The other positions use authored guidelines. For first-in opens these consider
+all four ranks, suit quality, position and effective stacks. A short or deep
+player behind is identified explicitly. Facing a single open, the price and
+the opener's possible range can leave more than one line worth studying.
+Pot size orders examples within a critique rule.
+
+An in-turn fold with a free check keeps the hand in the library. When Hero
+does this, Action critiques can show the decision even if the fold was a
+timeout. Reimport the original file to recover these hands from older imports.
 
 Review patterns groups guide differences.
 Each fraction counts decisions that differed from the guide out of all
@@ -44,6 +53,9 @@ action. Selected hands opens the individual hand shortlist.
 Use Room, Street and Hands to filter. Last 5 sessions applies per room.
 Reimporting an identical file makes its hands available once.
 Import > Import history shows duplicates and exclusion reasons.
+The title bar shows the application version. If startup fails, the error
+dialog gives the location of the local diagnostic log. On Windows it is
+normally %LOCALAPPDATA%\PLO Hero Leak Finder\errors.log.
 
 Reviewing a decision
 
@@ -88,8 +100,9 @@ with multiple bet sizes. Model recommendation and recommendation with
 history appear side by side. The history comparison uses earlier folds,
 calls, and raises against Hero in comparable contexts. Changing a
 recommendation requires at least 30 matched responses per size group
-across three dates and a clear estimate gap. Smaller samples remain
-visible for review. The historical sizing comparison assumes a fold to a
+across three dates and a clear estimate gap. This individual-opponent
+model pools sizes up to 40%, over 40% through 75%, and over 75% of pot.
+Smaller samples remain visible for review. The historical sizing comparison assumes a fold to a
 raise and no further betting after a call. The heads-up turn scenarios
 also compare calling the raise and facing a half-pot river bet on the same
 possible runouts. The river call view gives the break-even equity, example
@@ -108,6 +121,8 @@ Hover over a statistic or report cell for a short explanation. The 95%
 interval describes sampling uncertainty around the displayed estimate.
 
 Population review uses matched opponent decisions in your local library.
+Postflop matching and cash reports group bets by the pot before the bet,
+with inclusive upper bounds at 33%, 50%, 75% and 100%, then over 100%.
 Supported difference flags a frequency difference in similar situations.
 Exploratory also displays small samples and spots without a matched
 comparison. A frequency difference or a negative result can guide hand

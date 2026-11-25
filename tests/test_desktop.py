@@ -8,15 +8,17 @@ import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
 from tkinter import ttk
+from tkinter.scrolledtext import ScrolledText
 from types import SimpleNamespace
 from unittest.mock import patch
 from xml.etree import ElementTree as ET
 
+from leakfinder import __version__
 from leakfinder.demo import demo_path
 from leakfinder.home import PLAYED_RED, SUGGESTED_GREEN
 from leakfinder.importers import Record, decode
 from leakfinder.storage import profile, set_profile
-from leakfinder.ui import Workspace
+from leakfinder.ui import Workspace, main
 from tests.test_library import original, repaired_session
 
 
@@ -82,6 +84,33 @@ class DesktopTests(unittest.TestCase):
         self.assertIn("Action ", view.anno.get())
         self.assertTrue(view.raw.tag_ranges("focus"))
         self.assertIn("no=", view.raw.get(*view.raw.tag_ranges("focus")))
+
+    def test_error_list_has_a_bounded_height_and_keeps_every_file(self):
+        self.assertIn(__version__, self.root.title())
+        failures = [f"File {i} could not be read" for i in range(400)]
+        self.app.show_import_errors(failures)
+        dialog = next(
+            w for w in self.root.winfo_children() if isinstance(w, tk.Toplevel)
+        )
+        self.assertIn("400 failed files", dialog.title())
+        box = next(w for w in child_widgets(dialog) if isinstance(w, ScrolledText))
+        self.assertLessEqual(int(box.cget("height")), 15)
+        self.assertEqual(box.get("1.0", "end-1c").splitlines(), failures)
+
+    def test_startup_failure_shows_message_and_writes_local_traceback(self):
+        directory = Path(self.tmp.name)
+        with (
+            patch.dict("os.environ", LOCALAPPDATA=str(directory)),
+            patch("sys.argv", ["Leak Finder", "--library", str(directory)]),
+            patch("leakfinder.ui.tk.Tk", return_value=self.root),
+            patch("leakfinder.ui.messagebox.showerror") as dialog,
+            self.assertRaises(SystemExit) as exited,
+        ):
+            main()
+        self.assertEqual(exited.exception.code, 1)
+        log = directory / "PLO Hero Leak Finder" / "errors.log"
+        self.assertIn(str(log), dialog.call_args.args[1])
+        self.assertIn("OperationalError", log.read_text(encoding="utf-8"))
 
     def test_home_has_twelve_cards_and_filtering_reuses_the_index(self):
         self.assertEqual(len(self.app.queue.items), 12)

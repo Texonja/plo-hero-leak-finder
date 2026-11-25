@@ -5,6 +5,7 @@ from types import SimpleNamespace
 
 from leakfinder.replay_view import ReplayAction, ReplaySeat, ReplaySnapshot
 from leakfinder.sb_reference import compare_sb, fold_weights, hand_key, sb_reference
+from leakfinder.strategy_guide import advice_at
 
 
 def unopened():
@@ -79,3 +80,21 @@ class ReferenceTests(unittest.TestCase):
             replace(snap, seats=(*snap.seats[:-1], replace(snap.seats[-1], stack=150))),
         ):
             self.assertIsNone(sb_reference(changed))
+
+    def test_guide_uses_only_matched_near_pure_reference_weights(self):
+        snap = unopened()
+        for room in ("CoinPoker", "iPoker"):
+            base = replace(snap, room=room)
+            self.assertEqual(advice_at(base).choices, ("fold",))
+            aces = replace(base, hero_cards=("As", "Ks", "Ah", "Kh"))
+            self.assertEqual(advice_at(aces).choices, ("call", "raise"))
+            self.assertNotIn("solver", advice_at(replace(aces, sb=0)).title.lower())
+        key = next(k for k, f in fold_weights().items() if 0.05 < f < 0.95)
+        cards = tuple(
+            rank + suit for group, suit in zip(key.split("/"), "cdhs") for rank in group
+        )
+        mixed = replace(snap, hero_cards=cards)
+        advice = advice_at(mixed)
+        self.assertIn("solver", advice.title)
+        self.assertIn(f"{fold_weights()[key]:.1%}", advice.why)
+        self.assertFalse(advice.can_compare(mixed))

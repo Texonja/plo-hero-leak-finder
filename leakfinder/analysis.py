@@ -8,6 +8,7 @@ from dataclasses import dataclass, field
 from math import sqrt
 from statistics import NormalDist
 
+from .bet_sizing import MATCH_LABELS
 from .engine import METRICS
 from .storage import cohort
 
@@ -221,7 +222,7 @@ def describe(key):
         ("<40", "40–<80", "80–<150", "150+")[depth] + " BB",
         pot,
         texture,
-        size,
+        MATCH_LABELS.get(size, size),
     ]
     if ante:
         parts.append(f"antes {ante / 1e6:g}")

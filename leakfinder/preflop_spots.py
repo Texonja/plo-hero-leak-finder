@@ -3,6 +3,7 @@
 from collections import Counter
 
 from .critique import Critique
+from .preflop_critique import strong_shape
 from .vendor.common import RANK_VALUE
 
 POSTFLOP_ORDER = ("SB", "BB", "UTG", "HJ", "CO", "BTN")
@@ -54,6 +55,83 @@ def _shape(cards):
         tuple(suit_tops),
         min(fits, default=13),
         max(counts.values()),
+    )
+
+
+def opening_edges(cards, position):
+    """Only the ends of the study range. Middle hands stay available for review."""
+    ranks, distinct, tops, three_span, suit_count = _shape(cards)
+    strong = strong_shape(cards, position) if suit_count <= 2 else ""
+    if position in {"UTG", "HJ"} and ranks[-1] == 14 and ranks[0] < 10:
+        strong = ""
+    if (
+        not strong
+        and position in {"CO", "BTN"}
+        and len(distinct) == 4
+        and len(tops) == 2
+        and ranks[0] >= 7
+        and ranks[-1] - ranks[0] <= 4
+    ):
+        strong = "All four ranks fit one straight window from the seven up, with two flush suits"
+    # A pair, an ace, a second suit or a useful three-card connection can all
+    # change the decision. Three cards of one suit only give one flush path.
+    weak = ""
+    if (
+        len(distinct) == 4
+        and ranks[-1] <= 13
+        and sum(r >= 10 for r in ranks) <= 1
+        and three_span > 4
+        and (not tops or len(tops) == 1 and tops[0] <= 10)
+    ):
+        suit = (
+            "no flush possible"
+            if suit_count == 1
+            else "only a ten-high or lower flush suit"
+        )
+        weak = f"Four unpaired ranks, no three within one straight window, and {suit}"
+    return strong, weak
+
+
+def opening_comparison(cards, position, mixed, premium):
+    """Suggested first-in lines outside the blinds, conditional on typical opposition."""
+    strong, weak = opening_edges(cards, position)
+    if strong or (mixed and premium):
+        reason = strong or "A pair of aces can build a value pot against the field"
+        return (
+            ("raise",),
+            reason
+            + ". Frequent reraises behind and rake can reduce the return on opening.",
+        )
+    if weak and position in {"UTG", "HJ"}:
+        return (
+            ("fold",),
+            weak
+            + ". Entering from early position leaves several players to act. Frequent folds behind can make a steal worthwhile.",
+        )
+    return None
+
+
+def stack_context(snap, hero, seats, entries):
+    """A voluntary opponent must fit the normal-depth model. Unacted seats still matter."""
+    others = [s for s in seats if s.name != hero.name]
+    outside = {
+        s.name
+        for s in others
+        if not 40 * snap.bb
+        <= min(hero.stack + hero.committed, s.stack + s.committed)
+        <= 150 * snap.bb
+    }
+    if not outside:
+        return "standard", ""
+    if len(outside) == len(others) or any(a.name in outside for a in entries):
+        return (
+            "outside",
+            "The effective stack against a player already in the pot, or against every remaining opponent, falls outside 40–150 BB.",
+        )
+    outliers = ", ".join(s.position for s in others if s.name in outside)
+    return (
+        "mixed",
+        f"Effective depth against {outliers} is outside 40–150 BB. These seats can still enter or reraise.",
     )
 
 

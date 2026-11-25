@@ -4,14 +4,18 @@ import argparse
 import json
 import os
 import stat
+import sys
 import threading
 import tkinter as tk
+import traceback
 import webbrowser
+from datetime import datetime
 from pathlib import Path
 from queue import Empty, Queue
 from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
+from . import __version__
 from .analysis import analyze, cached_comparison, save_comparison
 from .demo import demo_path, load_demo
 from .engine import METRICS
@@ -34,6 +38,7 @@ from .storage import (
     cohort,
     connect,
     import_file_with_source,
+    import_revision,
     initialize,
     profile,
     set_profile,
@@ -155,7 +160,7 @@ class Workspace:
         self.status = tk.StringVar(value="Ready")
         self.hero_text = tk.StringVar()
         self.detail = tk.StringVar()
-        root.title("PLO Hero Leak Finder")
+        root.title(f"PLO Hero Leak Finder · {__version__}")
         width = max(860, min(1220, root.winfo_screenwidth() - 40))
         height = max(535, min(770, root.winfo_screenheight() - 95))
         root.geometry(f"{width}x{height}")
@@ -728,11 +733,7 @@ class Workspace:
                 msg = "Import failed. Showing the previous library selection."
             if failures:
                 msg += f"   ·   {len(failures)} failed file(s)"
-                messagebox.showwarning(
-                    "Files that could not be imported",
-                    "\n".join(failures),
-                    parent=self.root,
-                )
+                self.show_import_errors(failures)
             self.import_notice(msg)
             saved = profile(self.db)
             rooms = self.db.execute("""SELECT DISTINCT h.room FROM review_batch b
@@ -879,7 +880,7 @@ class Workspace:
             # change only while both its source data and Hero profile still match.
             key = (
                 room,
-                db.execute("SELECT max(id) FROM imports").fetchone()[0],
+                import_revision(db),
                 tuple(
                     tuple(row)
                     for row in db.execute(
@@ -901,7 +902,7 @@ class Workspace:
                     sample = preview_decisions(db, street)
                     if sample:
                         self.jobs.put(("review-preview", sample))
-            population_key = json.dumps((1, key), separators=(",", ":"))
+            population_key = json.dumps((2, key), separators=(",", ":"))
             comparison = (
                 previous_comparison[1:]
                 if previous_comparison and previous_comparison[0] == key
@@ -1013,6 +1014,15 @@ class Workspace:
             self.root, self.path, self.room.get(), self.results[tv.selection()[0]]
         )
 
+    def show_import_errors(self, failures):
+        win = tk.Toplevel(self.root)
+        win.title(f"Import details · {len(failures):,} failed files")
+        box = ScrolledText(
+            win, width=74, height=min(15, len(failures) + 1), wrap="word"
+        )
+        box.pack(fill="both", expand=True, padx=8, pady=8)
+        readonly(box, "\n".join(failures))
+
     def diagnostics(self):
         win = tk.Toplevel(self.root)
         win.title("Local import details")
@@ -1038,6 +1048,31 @@ class Workspace:
         readonly(text, "\n".join(lines))
 
 
+def report_error(exc_type, error, tb, directory, root=None):
+    heading = f"PLO Hero Leak Finder {__version__}"
+    message = str(error) or exc_type.__name__
+    log = directory / "errors.log"
+    try:
+        directory.mkdir(parents=True, exist_ok=True)
+        if log.exists() and log.stat().st_size >= 1024 * 1024:
+            log.replace(log.with_suffix(".previous.log"))
+        with log.open("a", encoding="utf-8") as stream:
+            print(datetime.now().isoformat(timespec="seconds"), heading, file=stream)
+            traceback.print_exception(exc_type, error, tb, file=stream)
+        message += f"\n\nLocal error log\n{log}"
+    except OSError:
+        pass
+    try:
+        messagebox.showerror(heading, message, parent=root)
+    except tk.TclError:
+        if os.name == "nt":
+            import ctypes
+
+            ctypes.windll.user32.MessageBoxW(None, message, heading, 0x10)
+        elif sys.stderr:
+            print(message, file=sys.stderr)
+
+
 def main():
     parser = argparse.ArgumentParser(description="Offline PLO4 Hero Leak Finder")
     default = (
@@ -1049,13 +1084,21 @@ def main():
         "--library", type=Path, help="Open the supplied personal SQLite library"
     )
     args = parser.parse_args()
-    root = tk.Tk()
-    app = Workspace(
-        root,
-        args.library or default,
-        start_demo=args.library is None and not default.exists(),
-    )
+    root = None
     try:
-        root.mainloop()
-    finally:
-        app.close()
+        root = tk.Tk()
+        root.report_callback_exception = lambda kind, err, tb: report_error(
+            kind, err, tb, default.parent, root
+        )
+        app = Workspace(
+            root,
+            args.library or default,
+            start_demo=args.library is None and not default.exists(),
+        )
+        try:
+            root.mainloop()
+        finally:
+            app.close()
+    except Exception as exc:
+        report_error(type(exc), exc, exc.__traceback__, default.parent, root)
+        raise SystemExit(1) from exc
