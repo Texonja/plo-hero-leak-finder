@@ -1,9 +1,11 @@
+import re
 import unittest
 from dataclasses import replace
 from types import SimpleNamespace
 
 from leakfinder.demo import SAMPLES
 from leakfinder.early_critique import review_early
+from leakfinder.early_equity import showdown_example
 from leakfinder.importers import sources
 from leakfinder.replay_view import _ledger, _snapshot
 from tests.test_early_audit import equity, spot
@@ -64,11 +66,21 @@ class EarlyCritiqueTests(unittest.TestCase):
     def test_bluff_defense_uses_the_actual_blockers(self):
         kings = spot("Kd Ks 8d 3h", "Ah Qd Jc Ts")
         item = review(kings, "bet", 80)
-        self.assertIn("24 of the 48 two-card combinations", item.counterargument)
+        self.assertIn("24 of the 48 two-card combinations", item.reason)
+        self.assertEqual(-1, item.review_priority)
         nut_blocker = spot("Ad 8s 4c 3h", "Jd 7d 2d")
-        self.assertIn("Ad blocks the strongest ordinary flush", review(nut_blocker, "bet", 80).counterargument)
+        self.assertIn("Ad blocks the strongest ordinary flush", review(nut_blocker, "bet", 80).reason)
         backdoors = spot("Ac 2c Ks 7s", "Jc 2h Ts")
-        self.assertIn("Ac gives Hero a backdoor draw", review(backdoors, "bet", 80).counterargument)
+        backdoor_bluff = review(backdoors, "bet", 80)
+        self.assertIn("Ac gives Hero a backdoor draw", backdoor_bluff.reason)
+        self.assertEqual(0, backdoor_bluff.review_priority)
+
+    def test_set_with_a_flush_redraw_counts_distinct_rivers(self):
+        snap = spot("Ah 6c 6d 2h", "6h 5h Ac 9s", owed=12, pot=40)
+        item = review(snap, "raise", 35)
+        self.assertIn("9 make Hero a full house or quads", item.reason)
+        self.assertIn("Another 8 make a straight, flush or straight flush", item.reason)
+        self.assertIn("4 guarantee at least a tie", item.reason)
 
     def test_free_card_needs_current_nuts_an_exposed_suit_and_last_action(self):
         top_set = spot("As Ad 7d 3s", "Ah 9c 4c")
@@ -91,6 +103,11 @@ class EarlyCritiqueTests(unittest.TestCase):
         self.assertIn("at most 2 of the 40", result.reason)
         self.assertIn("5.0%", result.reason)
         self.assertIn("19.8%", result.reason)
+        self.assertEqual(result.alternative, "Compare call and fold by range")
+        match = re.search(r"Against a possible (\S+ \S+ \S+ \S+) \(.*?\), Hero has ([\d.]+)%", result.reason)
+        self.assertIsNotNone(match)
+        self.assertEqual(match[2], f"{100 * equity(h, match[1], board):.1f}")
+        self.assertIn("40 runouts", result.reason)
         for villain in ("9s 9c 7d 8d", "Ad Ah 7d 8d", "Js Jd 5h 4h"):
             self.assertLessEqual(equity(h, villain, board), 2 / 40)
         self.assertIsNone(review(snap, "call", 50))  # River betting still possible.
@@ -110,6 +127,24 @@ class EarlyCritiqueTests(unittest.TestCase):
         self.assertIsNone(review(spot(h, board, owed=20, pot=100), "fold"))
         overhang = replace(snap, seats=tuple(replace(s, committed=60) if s.name == "SB" else s for s in snap.seats))
         self.assertIsNone(review(overhang, "fold"))
+
+    def test_trips_board_has_a_four_card_counterexample_without_a_pocket_pair(self):
+        hole = ("Ac", "Kd", "6c", "4h")
+        board = ("Js", "Jh", "Jd", "3s")
+        self.assertIn("three of a kind now", showdown_example(hole, board, 6))
+
+    def test_break_even_mixture_counts_showdown_shares_and_recognizes_impossible_price(self):
+        from leakfinder.early_equity import _scenarios
+        from leakfinder.river_holdings import DECK
+        from tests.test_early_audit import equity
+        hole, board = tuple("Ad Ac 6s 2h".split()), tuple("Qh 5d Tc 8d".split())
+        rival, _, low, count, strong, high = _scenarios(hole, board, 3)
+        self.assertEqual(count, 40)
+        for holding, share in ((rival, low), (strong, high)):
+            self.assertEqual(share, equity(" ".join(hole), " ".join(DECK[c] for c in holding), " ".join(board)))
+        self.assertGreater(low, high)
+        self.assertIn("50.0% of bets", showdown_example(hole, board, 3, (low + high) / 2))
+        self.assertIn("No mix", showdown_example(hole, board, 3, low + 0.05))
 
 
 if __name__ == "__main__":

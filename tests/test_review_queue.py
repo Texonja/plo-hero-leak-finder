@@ -2,6 +2,7 @@
 
 import json
 import unittest
+from types import SimpleNamespace
 from dataclasses import replace
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -10,6 +11,7 @@ from leakfinder.analysis import analyze, cached_comparison, save_comparison, sum
 from leakfinder.importers import STREETS
 from leakfinder.replay_view import load_snapshot
 from leakfinder.review_queue import (
+    _large_river_call,
     GuideIndex,
     ReviewItem,
     build_queue,
@@ -58,10 +60,32 @@ class QueueTests(unittest.TestCase):
         index = GuideIndex({s: () for s in STREETS}, (), (), (a, b, c))
         self.assertEqual(rank_critiques(index, "All streets", None), (b, c, a))
         self.assertEqual(rank_critiques(index, "Turn", {1, 2}), (a,))
+        blocked = replace(c, priority=-1)
+        self.assertEqual(rank_critiques(replace(index, critiques=(a, blocked)), "Turn", None), (a, blocked))
         revision = guide_revision("test")
         save_guides(self.db, "Both", revision, index)
         self.assertEqual(cached_guides(self.db, "Both", revision), index)
         self.assertIsNone(cached_guides(self.db, "Both", '[4,"test"]'))
+
+    def test_study_filter_requires_two_calls_against_the_same_bettor(self):
+        def action(street, name, verb, amount):
+            return SimpleNamespace(street=street, name=name, action=verb, amount=amount)
+
+        turn = [action("Turn", "B", "bet", 4), action("Turn", "H", "call", 4)]
+        bet = action("River", "B", "bet", 10)
+        event = action("River", "H", "call", 10)
+        snap = SimpleNamespace(
+            hero="H", street="River", bb=1, pot=25, to_call=10, history=[*turn, bet],
+            seats=[SimpleNamespace(name="H", live=True, is_hero=True),
+                   SimpleNamespace(name="B", live=True, is_hero=False)],
+        )
+        self.assertTrue(_large_river_call(snap, event))
+        snap.to_call = 9
+        self.assertFalse(_large_river_call(snap, event))
+        snap.to_call, snap.pot = 10, 26
+        self.assertFalse(_large_river_call(snap, event))
+        snap.pot, turn[0].name = 25, "C"
+        self.assertFalse(_large_river_call(snap, event))
 
     def test_rank_prefers_one_example_of_repeated_actions_then_clear_and_close_spots(
         self,

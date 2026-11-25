@@ -4,6 +4,7 @@ from collections import Counter
 from itertools import combinations
 
 from .critique import Critique
+from .early_equity import showdown_example
 from .early_postflop import _straight_pairs, next_draws
 from .opponent_history import heads_up_price
 from .postflop_value import RANK_LABEL, bet_size
@@ -60,7 +61,7 @@ def _cbet_price(snap, opponent):
     cost = (
         f"{opponent.position} made a {bet.amount / opening:.0%}-pot continuation bet. "
         f"Calling costs {snap.to_call / snap.bb:g} BB, or {price:.1%} of "
-        "the contestable pot after calling, before rake and further betting."
+        "the contestable pot after calling, before rake."
     )
     return cost, price, min(bet.amount, snap.to_call) / opening
 
@@ -126,12 +127,13 @@ def _cbet(snap, hero, opponent, hole, board):
             return Critique(
                 "flop-cbet-call-thin",
                 "Paid a large c-bet with limited turn improvements",
-                "Consider folding",
+                "Compare call and fold",
                 f"{cost} You have {'high card' if rank == 0 else 'less than top pair'}, "
                 f"no front-door flush draw, and {draws.total} turn cards that make a straight or flush. "
-                "Some pair or two-pair improvements can still lose.",
-                "A wide c-bettor can have weaker hands that give up later. A pair can already "
-                "be ahead. Position and a reliable way to win later can justify a call.",
+                "A pair can already lead missed high cards. Compare the bettor's made hands and draws, "
+                "the stacks left after calling and how often you face another barrel.",
+                "A call keeps weaker hands in and can win when the opponent gives up. "
+                "A fold saves the price against ranges that keep applying pressure.",
             )
     return None
 
@@ -167,14 +169,15 @@ def _closing_call(hole, board, price, cost):
     if bound + 0.05 > price:
         return None
     weak = (price - bound) / (1 - bound)
+    example = showdown_example(hole, board, minimum, price)
     return Critique(
         "flop-cbet-stackoff-bound",
-        "Called off against a possible flop value range",
-        "Compare folding to the call",
+        "Closing flop call against different betting ranges",
+        "Compare call and fold by range",
         f"{cost} No further betting is possible. Against {value}, at most {favorable} of "
         f"820 possible turn–river pairs per fixed opponent can even reach that category for Hero. "
         f"Treating all of them as wins gives a generous {bound:.1%} equity ceiling. "
-        f"Even if you always beat the rest, at least {weak:.1%} of the betting range must be outside that value group.",
+        f"Even if you always beat the rest, at least {weak:.1%} of the betting range must be outside that value group. {example}".strip(),
         "Draws and weaker made hands can raise your equity enough to call. Check what else "
         "this opponent bets for this size and stack depth.",
     )
@@ -272,12 +275,26 @@ def _checked(snap, event, hero, villain, raiser, hole, board):
                 + "The smaller size can keep weaker pairs in and work better as part of a range "
                 "that bets small. Calls and raises can change substantially with size.",
             )
-    if event.action == "bet" and raiser == hero.name and event.amount >= 0.8 * snap.pot:
+    if event.action == "bet" and raiser == hero.name and event.amount / snap.pot >= 0.8 - 1e-9:
         ranks = Counter(RANK_VALUE[c[0]] for c in board)
         if rank == 2 and len(ranks) == 2 and len({c[1] for c in board}) == 3:
-            other = next(v for v, count in ranks.items() if count == 1)
+            pocket = [v for v, n in Counter(RANK_VALUE[c[0]] for c in hole).items() if n == 2]
+            if pocket and ranks[max(ranks)] == 2 and min(ranks) < max(pocket) < max(ranks):
+                smaller = bet_size(snap, hero, [villain], 33).contestable
+                return Critique(
+                    "flop-size-underpair-dry-paired",
+                    "Large c-bet with a pocket pair below the paired board rank",
+                    "Compare checking back and a small c-bet",
+                    f"After {villain.position} checked, you bet {event.amount / snap.bb:g} BB "
+                    f"into {snap.pot / snap.bb:g} BB ({event.amount / snap.pot:.0%} pot). "
+                    "Your pocket pair has showdown value against unpaired overcards. "
+                    f"Checking takes a free turn. About {smaller / snap.bb:.2f} BB can deny "
+                    "some overcard equity while risking less against higher pairs, trips and full houses.",
+                    "The larger bet can gain if better pairs fold or worse hands call often. "
+                    "Compare those responses with what the smaller bet achieves.",
+                )
             if any(
-                v > other and v not in ranks and n == 2
+                v > max(ranks) and n == 2
                 for v, n in Counter(RANK_VALUE[c[0]] for c in hole).items()
             ):
                 smaller = bet_size(snap, hero, [villain], 33).contestable

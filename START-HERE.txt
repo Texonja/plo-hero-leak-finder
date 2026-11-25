@@ -96,6 +96,8 @@ differs from the played action in a supported guide situation.
 Suggested bet sizes are illustrations. Review priorities reflect
 study rules and repetition, without a solver or an estimate of EV lost.
 Study spots opens conditional and manual decisions, largest pot first.
+Use Large river calls after a turn call to review hands where you called
+the same opponent on both streets. This filter does not grade the call.
 Each entry shows the original action and opens the table at that decision.
 Why review this first? explains the priority. Open Related hands to see
 more examples of the same pattern. Previous and Next move between pages.

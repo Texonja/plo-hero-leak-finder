@@ -66,12 +66,48 @@ class StrategyTests(unittest.TestCase):
             self.assertEqual(advice_at(s).choices, ("raise",))
             self.assertIn(pos, advice_at(s).title)
         s = view("Kh Kc 7c 5s", "UTG")
-        self.assertEqual(advice_at(s).choices, ("fold", "raise"))
+        opening = advice_at(s)
+        self.assertFalse(opening.can_compare(s))
+        self.assertIn("A limp may induce", opening.why)
         sb_limp = move("SB", "call", 0.5)
         self.assertEqual(
             advice_at(view("Qd 7h 6s 4c", "BB", prior=[sb_limp], owed=0)).choices,
             (),
         )
+
+    def test_overlimp_shows_actual_price_limper_and_unacted_seats(self):
+        prior = [move("UTG", "call", 1), move("HJ", "fold")]
+        snap = view("Ac 2c 4s 6s", "CO", prior=prior, owed=1, pot=2.5)
+        guide = advice_at(snap)
+        self.assertIn("from UTG", guide.why)
+        self.assertIn("1 BB into 2.5 BB", guide.why)
+        self.assertIn("BTN, SB, BB can still act", guide.why)
+        self.assertIn("Overlimping is reasonable", guide.why)
+        self.assertFalse(guide.can_compare(snap))
+
+    def test_deep_double_pair_keeps_threebet_price_and_matched_stack(self):
+        prior = [move("UTG", "fold"), move("HJ", "fold"), move("CO", "raise", 3, to=3),
+                 move("BTN", "raise", 11, to=11), move("SB", "fold"), move("BB", "fold")]
+        snap = view("8d 8s 4d 4h", "CO", prior=prior, owed=8, pot=16)
+        snap = replace(snap, seats=tuple(replace(s, stack=195 if s.is_hero else 169) for s in snap.seats))
+        guide = advice_at(snap)
+        self.assertIn("8 BB into 16 BB (33.3%", guide.why)
+        self.assertIn("169 BB effective", guide.why)
+        self.assertIn("out of position", guide.why)
+        self.assertFalse(guide.can_compare(snap))
+
+    def test_ace_low_links_are_preserved_when_pricing_a_double_suited_hand(self):
+        prior = [move("HJ", "call", 1), move("CO", "raise", 4, to=4)]
+        for hand in ("Ac 2c 3h 5h", "Ac 4c 6h 7h"):
+            snap = view(hand, "BTN", prior=prior, owed=4, pot=6.5)
+            advice = advice_at(snap)
+            self.assertIn("wheel", advice.why)
+            self.assertIn("ace-high suit", advice.why)
+            self.assertIn("38.1%", advice.why)
+            self.assertNotIn("little straight support", advice.why)
+            self.assertFalse(advice.can_compare(snap))
+        isolated = view("Kh 2c 3h 5c", "BTN", prior=prior, owed=4, pot=6.5)
+        self.assertIn("little straight support", advice_at(isolated).why)
 
     def test_open_3bet_and_squeeze_use_action_prefix_and_raise_rights(self):
         opens = [

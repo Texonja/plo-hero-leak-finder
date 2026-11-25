@@ -31,7 +31,7 @@ from .vendor.common import RANK_VALUE
 from .vendor.primitives import best_plo_hand
 
 REVIEW_PAGE_SIZE = 12
-GUIDE_CACHE_VERSION = 10
+GUIDE_CACHE_VERSION = 12
 
 
 @dataclass(frozen=True)
@@ -91,6 +91,7 @@ class StudySpot(NamedTuple):
     pot_bb: float
     paid_bb: float
     cards: tuple
+    large_river_call: bool = False
 
     def card(self):
         played = f"Played {self.action}"
@@ -156,21 +157,6 @@ def _guide_key(revision):
     return None
 
 
-def migrate_v4_guides(db):
-    """Keep an exact 0.3.6 result as the baseline for a library's first delta."""
-    from .storage import import_revision
-
-    aliases = tuple(
-        tuple(row)
-        for row in db.execute("SELECT room,name FROM aliases ORDER BY room,name")
-    )
-    old = json.dumps((9, (import_revision(db), aliases)), separators=(",", ":"))
-    db.execute(
-        "UPDATE review_guide_cache SET revision=? WHERE revision=?",
-        (guide_revision((0, aliases)), old),
-    )
-
-
 def cached_guides(db, room, revision):
     row = db.execute(
         "SELECT payload FROM review_guide_cache WHERE room=? AND revision=?",
@@ -194,7 +180,7 @@ def cached_guides(db, room, revision):
                 for street, rows in counts.items()
             },
             restore(entries),
-            tuple(StudySpot(*entry[:-1], tuple(entry[-1])) for entry in study),
+            tuple(StudySpot(*entry[:12], tuple(entry[12]), *entry[13:]) for entry in study),
             restore(critiques),
         )
     except (TypeError, ValueError, IndexError, KeyError, AttributeError, zlib.error):
@@ -446,6 +432,35 @@ def index_guides(db, room, progress=None, *, audit=None):
     return _index_hands(db, room, progress, _sessions(db), audit=audit)
 
 
+def _large_river_call(snap, event):
+    """Study filter for a turn call followed by a substantial heads-up river call."""
+    if snap.street != "River" or event.action != "call" or snap.to_call < 10 * snap.bb:
+        return False
+    opponents = [s for s in snap.seats if s.live and not s.is_hero]
+    if len(opponents) != 1:
+        return False
+    # The same opponent must have opened the betting on both streets. Other
+    # prior checks are fine. A fold on the river changes the pricing context.
+    opponent = opponents[0].name
+    turn = [a for a in snap.history if a.street == "Turn"]
+    river = [a for a in snap.history if a.street == "River"]
+    if any(a.action == "fold" for a in river):
+        return False
+    turn_aggression = [a for a in turn if a.action in {"bet", "raise"}]
+    river_aggression = [a for a in river if a.action in {"bet", "raise"}]
+    if len(turn_aggression) != 1 or len(river_aggression) != 1:
+        return False
+    turn_bet, river_bet = turn_aggression[0], river_aggression[0]
+    opening_pot = snap.pot - river_bet.amount
+    return (
+        turn_bet.action == river_bet.action == "bet"
+        and turn_bet.name == river_bet.name == opponent
+        and any(a.name == snap.hero and a.action == "call" for a in turn)
+        and opening_pot > 0
+        and 3 * snap.to_call >= 2 * opening_pot
+    )
+
+
 def _index_hands(db, room, progress, sessions, *, hands=None, audit=None, stats=None):
     items = []
     study = []
@@ -504,6 +519,7 @@ def _index_hands(db, room, progress, sessions, *, hands=None, audit=None, stats=
                         critique.alternative,
                         critique.reason,
                         pot_bb=snap.pot / snap.bb,
+                        priority=critique.review_priority,
                     )
                 )
             if advice is None:
@@ -528,6 +544,7 @@ def _index_hands(db, room, progress, sessions, *, hands=None, audit=None, stats=
                         snap.pot / snap.bb,
                         event.amount / snap.bb,
                         snap.hero_cards,
+                        _large_river_call(snap, event),
                     )
                 )
                 continue
@@ -598,10 +615,10 @@ def rank_critiques(index, street, selected):
         ):
             groups.setdefault((item.street, item.node), []).append(item)
     rounds = []
-    order = {"Solver reference": 0, "Equity bound": 1, "River value review": 2}
+    order = {"Solver reference": 0, "Guaranteed showdown share": 1, "River value review": 2}
     for family in groups.values():
         for rank, item in enumerate(
-            sorted(family, key=lambda i: (-i.pot_bb, i.hand, i.ref))
+            sorted(family, key=lambda i: (-i.priority, -i.pot_bb, i.hand, i.ref))
         ):
             rounds.append(
                 (

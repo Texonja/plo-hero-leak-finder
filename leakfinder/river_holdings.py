@@ -1,10 +1,4 @@
-"""Exact two-card examples for reviewing a PLO4 river.
-
-Each example is one legal pair available to an opponent after removing Hero
-and the board. Its rank uses exactly this pair and the best three board cards.
-An opponent's two additional cards may give the complete hand a higher rank.
-No opponent range, action frequency, equity, or full-hand count is inferred.
-"""
+"""Complete four-card examples for reviewing a PLO4 river."""
 
 from collections import Counter
 from dataclasses import dataclass
@@ -83,7 +77,12 @@ class PairExample:
     kickers: tuple[int, ...]
     turn_category: int
     turn_kickers: tuple[int, ...]
+    side_cards: tuple[str, str]
     turn_outs: tuple[str, ...] = ()
+
+    @property
+    def holding(self):
+        return self.cards + self.side_cards
 
     @property
     def label(self):
@@ -91,7 +90,7 @@ class PairExample:
 
     @property
     def text(self):
-        return f"{' '.join(self.cards)} ({self.label})"
+        return f"{' '.join(self.holding)} ({self.label})"
 
 
 @dataclass(frozen=True)
@@ -217,15 +216,30 @@ def _blockers(hero, board):
 
 
 def _example(data, outs=()):
-    river, turn, a, b = data
+    river, turn, a, b, c, d = data
     return PairExample(
         (DECK[b], DECK[a]),
         river // UNIT,
         _kickers(river),
         turn // UNIT,
         _kickers(turn),
-        tuple(DECK[c] for c in outs),
+        (DECK[c], DECK[d]),
+        tuple(DECK[out] for out in outs if out not in (c, d)),
     )
+
+
+def _side_cards(a, b, available, scores):
+    """Complete this pair without any of the five other pairs outranking it."""
+    limit = scores[a][b]
+    candidates = []
+    for d in available:
+        if d == a or d == b or scores[a][d] > limit or scores[b][d] > limit:
+            continue
+        for c in candidates:
+            if scores[c][d] <= limit:
+                return c, d
+        candidates.append(d)
+    return None
 
 
 @lru_cache(maxsize=256)
@@ -245,46 +259,57 @@ def _analyze(hero, board):
     turn_suit_counts = Counter(c % 4 for c in board[:4])
     river_suit = board[-1] % 4
     completed_ace = 48 + river_suit if turn_suit_counts[river_suit] == 2 else -1
-    by_relation = ({}, {}, {})  # weaker, tied, stronger; one example per category.
+    by_relation = ({}, {}, {})  # Weaker, tied, stronger complete holdings.
     stronger_pairs = 0
     missed_flush = {}
     missed_straight = {}
     blocker_bluffs = {}
     best = 0
+    scores = [[0] * 52 for _ in DECK]
     for a, b in combinations(available, 2):
+        scores[a][b] = scores[b][a] = _score(a, b, river_base, river_suits)
+    for b, a in combinations(reversed(available), 2):
         idx = PAIR_INDEX[a][b]
         suit = a % 4 if a % 4 == b % 4 else -1
-        if suit < 0:
-            river, turn = river_base[idx], turn_base[idx]
-        else:
-            river, turn = river_suits[suit][idx], turn_suits[suit][idx]
+        river = scores[a][b]
         category = river // UNIT
         best = max(best, river)
         beats_hero = river > hero_river
         stronger_pairs += beats_hero
         group = by_relation[(river >= hero_river) + beats_hero]
-        if category not in group or group[category][0] < river:
-            group[category] = (river, turn, a, b)
-        if river >= hero_river or category >= 4:
-            continue
-        if (
-            completed_ace in (a, b)
+        want_made = category not in group or group[category][0] < river
+        missed = river < hero_river and category < 4
+        want_blocker = (
+            missed and completed_ace in (a, b)
             and suit < 0
             and category <= 1
             and (category not in blocker_bluffs or blocker_bluffs[category][0] > river)
-        ):
-            # A lone suited ace in the shown pair. Either unseen side card might
-            # still make a real flush, so the complete holding is conditional.
-            blocker_bluffs[category] = (river, turn, a, b)
-        if suit >= 0 and suit != river_suit and turn_suit_counts[suit] == 2:
-            quality = (-category, b // 4, a // 4)
-            if suit not in missed_flush or quality > missed_flush[suit][0]:
-                missed_flush[suit] = (quality, (river, turn, a, b))
+        )
+        flush_quality = (-category, b // 4, a // 4)
+        want_flush = (
+            missed and suit >= 0 and suit != river_suit and turn_suit_counts[suit] == 2
+            and (suit not in missed_flush or flush_quality > missed_flush[suit][0])
+        )
         mask = draw_masks[idx]
-        if mask:
-            quality = (-category, mask.bit_count(), b // 4, a // 4)
-            if idx not in missed_straight or quality > missed_straight[idx][0]:
-                missed_straight[idx] = (quality, (river, turn, a, b))
+        straight_quality = (-category, mask.bit_count(), b // 4, a // 4)
+        want_straight = missed and mask and (
+            idx not in missed_straight or straight_quality > missed_straight[idx][0]
+        )
+        if not (want_made or want_blocker or want_flush or want_straight):
+            continue
+        sides = _side_cards(a, b, available, scores)
+        if sides is None:
+            continue
+        turn = max(_score(x, y, turn_base, turn_suits) for x, y in combinations((a, b, *sides), 2))
+        data = (river, turn, a, b, *sides)
+        if want_made:
+            group[category] = data
+        if want_blocker:
+            blocker_bluffs[category] = data
+        if want_flush:
+            missed_flush[suit] = (flush_quality, data)
+        if want_straight and any(mask & (1 << (c // 4)) and c not in data[2:] for c in available):
+            missed_straight[idx] = (straight_quality, data)
 
     def representatives(group):
         return tuple(_example(group[cat]) for cat in sorted(group, reverse=True))
@@ -298,7 +323,7 @@ def _analyze(hero, board):
     for idx, (_, data) in sorted(
         missed_straight.items(), key=lambda item: item[1][0], reverse=True
     )[:3]:
-        outs = [c for c in available if draw_masks[idx] & (1 << (c // 4))]
+        outs = [c for c in available if draw_masks[idx] & (1 << (c // 4)) and c not in data[2:]]
         straight_examples.append(_example(data, outs))
     return RiverHoldings(
         hero_river // UNIT,
@@ -321,10 +346,9 @@ def river_holdings(hero_cards, board):
     """Review the five-card board in deal order, given Hero's four PLO cards.
 
     Input uses standard two-character card names. Returns a strongest example
-    for each available river category per comparison. Missed draws are limited
-    to weaker pairs whose best river hand ranks below a straight. Each listed
-    turn out would have completed the named draw using the two shown cards.
-    Example lists contain representative pairs, never opponent probabilities.
+    for each attainable category and comparison. All six pairs in the example
+    are checked. Draw outs apply to the first two cards and exclude its side
+    cards. Example lists convey possibilities without assigning frequencies.
     """
     hero, board = tuple(hero_cards), tuple(board)
     if len(hero) != 4 or len(board) != 5:

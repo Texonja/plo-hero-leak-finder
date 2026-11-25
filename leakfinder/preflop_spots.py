@@ -147,6 +147,11 @@ def _opening_support(ranks, distinct, tops, _trip_span, suit_count, position):
         and (ranks.count(13) == 2 or ranks.count(12) == 2)
         and len(distinct) >= 2
     ):
+        pair_rank = 13 if ranks.count(13) == 2 else 12
+        if not tops and len(distinct) == 3 and all(
+            abs(v - pair_rank) > 4 for v in distinct if v != pair_rank
+        ):
+            return ""
         return "Your high pair can flop top set, and you will act last after the flop."
     if not tops or len(distinct) != 4 or suit_count != 2:
         return ""
@@ -187,8 +192,6 @@ def _thin_structure(ranks, distinct, tops, trip_span, suit_count):
     if len(distinct) == 4 and not tops and trip_span > 4:
         return "Four different suits rule out a flush and no three ranks fit in one straight window."
     pairs = [r for r in distinct if ranks.count(r) == 2]
-    if len(pairs) == 2 and max(pairs) <= 9 and (not tops or tops[0] <= 9):
-        return "Both pairs are nine-high or lower. You can hit a set two ways, but neither pair makes top set on high boards."
     if (
         len(pairs) == 1
         and pairs[0] <= 9
@@ -273,7 +276,7 @@ def _threebet_line(snap, hero, opponent, actions):
     return (
         f"{opponent.position} raised your {hero.position} open from {op:g} to {tb:g} BB. "
         f"Calling costs {snap.to_call / snap.bb:.2f} BB ({price:.1%} of the pot after calling), "
-        f"with {spr:.1f} pot-sized bets left in the effective stack. "
+        f"giving a flop stack-to-pot ratio of {spr:.1f}. "
         f"You would play {'in' if ip else 'out of'} position."
     )
 
@@ -343,7 +346,7 @@ def _review_threebet(snap, event, hero, opponent, actions, shape):
             return Critique(
                 "threebet_committing_fourbet",
                 "Built a big 4-bet pot out of position without an ace",
-                "Compare calling the 3-bet",
+                "Compare the 4-bet with calling",
                 f"{_threebet_line(snap, hero, opponent, actions)} If called, the 4-bet commits {new_total / depth:.0%} of your effective starting stack. "
                 "All opposing ace pairs remain available. Calling keeps the opponent's weaker 3-bets in and preserves more room to fold later.",
                 "Reraising can work against a wide 3-bettor and can reduce the cost of playing out of position. "

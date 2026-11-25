@@ -135,6 +135,10 @@ class PreflopCritiqueTests(unittest.TestCase):
         idea = review(snap, "raise", 90)
         self.assertEqual(idea.rule, "preflop_nonace_fivebet")
         self.assertIn("another 70 BB", idea.reason)
+        self.assertIn("50 BB beyond a flat call", idea.reason)
+        self.assertIn("Calling costs 20 BB", idea.reason)
+        self.assertIn("leaving 50 BB effective", idea.reason)
+        self.assertIn("5-bet with calling", idea.alternative)
         self.assertIn("43.3%", idea.reason)
         self.assertIsNone(review(snap, "call", 20))
         self.assertIsNone(
@@ -143,6 +147,16 @@ class PreflopCritiqueTests(unittest.TestCase):
         partial = review(snap, "raise", 49)
         self.assertIn("21 BB effective", partial.reason)
         self.assertNotIn("showdown share", partial.reason)
+
+    def test_aa_model_separates_connected_double_suited_hand_from_single_suited_kings(self):
+        from leakfinder.preflop_critique import _ace_scenario_key, _against_two_aces
+        def estimate(cards):
+            return _against_two_aces(_ace_scenario_key(cards.split()))
+        rundown, margin, _ = estimate("Js Td 9s 7d")
+        kings, kings_margin, _ = estimate("Ks Kh Qs 4d")
+        self.assertGreater(rundown - margin, 0.387)
+        self.assertLess(kings + kings_margin, 0.417)
+        self.assertEqual(estimate("Js Td 9s 7d"), estimate("7h Jc Th 9c"))
 
     def test_opener_can_reraise_after_a_cold_threebet_call(self):
         prior = [move("UTG", "raise", 3, to=3), move("HJ", "raise", 9, to=9)]

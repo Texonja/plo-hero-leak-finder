@@ -11,12 +11,13 @@ def reference(cards, board):
 
 
 class RiverHoldingTests(unittest.TestCase):
-    def test_all_live_pair_categories_and_kickers_against_reference(self):
+    def test_complete_hand_categories_and_kickers_against_reference(self):
         for hero, board in [
             ("Ah Ad Kh 7c", "Ac Ks Kc 6c 5c"),
             ("Jh 9c 2s 3d", "5s 6s Ts Ks Js"),
             ("Ac 2c 8d 9d", "3s 4d 6h 2s 5c"),
             ("Qc Qh Qd Qs", "Jd Jc Jh Js Ad"),
+            ("2c 3h 4d 5s", "Jh 8s 8d Kc Ah"),
         ]:
             with self.subTest(board=board):
                 hero, board = hero.split(), board.split()
@@ -27,8 +28,10 @@ class RiverHoldingTests(unittest.TestCase):
                     result.hero_turn_category, reference(hero, board[:4])[0]
                 )
                 groups = [{}, {}, {}]
-                for pair in combinations(sorted(set(DECK).difference(hero, board)), 2):
-                    rank = reference(pair, board)
+                available = sorted(set(DECK).difference(hero, board))
+                scores = {p: reference(p, board) for p in combinations(available, 2)}
+                for hand in combinations(available, 4):
+                    rank = max(scores[p] for p in combinations(hand, 2))
                     group = groups[(rank >= own) + (rank > own)]
                     group[rank[0]] = max(group.get(rank[0], rank), rank)
                 for cases, expected in zip(
@@ -39,13 +42,13 @@ class RiverHoldingTests(unittest.TestCase):
                     )
                     for case in cases:
                         self.assertEqual(
-                            reference(case.cards, board), (case.category, case.kickers)
+                            reference(case.holding, board), (case.category, case.kickers)
                         )
                         self.assertEqual(
-                            reference(case.cards, board[:4]),
+                            reference(case.holding, board[:4]),
                             (case.turn_category, case.turn_kickers),
                         )
-                        self.assertFalse(set(case.cards).intersection(hero + board))
+                        self.assertEqual(len(set(case.holding) | set(hero + board)), 13)
                 highest = max(rank for group in groups for rank in group.values())
                 self.assertEqual((result.river_made, result.river_kickers), highest)
 
@@ -66,7 +69,7 @@ class RiverHoldingTests(unittest.TestCase):
                 self.assertLess(ex.category, 4)
                 self.assertLess(ex.turn_category, 4)
                 self.assertTrue(ex.turn_outs)
-                blocked = set(hero + board + list(ex.cards))
+                blocked = set(hero + board + list(ex.holding))
                 self.assertFalse(blocked.intersection(ex.turn_outs))
                 for out in set(DECK) - blocked:
                     hits = any(

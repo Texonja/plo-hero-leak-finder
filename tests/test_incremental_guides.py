@@ -147,7 +147,7 @@ class IncrementalGuideTests(unittest.TestCase):
         self.assertIn("Consider a call", explanation(after))
         self.assertEqual(stats, {"replayed": 2, "reused": 29, "history_updated": 1})
 
-    def test_v4_cache_extends_after_first_new_import(self):
+    def test_v4_guide_rebuilds_once_then_extends_after_first_new_import(self):
         self.ingest("original.xml", original("ip-41.hh"))
         cohort(self.db)
         old = index_guides(self.db, "Both")
@@ -161,7 +161,9 @@ class IncrementalGuideTests(unittest.TestCase):
             self.db.execute("PRAGMA user_version=4")
         initialize(self.db)
         initial = guide_revision((0, self.aliases()))
-        self.assertEqual(cached_guides(self.db, "Both", initial), old)
+        self.assertIsNone(cached_guides(self.db, "Both", initial))
+        _, rebuilt = self.refresh()
+        self.assertEqual(rebuilt["replayed"], 1)
         self.ingest(
             "next.xml",
             original("ip-41.hh")

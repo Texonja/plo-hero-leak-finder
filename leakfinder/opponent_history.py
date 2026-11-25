@@ -427,6 +427,10 @@ def apply_history(snap, base, history):
         sample = history.sample(snap)
         if not sample.ready:
             return base
+        holdings = river_holdings(snap.hero_cards, snap.board)
+        if not holdings.weaker or not holdings.stronger:
+            # Historical categories cannot override the possible showdown results.
+            return base
         category = best_plo_hand(snap.hero_cards, snap.board)[0]
         # A weak hand with rank zero can still beat weaker kickers. The broad
         # same-class uncertainty remains in the upper limit.

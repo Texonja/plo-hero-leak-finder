@@ -6,11 +6,12 @@ from dataclasses import replace
 from itertools import combinations
 
 from leakfinder.demo import load_demo
-from leakfinder.opponent_history import context, heads_up_price
+from leakfinder.opponent_history import OpponentHistory, apply_history, context, heads_up_price
 from leakfinder.postflop_value import bet_size
 from leakfinder.replay_view import load_snapshot
 from leakfinder.river_guide import _history
 from leakfinder.river_holdings import DECK, river_holdings
+from leakfinder.range_review import river_price_note
 from leakfinder.storage import connect, initialize
 from leakfinder.strategy_guide import advice_at
 from leakfinder.vendor.primitives import best_plo_hand
@@ -31,6 +32,79 @@ class RiverAuditTests(unittest.TestCase):
         ) as cursor:
             hid, hero = cursor.fetchone()
         return load_snapshot(self.db, hid, hero, ref)
+
+    def test_weakest_possible_four_card_holding_can_only_split(self):
+        from unittest.mock import Mock
+        snap = replace(
+            self.snapshot("CoinPoker", "9000002844", "Line 32"),
+            hero_cards=("2c", "3h", "4d", "5s"),
+            board=("Jh", "8s", "8d", "Kc", "Ah"),
+        )
+        guide = advice_at(snap)
+        self.assertIn("only tie or lose", guide.why)
+        self.assertIn("50.0%", guide.why)
+        self.assertFalse(guide.rankable)
+        self.assertNotIn("Possible bluffs", guide.why)
+        history = Mock()
+        history.sample.return_value.ready = True
+        self.assertEqual(apply_history(snap, guide, history), guide)
+        note = river_price_note(snap, OpponentHistory(()))
+        self.assertIn("50.0% splits", note)
+        self.assertNotIn("bluff-catcher", note)
+        check = advice_at(replace(snap, to_call=0, price_to_match=0, can_raise=True))
+        self.assertIn("no weaker caller", check.why)
+
+    def test_closing_multiway_call_uses_only_possible_showdown_shares(self):
+        snap = self.snapshot("iPoker", "9000005984", "Action 16")
+        facing = max(s.committed for s in snap.seats)
+        seats = tuple(
+            replace(s, committed=facing) if s.live and not s.is_hero else s
+            for s in snap.seats
+        )
+        guide = advice_at(replace(snap, seats=seats,
+                                 hero_cards=("2c", "3h", "4d", "5s"),
+                                 board=("Jh", "8s", "8d", "Kc", "Ah")))
+        self.assertIn("Your call closes the betting", guide.why)
+        split_price = sum(s.live for s in seats) * snap.to_call / (snap.to_call + snap.pot)
+        self.assertIn(f"{split_price:.1%}", guide.why)
+        self.assertFalse(guide.rankable)
+
+    def test_a_missed_flush_and_straight_draw_is_one_bluff_example(self):
+        snap = replace(self.snapshot("CoinPoker", "9000002844", "Line 32"),
+                       hero_cards=("As", "4d", "Kh", "3s"),
+                       board=("Qs", "Th", "Kc", "4s", "2d"))
+        holdings = river_holdings(snap.hero_cards, snap.board)
+        self.assertEqual(holdings.missed_flush[0].holding, holdings.missed_straight[0].holding)
+        evidence = advice_at(snap).why.split("Possible bluffs include ")[1].split(".")[0]
+        self.assertEqual(evidence.count(holdings.missed_flush[0].text), 1)
+
+    def test_barrels_and_missed_draw_removal_respect_prior_action(self):
+        from leakfinder.river_guide import _barrel_blockers
+        from tests.test_strategy_guide import view, move
+        prior = [move("BB", "bet", 5, "Turn"), move("BTN", "call", 5, "Turn"),
+                 move("BB", "bet", 20, "River")]
+        snap = view("Ts 6c 7h 5h", "BTN", street="River", board="4c Kh Js Ah 3d",
+                    prior=prior, owed=20, pot=40)
+        bettor = next(s for s in snap.seats if s.name == "BB")
+        note = _barrel_blockers(snap, bettor, 1/3, 0)
+        self.assertIn("turn 50% pot, river 100% pot", note)
+        self.assertIn("7h 5h", note)
+        self.assertIn("lose to a bluff", note)
+        self.assertEqual(_barrel_blockers(replace(snap, board=(*snap.board[:4], "3h")), bettor, 1/3, 0), "")
+        self.assertEqual(_barrel_blockers(replace(snap, history=tuple(prior[2:])), bettor, 1/3, 0), "")
+
+    def test_no_four_card_example_printed_as_both_weaker_value_and_bluff(self):
+        import re
+        snap = replace(self.snapshot("CoinPoker", "9000002844", "Line 32"),
+                       hero_cards=("9c", "4d", "8h", "2d"), board=("Th", "6s", "6h", "Jc", "Ts"))
+        guide = advice_at(snap).why
+        self.assertIn("Count that holding once", guide)
+        def examples(marker):
+            section = guide.split(marker, 1)[1].split(".")[0]
+            return {frozenset(x.split()) for x in re.findall(r"((?:[2-9TJQKA][cdhs] ){3}[2-9TJQKA][cdhs])", section)}
+        value, bluffs = examples("weaker made hands include "), examples("Possible bluffs include ")
+        self.assertTrue(value and bluffs)
+        self.assertFalse(value & bluffs)
 
     def test_identical_public_line_can_favor_either_call_or_fold(self):
         # Each side of each example is a complete legal four-card holding.

@@ -4,7 +4,8 @@ from collections import Counter
 from functools import lru_cache
 
 from .critique import Critique
-from .early_postflop import _boat_cards, _straight_pairs, next_draws
+from .early_equity import showdown_example
+from .early_postflop import _straight_pairs, next_draws
 from .opponent_history import heads_up_price
 from .postflop_value import RANK_LABEL
 from .river_holdings import DECK, RANKS, nuts
@@ -65,15 +66,16 @@ def _turn_response(snap, action, hero, villain, hole, board):
     if ceiling + 0.05 > price:
         return None
     weaker = (price - ceiling) / (1 - ceiling)
+    example = showdown_example(hole, board, minimum, price)
     return Critique(
-        "turn-closing-call-value-bound", "Stack-off against a possible turn value range",
-        "Compare folding to the call",
+        "turn-closing-call-value-bound", "Closing turn call against different betting ranges",
+        "Compare call and fold by range",
         f"The call closes the betting and needs {price:.1%} equity before rake. "
         f"Against an opponent already holding {segment}, at most {eligible} of the "
         f"40 possible rivers per opposing hand can even reach that category for Hero. "
         f"Counting them all as wins caps equity against that group at {ceiling:.1%}. "
         f"Even if Hero always beats the rest, at least {weaker:.1%} of the betting "
-        "range must come from outside that group to cover the call.",
+        f"range must come from outside that group to cover the call. {example}".strip(),
         "Draws, weaker value or bluffs can justify calling if numerous enough. "
         "The hand history gives the price but cannot establish that range.",
     )
@@ -126,14 +128,29 @@ def _set_raise(snap, amount, hole, board):
     if not examples:
         return None
     pair = "-".join(RANK_LABEL[r] for r in reversed(max(examples)[1]))
-    boats = _boat_cards(tuple(sorted(c[0] for c in hole)), tuple(sorted(c[0] for c in board)))
+    boats = extra = unbeaten = 0
+    for river in DECK:
+        if river in hole or river in board:
+            continue
+        final = board + (river,)
+        rank, kicks, *_ = best_plo_hand(hole, final)
+        if rank in (6, 7):
+            boats += 1
+        elif rank in (4, 5, 8):
+            extra += 1
+            unbeaten += nuts(hole, final, rank, tuple(kicks))
+    redraws = (
+        f" Another {extra} make a straight, flush or straight flush as Hero's best hand. "
+        f"Of those, {unbeaten} guarantee at least a tie against every legal holding."
+        if extra else ""
+    )
     return Critique(
         "turn-set-raise-straight-possible", "Turn raise with a set on a straight board",
         "Compare calling to raising",
         f"Hero put in {amount / snap.bb:g} BB with a set. Calling cost "
         f"{snap.to_call / snap.bb:g} BB. An opponent using {pair} can already have "
         f"a straight. Of the 44 unseen river cards, {boats} make Hero a full house "
-        "or quads before assigning opposing cards. Calling keeps weaker bets in "
+        f"or quads before assigning opposing cards.{redraws} Calling keeps weaker bets in "
         "and avoids putting extra chips in against that straight.",
         "Raising can collect from worse made hands or draws, or deny equity to "
         "hands that would fold. Blockers and effective "
@@ -144,12 +161,14 @@ def _set_raise(snap, amount, hole, board):
 def _bluff_blockers(hole, board):
     suits = Counter(c[1] for c in board)
     notes = []
+    strong_blocker = False
     for suit, n in suits.items():
         highest = next(r + suit for r in reversed(RANKS) if r + suit not in board)
         if highest not in hole:
             continue
         if n >= 3:
             notes.append(f"{highest} blocks the strongest ordinary flush.")
+            strong_blocker = True
         if n == 1 and len(board) == 3 and sum(c[1] == suit for c in hole) >= 2:
             notes.append(f"{highest} gives Hero a backdoor draw to the highest ordinary flush in that suit.")
     ranks = Counter(RANK_VALUE[c[0]] for c in board)
@@ -163,16 +182,13 @@ def _bluff_blockers(hole, board):
                 before += (4 - ranks[a]) * (4 - ranks[b])
                 after += (4 - ranks[a] - used[a]) * (4 - ranks[b] - used[b])
         if after < before:
+            # A half or greater reduction affects review order only.
+            strong_blocker |= 2 * after <= before
             notes.append(
                 f"Hero blocks {before - after} of the {before} two-card combinations "
                 "that make the highest straight available on this board."
             )
-    if notes:
-        return " ".join(notes) + " Folds from better hands or a profitable later barrel can justify the bet."
-    return (
-        "Opponents who fold too often, later barrels or equity from pairing "
-        "can favor the bluff. Checking also retains a chance to improve."
-    )
+    return " ".join(notes), strong_blocker
 
 
 def _large_weak_bet(snap, amount, opponents, hole, board):
@@ -189,14 +205,18 @@ def _large_weak_bet(snap, amount, opponents, hole, board):
     required = amount / (amount + snap.pot)
     made = "high card" if rank == 0 else "a pair below the top board card"
     players = "one opponent" if len(opponents) == 1 else f"{len(opponents)} opponents"
+    removal, strong_blocker = _bluff_blockers(hole, board)
+    prefix = f"{removal} " if removal else ""
     return Critique(
         "large-weak-hand-bet", "Large bet with few immediate straight or flush cards",
-        "Compare checking to the large bet",
+        "Review the blocker bluff and checking" if strong_blocker else "Compare checking to the large bet",
         f"Hero bet {amount / snap.pot:.0%} pot into {players} with "
         f"{made}. {draws} unseen next cards make a straight or flush for Hero. "
-        f"If every continuation beats Hero and no more chips go in, everyone must "
+        f"{prefix}If every continuation beats Hero and no more chips go in, everyone must "
         f"fold {required:.1%} of the time to break even before rake.",
-        _bluff_blockers(hole, board),
+        "Folds from better hands, later barrels and equity when called can favor the bet. "
+        "Checking also retains showdown equity. Card removal alone gives no fold frequency.",
+        review_priority=-1 if strong_blocker else 0,
     )
 
 

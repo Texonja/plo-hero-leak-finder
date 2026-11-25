@@ -47,6 +47,9 @@ class FlopCritiqueTests(unittest.TestCase):
         self.assertIn("820 possible", result.reason)
         self.assertIn("a flush or better", result.reason)
         self.assertIn("No further betting", result.reason)
+        self.assertIn("820 runouts", result.reason)
+        self.assertIn("frequency of that hand", result.reason)
+        self.assertEqual(result.alternative, "Compare call and fold by range")
         self.assertLess(equity("Ks 8d Jh Tc", "Ah Qh 5c 3s", "Kh 8h 2h"), 65 / 230)
         self.assertGreater(equity("Ks 8d Jh Tc", "Kc 5d 4c 3s", "Kh 8h 2h"), 65 / 230)
 
@@ -78,6 +81,18 @@ class FlopCritiqueTests(unittest.TestCase):
         self.assertEqual(sizing.rule, "flop-size-large-dry-paired")
         self.assertIn("33% pot", sizing.alternative)
         self.assertIsNone(review_flop(dry, decision("bet", 7)))
+        under = replace(dry, hero_cards=("8c", "8h", "5h", "Ts"))
+        self.assertEqual(review_flop(under, decision("bet", 30)).rule, "flop-size-underpair-dry-paired")
+
+    def test_underpair_sizing_requires_a_large_cbet_after_a_check_on_high_paired_rainbow(self):
+        snap = preflop_raiser(spot("6c 6s 4c 4h", "7d 3c 7s", pot=25), "BTN")
+        idea = review_flop(snap, decision("bet", 20))
+        self.assertIn("checking back", idea.alternative)
+        self.assertIn("20 BB into 25 BB", idea.reason)
+        self.assertIsNone(review_flop(snap, decision("bet", 19)))
+        for board in ("3s 3c 7d", "7d 3d 7s", "7d 3c 6d"):
+            self.assertIsNone(review_flop(replace(snap, board=tuple(board.split())), decision("bet", 20)))
+        self.assertIsNone(review_flop(snap, decision("check")))
 
     def test_neutral_note_on_actual_fold_both_rooms(self):
         actual = (

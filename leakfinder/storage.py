@@ -110,10 +110,8 @@ def initialize(db):
                 WHERE o.rowid=(SELECT min(p.rowid) FROM origins p WHERE p.hand=o.hand)""")
         if version == 4:
             from .analysis import migrate_v4_comparisons
-            from .review_queue import migrate_v4_guides
 
             migrate_v4_comparisons(db)
-            migrate_v4_guides(db)
         db.execute(f"PRAGMA user_version={LIBRARY_VERSION}")
     db.execute("PRAGMA journal_mode=WAL")
 

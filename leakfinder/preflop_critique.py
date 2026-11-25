@@ -1,8 +1,13 @@
 """Conditional, action-specific reviews of selected PLO4 cash preflop lines."""
 
 from collections import Counter
+from functools import lru_cache
+from itertools import combinations
+from math import sqrt
+from random import Random
 
 from .critique import Critique
+from .river_holdings import CARD_ID, _score, _scores
 from .vendor.common import RANK_VALUE
 from .vendor.primitives import classify_known_hand
 
@@ -58,6 +63,35 @@ def _weak_shape(cards):
     return ""
 
 
+def _ace_scenario_key(cards):
+    # Equivalent suit permutations should yield the same sample and cache key.
+    groups = sorted((sorted(CARD_ID[c] // 4 for c in cards if c[1] == suit)
+                     for suit in "cdhs"), reverse=True)
+    return tuple(rank * 4 + suit for suit, ranks in enumerate(groups) for rank in ranks)
+
+
+@lru_cache(maxsize=256)
+def _against_two_aces(hole):
+    """Heads-up showdown against uniformly dealt AA and two non-ace side cards."""
+    generator = Random(71319)
+    aces = tuple(c for c in range(48, 52) if c not in hole)
+    sides = tuple(c for c in range(48) if c not in hole)
+    hero_pairs = tuple(combinations(hole, 2))
+    trials = 8192
+    wins = ties = 0
+    for _ in range(trials):
+        rival = generator.sample(aces, 2) + generator.sample(sides, 2)
+        board = generator.sample([c for c in range(52) if c not in hole and c not in rival], 5)
+        scores = _scores(tuple(board))
+        ours = max(_score(a, b, *scores) for a, b in hero_pairs)
+        theirs = max(_score(a, b, *scores) for a, b in combinations(rival, 2))
+        wins += ours > theirs
+        ties += ours == theirs
+    share = (wins + 0.5 * ties) / trials
+    margin = 1.96 * sqrt(((wins + 0.25 * ties) / trials - share ** 2) / (trials - 1))
+    return share, margin, trials
+
+
 def _large_fivebet(snap, event, entries, hero, live):
     # Only a heads-up, straight raise / reraise / 4-bet sequence. Extra chips
     # beyond the opponent's stack would be returned, so cap both contributions.
@@ -77,15 +111,30 @@ def _large_fivebet(snap, event, entries, hero, live):
     behind = min(hero.stack - added, opponent.stack - opponent_call)
     if opponent_call <= 0 or added < 30 * snap.bb or behind / final_pot > 0.5:
         return None
+    call_pot = snap.pot + snap.to_call
+    after_flat = min(hero.stack - snap.to_call, opponent.stack)
     reason = (
         f"The {opponent.position} 4-bet to {fourbet.raised_to / snap.bb:g} BB. "
-        f"Your 5-bet risks another {added / snap.bb:g} BB against that player. "
-        "With no ace in your hand, all four aces are available to the opponent. "
+        f"Calling costs {snap.to_call / snap.bb:g} BB into a final preflop pot of "
+        f"{call_pot / snap.bb:g} BB, leaving {after_flat / snap.bb:g} BB effective to play. "
+        f"Your 5-bet risks another {added / snap.bb:g} BB from this decision, "
+        f"including {opponent_call / snap.bb:g} BB beyond a flat call. "
     )
     if behind == 0:
+        price = added / final_pot
+        share, margin, trials = _against_two_aces(_ace_scenario_key(snap.hero_cards))
+        if share + margin < price:
+            assessment = "The shove falls short against this range. Folding is reasonable if the 4-bettor rarely folds and the flat realizes too little equity."
+        elif share - margin > price:
+            assessment = "The shove clears the price against this range before rake. Folding to aces alone would give up that edge."
+        else:
+            assessment = "The sampling interval overlaps the price. This model gives no clear edge."
         reason += (
             f"If always called, the showdown share needed to break even against folding is "
-            f"{added / final_pot:.1%} before rake. The actual share depends on the calling range."
+              f"{price:.1%} before rake. Against exactly two random aces and two random non-aces, "
+              f"your cards have about {share:.1%} equity ({trials:,} simulated deals, approximate "
+              f"95% sampling margin ±{margin * 100:.1f} percentage points). {assessment} "
+              f"Flat-calling costs {snap.to_call / call_pot:.1%} of the pot after calling and leaves future betting."
         )
     else:
         reason += (
@@ -94,10 +143,12 @@ def _large_fivebet(snap, event, entries, hero, live):
         )
     return Critique(
         "preflop_nonace_fivebet",
-        "Committed heavily against a 4-bet without an ace",
-        "Compare calling the 4-bet",
+        "Five-bet after facing a 4-bet",
+        "Compare the 5-bet with calling and folding",
         reason,
-        "Wide 4-bets and folds to further raises can justify the 5-bet. Connected or double-suited cards can retain equity against aces. Check this opponent's range before judging it.",
+        "All four aces are available to the opponent. The frequency and side cards of AAxx, "
+        "their non-AA hands and their folds to the 5-bet all matter. A flat can retain weaker "
+        "4-bets and allow you to fold unfavorable flops.",
     )
 
 

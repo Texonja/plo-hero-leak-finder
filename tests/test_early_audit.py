@@ -205,6 +205,17 @@ class EarlyAuditTests(unittest.TestCase):
         self.assertGreater(equity(hole, "Jh Jc 3h 4c", board), 0.20)
         self.assertFalse(advice_at(snap).choices)
 
+    def test_nut_straight_value_targets_and_closed_raise_rights(self):
+        only = spot("6s 4s Qc Kd", "3d 5c 7h", owed=5, pot=25)
+        self.assertIn("Only this straight is possible", advice_at(only).why)
+        many = spot("Jh Tc 3d 3c", "7d 8s 9c", owed=5, pot=25)
+        self.assertIn("Lower straights made with", advice_at(many).why)
+        royal = spot("As Ks 3h 4c", "Qs Js Ts", owed=5, pot=25)
+        closed = advice_at(replace(royal, can_raise=False))
+        self.assertEqual(closed.choices, ("call",))
+        self.assertNotIn("raise", closed.why.lower())
+        self.assertNotIn("keeps bluffs", closed.why)
+
     def test_checked_to_the_nuts_excludes_bet_fold_sizing(self):
         snap = spot("As Ks 3h 4c", "Qs Js Ts")
         hero = next(s for s in snap.seats if s.is_hero)

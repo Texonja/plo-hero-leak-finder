@@ -408,7 +408,13 @@ def river_price_note(snap, history):
     n = len(sample.comparable)
     known = sum(r.category is not None for r in sample.comparable)
     note = f"Call {snap.to_call / snap.bb:g} BB. Break-even showdown equity {price:.1%} before rake."
-    if river_holdings(snap.hero_cards, snap.board).stronger:
+    holdings = river_holdings(snap.hero_cards, snap.board)
+    if not holdings.weaker and holdings.stronger:
+        note += (
+            f" Hero can only tie or lose. A heads-up call needs at least {2 * price:.1%} splits."
+            if holdings.ties else " Every legal opposing holding beats Hero at showdown."
+        )
+    elif holdings.stronger:
         note += f" A pure bluff-catcher needs {price:.1%} bluffs if it loses to all value, beats all bluffs and never ties."
     if any(a.street == "River" and a.action == "raise" for a in snap.history):
         return (
@@ -536,9 +542,12 @@ def build_range_review(snap, hero, opponent, history):
             lines.append(
                 f"The share of these weak hands in the sample could be {air_range[0]:.1%}–{air_range[1]:.1%} , depending on the hidden cards. Overall bluff frequency and intent remain uncertain."
             )
-            lines.append(
-                f"Earlier hand categories and sampling uncertainty give a range of {win_range[0]:.1%}–{win_range[1]:.1%} for this comparison. The call price is {heads_up_price(snap):.1%} before rake."
-            )
+            if river_holdings(snap.hero_cards, snap.board).weaker:
+                lines.append(
+                    f"Earlier hand categories and sampling uncertainty give a range of {win_range[0]:.1%}–{win_range[1]:.1%} for this comparison. The call price is {heads_up_price(snap):.1%} before rake."
+                )
+            else:
+                lines.append("Hero cannot win outright on this board. Earlier hand categories cannot identify how often this bet ties.")
         matched.update(((r.hand, r.ref), r) for r in sample.comparable)
         broader = sample.previous
         other_known = sum(row.category is not None for row in broader)
@@ -668,7 +677,7 @@ def build_range_review(snap, hero, opponent, history):
         lines[3:3] = [
             "",
             "WHAT WOULD CHANGE THIS DECISION?",
-            "With the same board and range, vary how often weaker hands call the bet. "
+            "With the same board and range, vary the opponent's responses to each bet size. "
             + " · ".join(
                 f"{label}: {pick}"
                 for (label, _), pick in zip(RESPONSE_SCENARIOS, models)

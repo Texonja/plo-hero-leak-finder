@@ -1,31 +1,14 @@
 """Conditional river alternatives with legal four-card witnesses and explicit prices."""
 
 from collections import Counter
-from itertools import combinations
 
 from .critique import Critique
 from .postflop_value import bet_size
-from .river_holdings import CARD_ID, DECK, RANKS, _score, _scores, river_holdings
+from .river_holdings import RANKS, river_holdings
 
 
-def _example(snap, pairs):
-    """Complete a representative pair without improving its river rank with either side card."""
-    if not pairs:
-        return None
-    board = tuple(CARD_ID[c] for c in snap.board)
-    available = set(range(52)).difference(board, (CARD_ID[c] for c in snap.hero_cards))
-    scores = _scores(board)
-    for pair in pairs:
-        a, b = (CARD_ID[c] for c in pair.cards)
-        target = _score(a, b, *scores)
-        sides = [
-            c for c in sorted(available - {a, b})
-            if max(_score(a, c, *scores), _score(b, c, *scores)) <= target
-        ]
-        for c, d in combinations(sides, 2):
-            if _score(c, d, *scores) <= target:
-                return f"{' '.join((*pair.cards, DECK[c], DECK[d]))} ({pair.label})"
-    return None
+def _example(pairs):
+    return next((p.text for p in pairs), None)
 
 
 def _turn_bet_called(snap, bettor, caller):
@@ -41,7 +24,7 @@ def _value(snap, action, hero, opponent, result, facing):
     if (action == "check" and result.hero_category == 2 and result.stronger
             and all(p.category == 3 for p in result.stronger)
             and _turn_bet_called(snap, hero.name, opponent.name)):
-        target = _example(snap, [p for p in result.weaker if p.category == 2])
+        target = _example(p for p in result.weaker if p.category == 2)
         if target and min(hero.stack, opponent.stack) >= snap.bb:
             size = bet_size(snap, hero, [opponent], 33)
             return Critique(
@@ -57,7 +40,7 @@ def _value(snap, action, hero, opponent, result, facing):
     if result.hero_category < 4 or (better > 1 and not near_boat):
         return None
     minimum = 6 if better > 1 else max(3, result.hero_category - 2)
-    target = _example(snap, [p for p in result.weaker if p.category >= minimum])
+    target = _example(p for p in result.weaker if p.category >= minimum)
     if not target:
         return None
     if better == 0:
@@ -148,12 +131,12 @@ def _bluff_catch(snap, opponent, result, price, raised):
     else:
         return None
     min_category = max(2, made) if rule == "river_pair_second_barrel" else max(4, made)
-    value = _example(snap, sorted(
+    value = _example(sorted(
         (p for p in result.stronger if p.category >= min_category), key=lambda p: p.category == 8
     ))
     # Prefer a credible weaker flush; otherwise show a holding whose actual value loses.
     below = tuple(p for p in result.weaker if made == 5 and p.category == 5)
-    counter = _example(snap, below + result.missed_flush + result.missed_straight + result.weaker)
+    counter = _example(below + result.missed_flush + result.missed_straight + result.weaker)
     if not value or not counter:
         return None
     return Critique(
@@ -175,7 +158,7 @@ def _small_nut_bet(snap, event, hero, opponent, result):
     larger = bet_size(snap, hero, [opponent], 50).contestable
     if larger < max(2 * paid, snap.bb):
         return None
-    target = _example(snap, [p for p in result.weaker if p.category >= max(3, result.hero_category - 2)])
+    target = _example(p for p in result.weaker if p.category >= max(3, result.hero_category - 2))
     if not target:
         return None
     return Critique(
@@ -201,7 +184,7 @@ def _bluff(snap, event, opponent, result):
     effective = min(event.amount, opponent.stack)
     if effective < snap.pot * 2 / 3:
         return None
-    target = _example(snap, [p for p in result.stronger if p.category == 5])
+    target = _example(p for p in result.stronger if p.category == 5)
     if not target:
         return None
     folds = effective / (snap.pot + effective)
@@ -261,6 +244,18 @@ def review_river(snap, event, advice):
     if checked_to and action in ("check", "bet") and not snap.to_call and opponent.stack > 0:
         result = river_holdings(snap.hero_cards, snap.board)
         if action == "bet":
+            if not result.weaker and result.ties and result.stronger:
+                risk = min(event.amount, hero.stack, opponent.stack)
+                if risk > 0:
+                    return Critique(
+                        "river_split_only_bluff", "Bet after a check with only split-pot showdown value",
+                        "Compare the bluff with checking back",
+                        f"You risked {risk / snap.bb:g} BB into {snap.pot / snap.bb:g} BB in matched chips. "
+                        f"If every opponent hand beats you, a pure bluff needs {risk / (snap.pot + risk):.2%} folds "
+                        "before rake. A fold from a better hand gains the full pot over checking. "
+                        "Folding out a tying hand gains half the pot. A call from a tying hand adds no value before rake.",
+                        "Checking takes your share against ties. A bluff can gain when enough better or tying hands fold.",
+                    )
             return _small_nut_bet(snap, event, hero, opponent, result) or _bluff(snap, event, opponent, result)
         return _value(snap, action, hero, opponent, result, "")
     if action not in ("fold", "call") or not (opening_bet or raised) or snap.to_call <= 0:

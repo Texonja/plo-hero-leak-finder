@@ -16,8 +16,15 @@ from .postflop_value import (
     line_context,
     paired_targets,
     value_plan,
+    weaker_straights,
 )
-from .preflop_spots import opening_comparison, opening_edges, stack_context
+from .preflop_spots import (
+    POSTFLOP_ORDER,
+    opening_comparison,
+    opening_edges,
+    stack_context,
+    threebet_price_note,
+)
 from .river_guide import advise_river
 from .river_holdings import nuts
 from .sb_reference import reference_choices, sb_reference
@@ -159,6 +166,18 @@ def preflop_advice(snap, hero, seats):
     pos_label = f"{pos} vs {by_name[faced.name].position}" if faced else pos
     explanation = PREFLOP_CLASSES.get(hand) or preflop_guide.GROUPS[hand].title + "."
     ranks = tuple(sorted({RANK_VALUE[c[0]] for c in snap.hero_cards}))
+    if hand == "double_pair":
+        link = (
+            "The two ranks can work together in a straight."
+            if any(set(ranks) <= window for window in STRAIGHTS)
+            else "The two ranks cannot make a straight together."
+        )
+        # Four cards match the pairs, so the unconditional chance of seeing
+        # at least one of those ranks on the flop is 1 - C(44,3)/C(48,3).
+        explanation += (
+            f" {link} Before assigning opponent cards, 23.4% of flops contain at least "
+            "one of the four remaining cards matching either pair. A lower set can lose to a higher set."
+        )
     # The statistical spread tag can coexist with three highly connected ranks.
     # Describe the actual straight links for an individual decision instead.
     labels = [tag for tag in tags(snap.hero_cards) if tag != "Disconnected"]
@@ -207,6 +226,21 @@ def preflop_advice(snap, hero, seats):
             + " The action guide covers three to six dealt-in players. Heads-up and full-ring ranges need separate review.",
         )
     depth, depth_note = stack_context(snap, hero, seats, raises + calls)
+    if (depth in {"outside", "mixed"} and hand == "double_pair" and len(raises) == 2
+            and raises[0].name == hero.name and raises[1].name != hero.name and snap.to_call):
+        opponent = by_name[faced.name]
+        remaining = min(hero.stack - snap.to_call, opponent.stack)
+        other = [s.position for s in seats if s.live and s.name not in {hero.name, opponent.name}]
+        where = (f" Other live players: {', '.join(other)}." if other else
+                 f" You would be {'in' if POSTFLOP_ORDER.index(pos) > POSTFLOP_ORDER.index(opponent.position) else 'out of'} position.")
+        return advice(
+            "Double-paired 3-bet defense", (),
+            f"{explanation} {opponent.position} 3-bet to {size:g} BB. Calling costs "
+            f"{snap.to_call / snap.bb:g} BB into {snap.pot / snap.bb:g} BB ({pot_odds:.1%} "
+            f"of the pot after your call), leaving {remaining / snap.bb:g} BB effective "
+            f"against the raiser.{where} A low set can face a higher set. Compare implied "
+            f"odds with the risk of losing a larger pot. {depth_note}",
+        )
     if depth == "outside":
         return advice(
             "Effective stack review",
@@ -309,7 +343,31 @@ def preflop_advice(snap, hero, seats):
                 explanation
                 + " Folding is a reasonable starting point. Only one card of the tripled rank remains, the two ranks cannot make a straight together and the SB faces a substantial price out of position. A counter-bluff needs specific evidence that the opponents will fold.",
             )
-    if hand in {"double_pair", "rainbow_pair", "quads", "trips"}:
+    if hand == "double_pair":
+        price_note = threebet_price_note(snap)
+        if price_note:
+            return advice(
+                "Double-paired 3-bet defense",
+                (),
+                f"{explanation} {price_note} A call can benefit from both set ranks. "
+                "Compare how much equity you realize against overpairs, higher sets and draws.",
+            )
+        if not raises and not calls:
+            return advice(
+                "Double-paired opening review",
+                (),
+                f"{explanation} Opening can win the blinds or build a pot when you hit. "
+                "A frequent 3-bet behind or high rake makes a marginal open less attractive.",
+            )
+        return advice("Double-paired hand review", (), explanation)
+    if hand in {"rainbow_pair", "quads", "trips"}:
+        if hand == "rainbow_pair" and pos == "BTN" and not raises and not calls:
+            return advice(
+                "Paired button opening review",
+                (),
+                explanation + " Position favors opening. Weigh the side-card connections, "
+                "the risk of a higher set and how often the blinds 3-bet or fold.",
+            )
         return advice(
             "Hand structure review",
             (),
@@ -331,9 +389,16 @@ def preflop_advice(snap, hero, seats):
             if snap.to_call:
                 note += " Folding is reasonable."
         elif hand == "connected_ds" and max(ranks) >= 12 and ranks[-2] <= 7:
-            note = "The high card has little straight support from the low cards."
-            if snap.to_call:
-                note += " Folding is reasonable."
+            if ranks[-1] == 14 and ranks[0] <= 5:
+                note = (
+                    "The ace and a low card can play together in a wheel (A-2-3-4-5). "
+                    "One ace-high suit can make the nut flush. Low-end straights and "
+                    "the other flush suit can be dominated."
+                )
+            else:
+                note = "The high card has little straight support from the low cards."
+                if snap.to_call:
+                    note += " Folding is reasonable."
         elif max(suits.values()) == 3:
             note = "The suited ace can make the nut flush, but the third card of its suit removes a flush out."
         elif faced and "A" not in {c[0] for c in snap.hero_cards}:
@@ -344,6 +409,17 @@ def preflop_advice(snap, hero, seats):
             note = "Consider the cost of seeing the flop and which limpers would continue against an isolation raise."
         else:
             note = "The suits and straight potential give this hand some playability. Opening also depends on the players behind, stack depth and rake."
+        if calls and not raises and not own and snap.to_call:
+            limpers = ", ".join(by_name[a.name].position for a in calls)
+            acted = {a.name for a in voluntary}
+            pending = [s.position for s in seats if s.live and s.name != hero.name and s.name not in acted]
+            note += (f" After the limp from {limpers}, overlimping costs {snap.to_call / snap.bb:g} BB "
+                     f"into {snap.pot / snap.bb:g} BB.")
+            if pending:
+                note += f" {', '.join(pending)} can still act."
+            if 14 in tops and len(tops) == 2 and ranks[0] <= 5 and ranks[-2] <= 7:
+                note += (" Overlimping is reasonable with a nut suit at this price. "
+                         "An isolation raise gains appeal if it gets heads-up. Frequent raises behind reduce the value of limping.")
         if faced and snap.to_call:
             note += f" Calling costs {snap.to_call / snap.bb:g} BB, or {pot_odds:.1%} of the pot after calling, before rake and later betting. Equity against the opponent's range is unknown."
         return advice("Hand structure review", (), explanation + " " + note)
@@ -377,9 +453,11 @@ def preflop_advice(snap, hero, seats):
         if pos != "SB" and hand == "kings":
             return advice(
                 "First in",
-                ("fold", "raise"),
+                (),
                 explanation
-                + " Open wider from CO and BTN. Early position calls for stronger support across all four cards.",
+                + " An open-raise can isolate and build a pot with kings. A limp may induce "
+                "a raise but can invite several players into the pot. Folding can save "
+                "chips when reraises and rake make these side cards hard to play.",
             )
         return advice(
             "First in",
@@ -644,9 +722,15 @@ def postflop_advice(snap, hero, seats):
             price = heads_up_price(snap)
         cost = f"The call costs {price:.1%} of the contestable pot after calling, before rake."
         if best and rank == 4:
+            lower = weaker_straights(cards, board, kicks[0])
+            targets = (
+                f"Lower straights made with {' or '.join(lower)} can be in the betting range."
+                if lower else
+                "Only this straight is possible here. The weaker part of the betting range could include sets, two pair or draws."
+            )
             return advice(
                 (),
-                f"You have the current nut straight. {cost} Weaker straights can pay you, but the same straight with a flush or full-house redraw can take more than half the pot. Compare both ranges before committing chips.",
+                f"You have the current nut straight. {cost} {targets} A player sharing your straight may have extra ways to win on the remaining cards. Compare both players' redraws.",
             )
         if (allin or snap.to_call == hero.stack) and not (
             best or (top_set and not flush_on_board and not straight_possible)
@@ -656,9 +740,13 @@ def postflop_advice(snap, hero, seats):
                 f"{cost} An all-in call depends on showdown equity against the opponent's range. Count ties, redraws and the cards still to come.",
             )
         if not heads_up and top_set:
+            high = max(s.committed for s in seats)
+            pending = [s.position for s in opponents if s.stack and s.committed < high]
+            action = (f"{' and '.join(pending)} can still respond after a call." if pending
+                      else "A call closes this street.")
             return advice(
                 (),
-                f"You have top set. {cost} Other players may call or raise. Compare the combined draws and how much of the pot Hero can win.",
+                f"You have top set. {cost} {action} Compare the combined draws and how much of the pot Hero can win.",
             )
     if street == "River" and not best:
         river = advise_river(snap, hero, opponents)
@@ -783,6 +871,15 @@ def postflop_advice(snap, hero, seats):
 
     if best:
         context, _, _, _ = line_context(snap, hero, opponents, actions)
+        if not snap.can_raise:
+            board_note = ("The final board is complete." if street == "River" else
+                          "The remaining board can change the relative strength of both hands.")
+            return advice(
+                ("call",),
+                f"{context} You face a bet with the current nuts. {board_note} "
+                "Your available actions are call and fold.".strip(),
+                4,
+            )
         targets, _ = (
             paired_targets(cards, board, rank, kicks)
             if paired and rank >= 6
@@ -802,7 +899,9 @@ def postflop_advice(snap, hero, seats):
     if top_set and not flush_on_board and not straight_possible:
         return advice(
             ("call", "raise") if snap.can_raise else ("call",),
-            "Top set is strong on this board. Call or raise for value depending on the bet size and remaining stack.",
+            ("Top set is strong on this board. Call or raise for value depending on the bet size and remaining stack."
+             if snap.can_raise else
+             "Top set is currently the best hand. Compare the price of calling with the draws that can overtake you."),
             3,
         )
     if nut_draw and not paired:

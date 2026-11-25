@@ -303,7 +303,7 @@ def early_advice(snap, hero, opponents, rank, kicks):
         cost = f"Calling costs {price:.0%} of the pot after calling, before rake."
         checked_before_bet = line.endswith("after checking")
         if raise_faced:
-            why = f"{cost} After prior aggression, weigh the opponent's value hands and semibluffs again before raising. {note}"
+            why = f"{cost} After prior aggression, weigh the opponent's value hands and semibluffs at this price. {note}"
             return EarlyAdvice(title, (), why)
         if (
             heads_up

@@ -76,6 +76,11 @@ class HandReview(ttk.Frame):
             self.controls, text="Study spots", command=self._toggle_study
         )
         self.study_button.pack(side="left")
+        self.river_calls_only = tk.BooleanVar(value=False)
+        self.river_calls_filter = ttk.Checkbutton(
+            self.controls, text="Large river calls after a turn call",
+            variable=self.river_calls_only, command=self._filter_spots,
+        )
         self.critique_spot = ttk.Combobox(
             self.controls,
             state="readonly",
@@ -83,7 +88,7 @@ class HandReview(ttk.Frame):
             values=("All spots", *CRITIQUE_SPOTS),
         )
         self.critique_spot.current(0)
-        self.critique_spot.bind("<<ComboboxSelected>>", self._filter_critiques)
+        self.critique_spot.bind("<<ComboboxSelected>>", self._filter_spots)
         self.back = ttk.Button(
             self.controls, text="Back to results", command=self._close_related
         )
@@ -161,6 +166,7 @@ class HandReview(ttk.Frame):
         self._hide_pager()
         self.back.pack_forget()
         self.critique_spot.pack_forget()
+        self.river_calls_filter.pack_forget()
         self._clear_cards(message)
 
     def _clear_cards(self, message):
@@ -204,6 +210,7 @@ class HandReview(ttk.Frame):
     def _toggle_study(self):
         self.show_critiques = False
         self.show_study = not self.show_study
+        self.river_calls_only.set(False)
         self.differences.set(False)
         self.related_pattern = ""
         self.page = 0
@@ -225,7 +232,7 @@ class HandReview(ttk.Frame):
         self.page = 0
         self._render()
 
-    def _filter_critiques(self, _event):
+    def _filter_spots(self, _event=None):
         self.page = 0
         self._render()
 
@@ -254,6 +261,7 @@ class HandReview(ttk.Frame):
         queue, pockets, empty, action = self.current
         self._hide_pager()
         self.back.pack_forget()
+        self.river_calls_filter.pack_forget()
         selected = queue.items
         heading = ""
         pattern_page = False
@@ -283,6 +291,11 @@ class HandReview(ttk.Frame):
         elif self.show_study:
             selected = queue.study
             heading = "Study spots"
+            self.river_calls_filter.pack(side="left", padx=8)
+            if self.river_calls_only.get():
+                selected = tuple(spot for spot in selected if spot.large_river_call)
+                heading = "Large river calls after a turn call"
+                empty = "No study spots match this betting line in the selected hands and street."
         elif self.related_pattern:
             self.back.pack(side="left", padx=(9, 0))
             group = next(g for g in queue.patterns if g.key == self.related_pattern)
@@ -332,6 +345,8 @@ class HandReview(ttk.Frame):
             summary += "\nRepeated across sessions first, then by the lower end of the difference-rate interval."
         if self.show_study:
             summary += "\nOrdered by pot size before Hero acted, largest first. These decisions require assumptions about ranges or future play."
+            if self.river_calls_only.get():
+                summary += "\nSame opponent bet both streets. Hero called at least 10 BB and two thirds of the opening river pot."
         if queue.hand_count and not self.related_pattern:
             total_indexed = queue.guide_choices + len(queue.study)
             if total_indexed:

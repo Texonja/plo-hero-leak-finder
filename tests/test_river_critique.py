@@ -58,6 +58,17 @@ class RiverCritiqueTests(unittest.TestCase):
         self.assertIsNone(self.flag(replace(s, history=tuple(a for a in s.history if a.street != "Turn")), e))
         self.assertIsNone(self.flag(replace(s, history=s.history[:-1]), e))  # First to speak may trap.
 
+    def test_split_only_bluff_prices_better_folds_and_tying_folds_differently(self):
+        e, s = self.decision("CoinPoker", "9000002872", "Line 35")
+        s = replace(s, hero_cards=("2c", "3h", "4d", "5s"), board=("Jh", "8s", "8d", "Kc", "Ah"))
+        amount = min(seat.stack for seat in s.seats if seat.live) // 2
+        amount = min(amount, s.pot)
+        idea = self.flag(s, replace(e, action="bet", amount=amount))
+        self.assertEqual(idea.rule, "river_split_only_bluff")
+        self.assertIn(f"{amount / (s.pot + amount):.2%}", idea.reason)
+        self.assertIn("half the pot", idea.reason)
+        self.assertIsNone(self.flag(s, e))
+
     def test_matched_history_can_defend_the_played_call_or_challenge_a_fold(self):
         e, s = self.decision("iPoker", "9000010026", "Action 17")
         history = replace(advice_at(s), title="River · opponent history", choices=("call",),

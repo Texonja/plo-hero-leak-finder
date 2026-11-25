@@ -10,6 +10,7 @@ class Critique:
     alternative: str
     reason: str
     counterargument: str
+    review_priority: int = 0
 
 
 def evidence_label(rule):
@@ -17,12 +18,10 @@ def evidence_label(rule):
         return "Recorded free check option"
     if rule == "sb_fold_reference":
         return "Solver reference"
-    if rule in {
-        "flop-cbet-stackoff-bound",
-        "turn-closing-call-value-bound",
-        "turn-fold-guaranteed-share",
-    }:
-        return "Equity bound"
+    if rule == "turn-fold-guaranteed-share":
+        return "Guaranteed showdown share"
+    if rule in {"flop-cbet-stackoff-bound", "turn-closing-call-value-bound"}:
+        return "Range-dependent equity bound"
     if rule in {"river_flat_value", "river_check_back_value", "river_fold_near_nuts"}:
         return "River value review"
     return "Conditional critique"

@@ -22,6 +22,44 @@ def _examples(holdings, count=2):
     return ", ".join(h.text for h in holdings[:count])
 
 
+def _barrel_blockers(snap, bettor, price, rank):
+    """Price and removal effects for a bluff-catcher facing successive opening bets."""
+    if rank > 2 or price < 0.25:
+        return ""
+    running = snap.pot
+    sized = {}
+    for action in reversed(snap.history):
+        running -= -action.amount if action.action == "return" else action.amount
+        if action.street in {"Flop", "Turn", "River"} and action.action in {"bet", "raise"}:
+            sized.setdefault(action.street, []).append((action, running))
+    barrels = []
+    for street in ("River", "Turn", "Flop"):
+        actions = sized.get(street, ())
+        if len(actions) != 1:
+            break
+        action, pot = actions[0]
+        if action.name != bettor.name or action.action != "bet" or pot <= 0:
+            break
+        barrels.append(f"{street.lower()} {action.amount / pot:.0%} pot")
+    if len(barrels) < 2:
+        return ""
+    missed = []
+    for suit in "cdhs":
+        held = [c for c in snap.hero_cards if c[1] == suit]
+        if (len(held) >= 2 and sum(c[1] == suit for c in snap.board[:4]) == 2
+                and snap.board[-1][1] != suit):
+            missed.append(" ".join(held))
+    if not missed:
+        return ""
+    note = (f" {bettor.position}'s bets were {', '.join(reversed(barrels))}. "
+            f"Your {' and '.join(missed)} remove cards from missed flush draws, leaving fewer natural bluffs.")
+    if rank == 0:
+        note += " With high card you can even lose to a bluff. Folding is reasonable without enough bets from hands you actually beat."
+    else:
+        note += " Folding is reasonable if this line contains too few weaker bets to meet the call price."
+    return note
+
+
 def _history(snap, opponents, river_actions):
     """Summarize public actions through the decision and identify players left to act."""
     seats = {s.name: s.position for s in snap.seats}
@@ -99,14 +137,21 @@ def advise_river(snap, hero, opponents):
     rank = result.hero_category
     stronger, weaker = result.stronger, result.weaker
     less_of_category = tuple(h for h in weaker if h.category == rank)
-    value_below = less_of_category + tuple(
+    value_below = tuple(h for h in less_of_category if h.category >= 1) + tuple(
         h for h in weaker if max(rank - 1, 1) <= h.category < rank
     )
-    missed = (
-        *result.missed_flush[:1],
-        *result.missed_straight[:1],
-        *result.flush_blocker_bluffs[:1],
-    )
+    missed_groups = (result.missed_flush, result.missed_straight, result.flush_blocker_bluffs)
+    shown_made = {frozenset(h.holding) for h in value_below[:2]} if snap.to_call else set()
+    overlap = any(frozenset(h.holding) in shown_made for group in missed_groups for h in group[:1])
+    missed = []
+    used = set(shown_made)
+    for group in missed_groups:
+        for h in group:
+            key = frozenset(h.holding)
+            if key not in used:
+                missed.append(h)
+                used.add(key)
+                break
     suits = Counter(c[1] for c in snap.board)
     ranks = Counter(c[0] for c in snap.board)
     paired = max(ranks.values()) > 1
@@ -124,7 +169,7 @@ def advise_river(snap, hero, opponents):
         and sum(c[1] == flush_suit for c in snap.hero_cards) == 1
     )
     blocked = (" " + result.blockers[0]) if result.blockers else ""
-    candidates_label = " Examples use two hole cards. The other two can improve a holding. The examples carry no range frequencies."
+    candidates_label = " Each example is a legal four-card holding. Its frequency in this line is unknown."
     texture = (6, 5, 4, 3, 2, 1, 7, 8, 0) if paired else (5, 4, 3, 2, 1, 6, 7, 8, 0)
     value_above = (
         sorted(
@@ -167,9 +212,8 @@ def advise_river(snap, hero, opponents):
         price = snap.to_call / (call_pot + snap.to_call)
         raised = faced.action == "raise"
         price_text = f"Calling costs {snap.to_call / snap.bb:g} BB. The raw threshold is {price:.1%} equity before rake"
-        price_text += (
-            "." if heads_up else " in the current pot, before the other players act."
-        )
+        price_text += "."
+        behind = []
         if not heads_up:
             order = sorted(snap.seats, key=lambda seat: seat.seat)
             start = order.index(opponent) + 1
@@ -180,7 +224,9 @@ def advise_river(snap, hero, opponents):
                 if seat.live and seat.stack and seat.committed < opponent.committed
             ]
             if behind:
-                price_text += f" {' and '.join(behind)} can still act behind you."
+                price_text += f" This uses the current pot before the other players act. {' and '.join(behind)} can still act behind you."
+            else:
+                price_text += " Your call closes the betting."
         if not stronger:
             return advice(
                 "continue",
@@ -189,6 +235,28 @@ def advise_river(snap, hero, opponents):
                 3,
                 rankable=True,
             )
+        if not weaker:
+            if not result.ties:
+                note = "Every legal four-card holding beats Hero. Calling cannot recover any chips."
+                if snap.can_raise:
+                    note += " A bluff raise needs enough folds to recover the extra chips at risk."
+                return advice("no showdown equity", () if snap.can_raise else ("fold",),
+                              f"{price_text} {note}", 3, rankable=not snap.can_raise)
+            note = f"Hero can only tie or lose. One legal holding that ties is {_examples(result.ties, 1)}."
+            if not heads_up:
+                note += " For a share, all opponents at showdown need simultaneously possible tying hands. The example checks one opponent."
+            if heads_up or not behind:
+                players = opponent_count + 1
+                split_price = players * price
+                if split_price >= 1:
+                    note += " Even an awarded split every time cannot make a call profitable before rake."
+                else:
+                    note += f" Breaking even before rake requires a {players}-way split at least {split_price:.1%} of the time."
+            else:
+                note += " Later actions can change the pot and the number sharing it."
+            if snap.can_raise:
+                note += " Raising would depend on getting better hands to fold."
+            return advice("split or lose", (), f"{price_text} {note}")
         made = (
             f"Stronger value hands can include {_examples(value_above)}."
             if value_above
@@ -207,8 +275,10 @@ def advise_river(snap, hero, opponents):
         bluff = (
             f"Possible bluffs include {_examples(missed, 3)}."
             if missed
-            else "None of the reviewed pairs represents a clear missed draw that your hand beats."
+            else "" if overlap else "No additional missed-draw bluff was identified among the examples."
         )
+        if overlap:
+            bluff += " A weaker made hand shown above can also bluff after missing a draw. Count that holding once."
         pure = ""
         if heads_up and (raised or rank <= 2):
             pure = f" If you only beat bluffs and ties are impossible, at least {price:.1%} of their bets must be bluffs."
@@ -223,35 +293,17 @@ def advise_river(snap, hero, opponents):
                 "multiway review",
                 (),
                 evidence
-                + " More than one range can win this pot. Estimate your equity against all live players and account for any action behind.",
+                + " More than one range can win this pot. Estimate your equity against all live players.",
             )
-        if not weaker and not result.ties:
-            if not snap.can_raise:
-                return advice(
-                    "no showdown equity",
-                    ("fold",),
-                    price_text
-                    + " Every available opponent pair beats Hero. Calling cannot recover any part of the pot and raising is unavailable.",
-                    3,
-                    rankable=True,
-                )
-            return advice(
-                "no showdown equity",
-                (),
-                price_text
-                + " Every available opponent pair beats Hero. A call loses. A bluff raise needs enough folds to recover the extra chips at risk.",
-            )
-        if not weaker:
-            comparison = f"Hero can only tie or lose. Calling breaks even if the pot is split at least {2 * price:.1%} of the time."
-        else:
-            comparison = (
-                f"If there are no ties, calling gains over folding when Hero wins more than {price:.1%} of the time. "
-                "Count weaker value bets as wins and each tie as half a win. Folding gains over calling below that threshold."
-            )
+        comparison = (
+            f"If there are no ties, calling gains over folding when Hero wins more than {price:.1%} of the time. "
+            "Count weaker value bets as wins and each tie as half a win. Folding gains over calling below that threshold."
+        )
         if raised:
             comparison += " Estimate those shares among raises specifically. An opponent who bluffs opening bets can still raise only for value."
         elif pressure:
             comparison += " The earlier bet or call helps identify plausible hands. Their betting frequencies remain unknown."
+            comparison += _barrel_blockers(snap, opponent, price, rank)
         if snap.can_raise and result.stronger_pair_count == 1:
             pair = " ".join(stronger[0].cards)
             comparison += (
@@ -269,6 +321,21 @@ def advise_river(snap, hero, opponents):
 
     if not snap.can_raise:
         return None
+    if not weaker:
+        ending = (
+            f"Hero can only tie or lose at showdown. One holding that ties is {_examples(result.ties, 1)}."
+            if result.ties else "Every legal four-card holding beats Hero at showdown."
+        )
+        if not heads_up and result.ties:
+            ending += " A split requires simultaneous ties with all opponents still contesting the pot."
+        ending += " A value bet has no weaker caller."
+        if heads_up and result.ties and any(a.name == opponent.name and a.action == "check" for a in actions):
+            ending += (" Checking back keeps half the pot against a tie. Compared with checking, "
+                       "folding out a better hand gains the full pot and folding out a tying hand gains half. "
+                       "A call from a better hand costs the bet. Check back unless those folds justify the risk.")
+        else:
+            ending += " A bluff needs enough folds to justify the risk."
+        return advice("bluff or check", (), ending)
     checked_to = heads_up and any(
         a.action == "check" and a.name == opponent.name for a in actions
     )
