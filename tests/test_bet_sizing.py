@@ -70,11 +70,11 @@ class BetSizingTests(unittest.TestCase):
             ]
             restored_rooms = set()
             old = []
-            for (
-                row
-            ) in db.execute("""SELECT h.room,d.rowid,d.cell,o.faced FROM decisions d
-                    JOIN hands h ON h.id=d.hand LEFT JOIN obs o ON o.hand=d.hand AND o.actor=d.actor AND o.ref=d.ref
-                    WHERE d.cell LIKE '%"bet-%'"""):
+            priced = db.execute("""SELECT h.room,d.rowid,d.cell,o.faced FROM decisions d
+                JOIN hands h ON h.id=d.hand
+                LEFT JOIN obs o ON o.hand=d.hand AND o.actor=d.actor AND o.ref=d.ref
+                WHERE d.cell LIKE '%"bet-%'""")
+            for row in priced:
                 cell = json.loads(row["cell"])
                 old_key = "bet-" + str(
                     sum(
@@ -124,11 +124,8 @@ class BetSizingTests(unittest.TestCase):
                 ],
                 origins,
             )
-            self.assertEqual(
-                db.execute("SELECT count(*) FROM review_comparison_cache").fetchone()[
-                    0
-                ],
-                0,
+            self.assertIsNone(
+                db.execute("SELECT 1 FROM review_comparison_cache").fetchone()
             )
             self.assertEqual(
                 db.execute("SELECT payload FROM review_guide_cache").fetchone()[0],

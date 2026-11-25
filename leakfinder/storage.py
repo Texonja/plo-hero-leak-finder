@@ -54,6 +54,8 @@ def initialize(db):
         version = db.execute("PRAGMA user_version").fetchone()[0]
         if version == 3:
             return
+        if version not in (0, 1, 2):
+            raise ValueError("This library belongs to a different version.")
         if version == 1:
             for row in db.execute("""SELECT h.id,h.room,o.raw,o.locator FROM hands h JOIN origins o ON o.rowid=
                 (SELECT min(rowid) FROM origins WHERE hand=h.id)"""):

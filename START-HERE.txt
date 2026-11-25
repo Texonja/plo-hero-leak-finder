@@ -7,6 +7,12 @@ Getting started
    It sits beside PLO Hero Leak Finder.exe. Python is included.
 3. Select Library > HeroDemo to try the public sample from both networks.
 
+Upgrading an existing library
+
+Close the older app before opening this build. The first launch updates
+previous sizing groups in the local library. Version 0.3.4 cannot open the
+updated library. Keep a copy of the closed library if you need to go back.
+
 Importing completed hands
 
 Use Import > Import files to select individual files. Use Import > Import
@@ -102,8 +108,8 @@ calls, and raises against Hero in comparable contexts. Changing a
 recommendation requires at least 30 matched responses per size group
 across three dates and a clear estimate gap. This individual-opponent
 model pools sizes up to 40%, over 40% through 75%, and over 75% of pot.
-Smaller samples remain visible for review. The historical sizing comparison assumes a fold to a
-raise and no further betting after a call. The heads-up turn scenarios
+Smaller samples remain visible for review. The historical sizing comparison
+assumes a fold to a raise and no further betting after a call. The heads-up turn scenarios
 also compare calling the raise and facing a half-pot river bet on the same
 possible runouts. The river call view gives the break-even equity, example
 holdings and how much the modeled range would need to change.
