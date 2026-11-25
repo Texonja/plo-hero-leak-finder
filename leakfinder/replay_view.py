@@ -11,7 +11,7 @@ from xml.etree import ElementTree as ET
 
 from .engine import replay
 from .importers import SCALE, STREETS, Record, decode
-from .statistics import settlements
+from .statistics import settled_chips
 
 
 @dataclass(frozen=True)
@@ -73,7 +73,7 @@ class HandResult:
     board: tuple[str, ...]
     awards: tuple
     verified: bool
-    net_bb: float | None
+    net_chips: int | None
     opponents: tuple
     subsequent: tuple
 
@@ -92,7 +92,7 @@ def hand_result(hand, streets, actor, ref):
         ),
         (),
     )
-    net = settlements(hand)
+    net = settled_chips(hand)
     return HandResult(
         showdown,
         board,
@@ -256,7 +256,7 @@ def playback_frames(hand, streets, actor):
         append("action", step.street, step)
 
     append("start", "Preflop")
-    verified = bool(settlements(hand))
+    verified = bool(settled_chips(hand))
     # Some iPoker exports count the last unmatched bet as paid without a
     # return action. Only animate a refund that the settlement reconciled.
     refund = (

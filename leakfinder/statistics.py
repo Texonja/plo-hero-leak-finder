@@ -285,6 +285,10 @@ def sizing(fraction):
 
 
 def settlements(h):
+    return {name: value / h.bb for name, value in settled_chips(h).items()}
+
+
+def settled_chips(h):
     """Require conservation after attributable returns and declared fees."""
     spent = h.spent.copy()
     awards = h.awards
@@ -310,7 +314,7 @@ def settlements(h):
         return {}
     if sum(awards.values()) + h.fees != gross:
         return {}
-    return {n: (awards.get(n, 0) - v) / h.bb for n, v in spent.items()}
+    return {n: awards.get(n, 0) - v for n, v in spent.items()}
 
 
 def observations(h, decisions, events):

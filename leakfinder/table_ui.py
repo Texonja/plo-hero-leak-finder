@@ -54,12 +54,12 @@ VERBS = {
 DELAYS = {"0.5×": 2200, "1×": 1100, "2×": 550, "4×": 275}
 
 
-def action_text(step):
+def action_text(step, format_amount):
     verb = VERBS[step.action]
     if step.raised_to is not None:
-        verb += f" to {chip_text(step.raised_to)} (+{chip_text(step.amount)})"
+        verb += f" to {format_amount(step.raised_to)} (+{format_amount(step.amount)})"
     elif step.amount:
-        verb += " " + chip_text(step.amount)
+        verb += " " + format_amount(step.amount)
     if step.action == "return" and not step.ref:
         verb += " (reconciled uncalled bet)"
     return f"{step.name}  {verb}" + ("  ·  all-in" if step.all_in else "")
@@ -302,6 +302,13 @@ class TableDialog:
         self.speed.pack(side="right", padx=4)
         _label(bar, "Speed", size=9, bg=NAV).pack(side="right")
         self.speed.bind("<<ComboboxSelected>>", self._change_speed)
+        self.amount_unit = ttk.Combobox(
+            bar, state="readonly", values=("Currency", "BB"), width=9
+        )
+        self.amount_unit.set("Currency")
+        self.amount_unit.pack(side="right", padx=(4, 12))
+        _label(bar, "Amounts", size=9, bg=NAV).pack(side="right")
+        self.amount_unit.bind("<<ComboboxSelected>>", self._change_amount_unit)
         for key, operation in (
             ("<Left>", lambda: self.step(-1)),
             ("<Right>", lambda: self.step(1)),
@@ -439,7 +446,10 @@ class TableDialog:
         self.win.destroy()
 
     def _key(self, event, operation):
-        if event.widget.winfo_toplevel() != self.win or event.widget == self.speed:
+        if event.widget.winfo_toplevel() != self.win or event.widget in (
+            self.speed,
+            self.amount_unit,
+        ):
             return
         if event.keysym == "space" and isinstance(event.widget, tk.Button):
             return  # Tk already invoked the focused button.
@@ -467,6 +477,23 @@ class TableDialog:
     def _change_speed(self, _=None):
         if self.play_timer is not None:
             self._schedule()
+
+    def _amount(self, chips, *, signed=False):
+        sign = "+" if signed and chips >= 0 else ""
+        if self.amount_unit.get() == "Currency":
+            return f"{sign}{chip_text(chips)} {self.snapshot.currency}"
+        value = chips / self.snapshot.bb
+        places = 1 - math.floor(math.log10(abs(value))) if 0 < abs(value) < 0.01 else 2
+        number = f"{value:.{places}f}".rstrip("0").rstrip(".")
+        return f"{sign}{number} BB"
+
+    def _change_amount_unit(self, _=None):
+        scroll, _ = self.timeline.yview()
+        if self.cursor is None:
+            self._render_decision()
+        else:
+            self._render_playback()
+        self.timeline.yview_moveto(scroll)
 
     def _schedule(self):
         self._cancel("play_timer")
@@ -512,6 +539,13 @@ class TableDialog:
         self.back.configure(state="normal" if index else "disabled")
         self.forward.configure(state="disabled" if end else "normal")
         self.timeline_caption.configure(text="Recorded actions · hand playback")
+        self._render_playback()
+        if animate and index == old + 1:
+            self._animate(self.frames[old], frame)
+
+    def _render_playback(self):
+        index = self.cursor
+        frame = self.frames[index]
         self.outcome_panel.grid_remove()
         box = self.timeline
         box.configure(state="normal")
@@ -526,7 +560,7 @@ class TableDialog:
                 caption = "Hole cards dealt"
                 box.insert("end", caption + "\n", style)
             elif f.step:
-                caption = action_text(f.step)
+                caption = action_text(f.step, self._amount)
                 box.insert("end", caption + "\n", style)
             else:
                 caption = "Hand complete"
@@ -542,11 +576,9 @@ class TableDialog:
         self.status.configure(
             text=f"{index + 1}/{len(self.frames)}   ·   {frame.street}   ·   {caption}"
         )
-        if end:
+        if frame.phase == "result":
             self.win.update_idletasks()  # Position chips after the outcome panel opens.
         self.draw()
-        if animate and index == old + 1:
-            self._animate(self.frames[old], frame)
 
     def _refresh(self):
         snap = self.snapshot
@@ -586,6 +618,11 @@ class TableDialog:
             if self.revealed
             else "Before the selected decision"
         )
+        self.decision_notes = self._review_notes(snap, eligible)
+        self._render_decision()
+
+    def _render_decision(self):
+        snap = self.snapshot
         self.outcome_panel.grid_remove()
         box = self.timeline
         box.configure(state="normal")
@@ -600,9 +637,9 @@ class TableDialog:
                 f"{step.name}  {VERBS.get(step.action, step.action.replace('_', ' '))}",
             )
             if step.raised_to is not None and step.action == "raise":
-                box.insert("end", " to " + chip_text(step.raised_to), "amount")
+                box.insert("end", " to " + self._amount(step.raised_to), "amount")
             elif step.amount:
-                box.insert("end", " " + chip_text(step.amount), "amount")
+                box.insert("end", " " + self._amount(step.amount), "amount")
             if step.all_in:
                 box.insert("end", "  ·  all-in", "amount")
             box.insert("end", "\n")
@@ -610,7 +647,23 @@ class TableDialog:
             box.insert("end", snap.street.upper() + "\n", "street")
         box.insert("end", f"{self.actor} to act\n", "active")
         if self.revealed:
-            box.insert("end", self.played_text + "\n", "active")
+            event = self.played_event
+            amount = f" · {self._amount(event.amount)} paid" if event.amount else ""
+            box.insert("end", f"Played: {event.action}{amount}\n", "active")
+        for text, style in self.decision_notes:
+            box.insert("end", text, style)
+        if self.revealed:
+            self._show_outcome(box, snap)
+        box.configure(state="disabled")
+        box.see("end")
+        self.draw()
+
+    def _review_notes(self, snap, eligible):
+        notes = []
+
+        def add(text, style):
+            notes.append((text, style))
+
         suggestion = advice_at(snap) if self.actor == self.profile else None
         if eligible and suggestion and river_opponent(snap):
             suggestion = apply_history(snap, suggestion, self._opponent_history(snap))
@@ -618,16 +671,12 @@ class TableDialog:
         if self.revealed and self.actor == self.profile:
             critique = critique_for(snap, self.played_event, suggestion)
             if critique:
-                box.insert(
-                    "end", "\nACTION CRITIQUE · " + critique.title + "\n", "street"
-                )
-                box.insert(
-                    "end",
+                add("\nACTION CRITIQUE · " + critique.title + "\n", "street")
+                add(
                     critique.alternative[:1].upper() + critique.alternative[1:] + "\n",
                     "active",
                 )
-                box.insert(
-                    "end",
+                add(
                     critique.reason
                     + "\nCase for the played action: "
                     + critique.counterargument
@@ -637,12 +686,9 @@ class TableDialog:
         reference = sb_reference(snap) if self.actor == self.profile else None
         if reference is not None:
             weight, depth = reference
-            box.insert("end", "\nSOLVER REFERENCE · FIRST IN FROM SB\n", "street")
-            box.insert(
-                "end", f"Fold {weight:.1%} · continue {1 - weight:.1%}\n", "active"
-            )
-            box.insert(
-                "end",
+            add("\nSOLVER REFERENCE · FIRST IN FROM SB\n", "street")
+            add(f"Fold {weight:.1%} · continue {1 - weight:.1%}\n", "active")
+            add(
                 f"PokerData 100 BB sample, six seats, no ante, 5% rake capped at 1 BB. "
                 f"This hand was {depth:g} BB effective against the big blind. The room's rake "
                 "can differ. The sample does not split completing from raising here.\n",
@@ -653,19 +699,18 @@ class TableDialog:
         ):
             price_note = threebet_price_note(snap)
             if price_note:
-                box.insert("end", "\nFACING A 3-BET\n", "street")
-                box.insert("end", price_note + "\n", "amount")
+                add("\nFACING A 3-BET\n", "street")
+                add(price_note + "\n", "amount")
         if self.actor == self.profile and (
             not critique or not critique.rule.startswith("flop-cbet-")
         ):
             price_note = flop_cbet_note(snap)
             if price_note:
-                box.insert("end", "\nFACING A FLOP C-BET\n", "street")
-                box.insert("end", price_note + "\n", "amount")
+                add("\nFACING A FLOP C-BET\n", "street")
+                add(price_note + "\n", "amount")
         if suggestion is not None:
-            box.insert("end", "\nGUIDE · " + suggestion.title.upper() + "\n", "street")
-            box.insert(
-                "end",
+            add("\nGUIDE · " + suggestion.title.upper() + "\n", "street")
+            add(
                 (suggestion.play.capitalize() or "Manual review") + "\n",
                 "active",
             )
@@ -676,7 +721,7 @@ class TableDialog:
             )
             if suggestion.size:
                 note += " The bet size is an example."
-            box.insert("end", suggestion.why + "\n" + note, "amount")
+            add(suggestion.why + "\n" + note, "amount")
             if (
                 eligible
                 and snap.street == "River"
@@ -686,23 +731,18 @@ class TableDialog:
                     a.street == "River" and a.action == "fold" for a in snap.history
                 )
             ):
-                box.insert(
-                    "end",
+                add(
                     "\n\n" + river_price_note(snap, self._opponent_history(snap)),
                     "amount",
                 )
-        if self.revealed:
-            self._show_outcome(box, snap)
-        box.configure(state="disabled")
-        box.see("end")
-        self.draw()
+        return notes
 
     def _show_outcome(self, box, snap, include_actions=True):
         result = self.result
         summary = "Showdown" if result.showdown else "Hand ended by folds"
         if result.awards:
             payouts = " · ".join(
-                f"{name} collected {chip_text(amount)} {snap.currency}"
+                f"{name} collected {self._amount(amount)}"
                 for name, amount in result.awards
             )
             summary += f" · {payouts}"
@@ -710,8 +750,8 @@ class TableDialog:
                 summary += " (source-reported)"
         else:
             summary += " · Payout unavailable in the source"
-        if result.net_bb is not None and self.actor == self.profile:
-            summary += f" · Hero {result.net_bb:+.2f} BB"
+        if result.net_chips is not None and self.actor == self.profile:
+            summary += f" · Hero {self._amount(result.net_chips, signed=True)}"
         holdings = " · ".join(
             f"{name}: {' '.join(cards) if cards else 'cards unrecorded'}"
             for name, cards in result.opponents
@@ -727,7 +767,7 @@ class TableDialog:
             if event.street != street:
                 street = event.street
                 box.insert("end", street.upper() + "\n", "street")
-            amount = f" · {chip_text(event.amount)} paid" if event.amount else ""
+            amount = f" · {self._amount(event.amount)} paid" if event.amount else ""
             box.insert("end", f"{event.player} {VERBS[event.action]}{amount}\n")
         if result.board:
             box.insert("end", f"Final board · {' '.join(result.board)}\n", "amount")
@@ -758,9 +798,7 @@ class TableDialog:
                 for e in self.streets[self.snapshot.street]
                 if e.ref == self.snapshot.ref
             )
-            amount = f" · {chip_text(event.amount)} paid" if event.amount else ""
             self.played_event = event
-            self.played_text = f"Played: {event.action}{amount}"
             self.result = hand_result(
                 self.hand, self.streets, self.actor, self.snapshot.ref
             )
@@ -1003,7 +1041,7 @@ class TableDialog:
         pot_item = c.create_text(
             cx,
             cy + 22,
-            text=f"{pot_label}  {chip_text(pot)} {snap.currency}",
+            text=f"{pot_label}  {self._amount(pot)}",
             fill=NAVY,
             font=("Segoe UI", 15, "bold"),
         )
@@ -1011,19 +1049,22 @@ class TableDialog:
         live_bets = sum(s.committed for s in seats)
         if pot > live_bets and not (frame and result):
             self._chips(*self.pot_point)
-        price = (
-            f"To call  {chip_text(snap.to_call)}" if snap.to_call else "No bet to call"
+        detail = (
+            f"To call  {self._amount(snap.to_call)}"
+            if snap.to_call
+            else "No bet to call"
         )
-        detail = f"{price}   ·   {chip_text(snap.bb)} big blind"
+        if self.amount_unit.get() == "Currency":
+            detail += f"   ·   Big blind  {self._amount(snap.bb)}"
         if frame:
             if result:
                 detail = (
-                    f"Rake and fees  {chip_text(self.hand.fees)} {snap.currency}"
+                    f"Rake and fees  {self._amount(self.hand.fees)}"
                     if result.verified
                     else "Source-reported result"
                 )
             else:
-                detail = f"In middle  {chip_text(pot - live_bets)}   ·   In front  {chip_text(live_bets)}"
+                detail = f"In middle  {self._amount(pot - live_bets)}   ·   In front  {self._amount(live_bets)}"
         c.create_text(
             cx,
             cy + 46,
@@ -1061,9 +1102,9 @@ class TableDialog:
                 by = y - 45
             self.seat_points[s.name] = ((x, y), (bx, by))
             if s.committed and not result:
-                self._chips(bx, by, chip_text(s.committed))
+                self._chips(bx, by, self._amount(s.committed))
             elif s.name in awards:
-                self._chips(bx, by, "+" + chip_text(awards[s.name]))
+                self._chips(bx, by, self._amount(awards[s.name], signed=True))
             if not focus and (cards := shown.get(s.name)):
                 for ci, card in enumerate(cards):
                     self.card(x - 49 + ci * 25, y - 56, card, 23, 33)
@@ -1095,7 +1136,11 @@ class TableDialog:
                 name += "…"
             c.create_text(x, y - 8, text=name, fill=fg, font=font)
             state = (
-                "Folded" if not s.live else "All-in" if s.all_in else chip_text(s.stack)
+                "Folded"
+                if not s.live
+                else "All-in"
+                if s.all_in
+                else self._amount(s.stack)
             )
             c.create_text(
                 x,

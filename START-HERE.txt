@@ -83,11 +83,13 @@ single action, or click a street to jump to its first frame. Back to decision
 returns to the spot you opened. Chips in front of a seat show its total live
 bet on this street. Pot includes those chips. For raises, (+amount) is the
 additional payment. Recorded payouts and known showdown cards appear at the end.
+Use Amounts below the table to switch between the hand's currency and
+big blinds (BB), including the pot, stacks, bets, call price and payouts.
 Full hand history opens the original record at the selected action.
 On any street, Reveal action & outcome shows what Hero did, later actions,
 the final board, pot awards and opponent cards recorded in the source.
-Verified Hero results show net big blinds. Hidden cards are labeled as
-unrecorded. Hide action & outcome returns to the pre-decision view.
+Verified Hero results show the net result in the selected unit. Hidden cards
+are labeled as unrecorded. Hide action & outcome returns to the pre-decision view.
 
 Guide differences only lists decisions where the guide's recommendation
 differs from the played action in a supported guide situation.

@@ -100,6 +100,122 @@ class TableUITests(unittest.TestCase):
                 self.assertFalse(dlg.outcome_panel.winfo_manager())
                 dlg.close()
 
+    def test_amount_switch_updates_the_table_history_and_revealed_outcome(self):
+        for room, ref, price, pot, stack, bb_price, bb_pot, bb_stack in (
+            (
+                "CoinPoker",
+                "Line 25",
+                "0.5 USDT",
+                "1.2 USDT",
+                "25.7 USDT",
+                "2 BB",
+                "4.8 BB",
+                "102.8 BB",
+            ),
+            (
+                "iPoker",
+                "Action 5",
+                "1.75 EUR",
+                "2.5 EUR",
+                "50 EUR",
+                "3.5 BB",
+                "5 BB",
+                "100 BB",
+            ),
+        ):
+            with self.subTest(room=room):
+                dlg = open_table(self.root, self.path, self.ids[room], ref)
+                self.root.update()
+
+                def table_text():
+                    return [
+                        dlg.canvas.itemcget(i, "text")
+                        for i in dlg.canvas.find_all()
+                        if dlg.canvas.type(i) == "text"
+                    ]
+
+                labels = table_text()
+                self.assertIn(f"Pot  {pot}", labels)
+                self.assertTrue(any(t.startswith(f"To call  {price}") for t in labels))
+                self.assertIn(
+                    f"{next(s.position for s in dlg.snapshot.seats if s.is_hero)}  ·  {stack}",
+                    labels,
+                )
+                dlg.reveal.invoke()
+                self.assertIn(
+                    f"Played: call · {price} paid", dlg.timeline.get("1.0", "end")
+                )
+
+                dlg.amount_unit.set("BB")
+                with patch(
+                    "leakfinder.table_ui.advice_at",
+                    side_effect=AssertionError("Recomputing advice"),
+                ):
+                    dlg.amount_unit.event_generate("<<ComboboxSelected>>")
+                labels = table_text()
+                self.assertIn(f"Pot before decision  {bb_pot}", labels)
+                self.assertIn(f"To call  {bb_price}", labels)
+                self.assertTrue(any(t.endswith(f"  ·  {bb_stack}") for t in labels))
+                self.assertIn(
+                    f"Played: call · {bb_price} paid", dlg.timeline.get("1.0", "end")
+                )
+                self.assertIn(" BB", dlg.outcome_summary.cget("text"))
+                self.assertTrue(dlg.revealed)
+                self.assertEqual(dlg.snapshot.ref, ref)
+
+                dlg.reveal.invoke()
+                self.assertIn(f"Pot  {bb_pot}", table_text())
+                self.assertIn("3 BB" if room == "CoinPoker" else "3.5 BB", table_text())
+                self.assertNotIn("HAND OUTCOME", dlg.timeline.get("1.0", "end"))
+                dlg.close()
+
+    def test_amount_switch_during_playback_keeps_frame_and_converts_payout(self):
+        dlg = open_table(self.root, self.path, self.ids["CoinPoker"], "Line 25")
+        self.addCleanup(dlg.close)
+        self.root.update()
+        frame = next(
+            i for i, f in enumerate(dlg.frames) if f.step and f.step.action == "raise"
+        )
+        dlg.seek(frame)
+        dlg.play.invoke()
+        timer = dlg.play_timer
+        self.assertIsNotNone(timer)
+        dlg.amount_unit.set("BB")
+        dlg.amount_unit.event_generate("<<ComboboxSelected>>")
+        self.assertEqual((dlg.cursor, dlg.play_timer), (frame, timer))
+        self.assertEqual(dlg.play.cget("text"), "Ⅱ Pause")
+        timeline = dlg.timeline.get("1.0", "end")
+        self.assertIn("raises to 3 BB (+2.6 BB)", timeline)
+        self.assertIn("raises to 3 BB (+2.6 BB)", dlg.status.cget("text"))
+        self.assertIn(
+            "In middle  0.8 BB   ·   In front  4 BB",
+            [
+                dlg.canvas.itemcget(i, "text")
+                for i in dlg.canvas.find_all()
+                if dlg.canvas.type(i) == "text"
+            ],
+        )
+
+        dlg.seek(len(dlg.frames) - 1)
+        summary = dlg.outcome_summary.cget("text")
+        self.assertIn("Hero collected 6.4 BB", summary)
+        self.assertIn("Hero +3.24 BB", summary)
+        labels = {
+            dlg.canvas.itemcget(i, "text")
+            for i in dlg.canvas.find_all()
+            if dlg.canvas.type(i) == "text"
+        }
+        self.assertIn("+6.4 BB", labels)
+        self.assertIn("Final pot  6.8 BB", labels)
+        self.assertIn("Rake and fees  0.4 BB", labels)
+        self.assertIn("receives refund 6.8 BB", dlg.timeline.get("1.0", "end"))
+        dlg.amount_unit.set("Currency")
+        dlg.amount_unit.event_generate("<<ComboboxSelected>>")
+        summary = dlg.outcome_summary.cget("text")
+        self.assertIn("Hero collected 1.6 USDT", summary)
+        self.assertIn("Hero +0.81 USDT", summary)
+        self.assertEqual(dlg.frames[dlg.cursor].phase, "result")
+
     def test_early_range_dialog_uses_the_replayed_decision_in_both_rooms(self):
         for room, ref, street, preceding in (
             ("CoinPoker", "Line 28", "FLOP", "Line 27"),
@@ -350,6 +466,7 @@ class TableUITests(unittest.TestCase):
             dialog.reveal.winfo_rooty() + dialog.reveal.winfo_height(), 720 - 40
         )
         self.assertTrue(dialog.reveal.winfo_ismapped())
+        self.assertTrue(dialog.amount_unit.winfo_ismapped())
 
     def test_ipoker_seat_fallback_and_complete_source_only_on_request(self):
         dialog = open_table(self.root, self.path, self.ids["iPoker"], "Seat 1")
