@@ -143,7 +143,7 @@ class DesktopTests(unittest.TestCase):
         self.assertIn("Study spots 13–", home.summary.get())
         home.study_button.invoke()
         with patch(
-            "leakfinder.ui.index_guides",
+            "leakfinder.ui.update_guides",
             side_effect=AssertionError("rebuilt the guide index"),
         ):
             for room, street in (
@@ -392,15 +392,30 @@ class DesktopTests(unittest.TestCase):
             self.assertTrue(all(a.ref != item.ref for a in dialog.snapshot.history))
             dialog.win.destroy()
 
-        self.app.import_paths([coin])
+        prior = self.app.queue
+        with patch.object(
+            self.app, "refresh", side_effect=AssertionError("unnecessary refresh")
+        ):
+            self.app.import_paths([coin])
+            self.wait()
+        self.assertIn("No new hands", self.app.notice.get())
+        self.assertIs(self.app.queue, prior)
+        self.assertEqual(self.app.street.get(), "Flop")
+        self.assertEqual(self.app.queue.hand_count, 2)
+        # A growing day file can also contain hands seen in a previous file.
+        day = Path(self.tmp.name) / "another-day.txt"
+        day.write_text(
+            original("coin-30.hh") + "\n" + original("coin-1.hh"), encoding="utf-8"
+        )
+        self.app.import_paths([coin, xml, day])
         self.wait()
         self.assertEqual(self.app.queue.hand_count, 1)
-        self.assertEqual({item.room for item in self.app.queue.items}, {"CoinPoker"})
-        self.assertEqual(self.app.queue.library_hands, 2)
+        self.assertEqual({item.number for item in self.app.queue.items}, {"9000000001"})
+        self.assertEqual(self.app.queue.library_hands, 3)
         self.app.scope.set("All hands")
         self.app.refresh(filters_only=True)
         self.wait()
-        self.assertEqual(self.app.queue.hand_count, 2)
+        self.assertEqual(self.app.queue.hand_count, 3)
 
     def test_first_import_confirms_detected_alias_then_shows_review_cards(self):
         coin = Path(__file__).parent / "fixtures" / "coin-30.hh"

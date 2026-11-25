@@ -5,6 +5,7 @@ import sqlite3
 import zlib
 from collections import Counter
 from dataclasses import dataclass, replace
+from datetime import timedelta
 from typing import NamedTuple
 
 from .analysis import analyze, wilson
@@ -16,11 +17,13 @@ from .importers import STREETS, Record, decode
 from .opponent_history import (
     OpponentHistory,
     apply_history,
+    clock,
+    finished_by,
     observations,
     river_opponent,
 )
 from .postflop_value import STRAIGHTS
-from .replay_view import hero_decisions
+from .replay_view import hero_decisions, record_stamp
 from .statistics import BITS, DEFS, tags
 from .storage import cohort
 from .strategy_guide import LABELS, advice_at, preflop_class
@@ -28,7 +31,7 @@ from .vendor.common import RANK_VALUE
 from .vendor.primitives import best_plo_hand
 
 REVIEW_PAGE_SIZE = 12
-GUIDE_CACHE_VERSION = 9
+GUIDE_CACHE_VERSION = 10
 
 
 @dataclass(frozen=True)
@@ -138,6 +141,36 @@ def guide_revision(comparison_key):
     return json.dumps((GUIDE_CACHE_VERSION, comparison_key), separators=(",", ":"))
 
 
+def _guide_key(revision):
+    try:
+        version, (watermark, aliases) = json.loads(revision)
+    except (TypeError, ValueError):
+        return None
+    if (
+        version == GUIDE_CACHE_VERSION
+        and type(watermark) is int
+        and watermark >= 0
+        and isinstance(aliases, list)
+    ):
+        return watermark, aliases
+    return None
+
+
+def migrate_v4_guides(db):
+    """Keep an exact 0.3.6 result as the baseline for a library's first delta."""
+    from .storage import import_revision
+
+    aliases = tuple(
+        tuple(row)
+        for row in db.execute("SELECT room,name FROM aliases ORDER BY room,name")
+    )
+    old = json.dumps((9, (import_revision(db), aliases)), separators=(",", ":"))
+    db.execute(
+        "UPDATE review_guide_cache SET revision=? WHERE revision=?",
+        (guide_revision((0, aliases)), old),
+    )
+
+
 def cached_guides(db, room, revision):
     row = db.execute(
         "SELECT payload FROM review_guide_cache WHERE room=? AND revision=?",
@@ -147,6 +180,8 @@ def cached_guides(db, room, revision):
         return None
     try:
         counts, entries, study, critiques = json.loads(zlib.decompress(row[0]))
+        if set(counts) != set(STREETS):
+            return None
 
         def restore(entries):
             return tuple(
@@ -162,7 +197,7 @@ def cached_guides(db, room, revision):
             tuple(StudySpot(*entry[:-1], tuple(entry[-1])) for entry in study),
             restore(critiques),
         )
-    except (TypeError, ValueError, IndexError, KeyError, zlib.error):
+    except (TypeError, ValueError, IndexError, KeyError, AttributeError, zlib.error):
         return None
 
 
@@ -271,27 +306,175 @@ def _sessions(db):
     return {hand: session for session, hand in session_keys(rows)}
 
 
+def _history_dependents(db, changed, previous):
+    """Find cached river decisions that could now see different *prior* evidence."""
+    river_hands = {
+        entry.hand
+        for rows in (previous.items, previous.study, previous.critiques)
+        for entry in rows
+        if entry.street == "River" and entry.hand not in changed
+    }
+    if not changed or not river_hands:
+        return set()
+    # Include now-conflicting hands: their evidence was visible before the import.
+    # The original record provides the same session end bound used by observations().
+    rows = db.execute(
+        """SELECT h.room,h.number,f.stamp,s.locator,s.raw,o.actor,o.opp
+        FROM json_each(?) ids JOIN hands h ON h.id=ids.value
+        JOIN facts f ON f.hand=h.id JOIN obs o ON o.hand=h.id
+        JOIN origins s ON s.rowid=(SELECT min(rowid) FROM origins WHERE hand=h.id)
+        WHERE (o.eligible & ?)<>0 AND EXISTS (
+            SELECT 1 FROM aliases a WHERE a.room=h.room AND a.name IN (o.actor,o.opp))""",
+        (json.dumps(sorted(changed)), BITS["RIVERC"]),
+    )
+    cutoffs = {}
+    for room, number, stamp, locator, raw, responder, bettor in rows:
+        record = Record(room, zlib.decompress(raw).decode(), locator, number)
+        end = finished_by(record, clock(record_stamp(record, stamp)))
+        if end is not None:
+            for name in (responder, bettor):
+                key = room, name, end.tzinfo is not None
+                cutoffs[key] = min(cutoffs.get(key, end), end)
+    if not cutoffs:
+        return set()
+
+    affected = set()
+    candidates = db.execute(
+        """SELECT h.id,h.room,h.number,f.stamp,s.name
+        FROM json_each(?) ids JOIN hands h ON h.id=ids.value JOIN facts f ON f.hand=h.id
+        JOIN cohort c ON c.hand=h.id JOIN seats s ON s.hand=h.id AND s.name<>c.hero""",
+        (json.dumps(sorted(river_hands)),),
+    )
+    for hid, room, number, stamp, name in candidates:
+        if hid in affected:
+            continue
+        start = clock(stamp)
+        aware = room == "CoinPoker" or (start is not None and start.tzinfo is not None)
+        end = cutoffs.get((room, name, aware))
+        if start is None or end is None:
+            continue
+        if room == "CoinPoker":
+            # The facts table stores the local clock without its UTC offset.
+            # Discard clearly earlier dates before reading the original zone.
+            if start.date() < end.date() - timedelta(days=1):
+                continue
+            locator, raw = db.execute(
+                "SELECT locator,raw FROM origins WHERE hand=? ORDER BY rowid LIMIT 1",
+                (hid,),
+            ).fetchone()
+            record = Record(room, zlib.decompress(raw).decode(), locator, number)
+            start = clock(record_stamp(record, stamp))
+        if (
+            start is not None
+            and (start.tzinfo is None) == (end.tzinfo is None)
+            and end < start
+        ):
+            affected.add(hid)
+    return affected
+
+
+def update_guides(db, room, revision, progress=None, *, stats=None):
+    """Extend a persisted index in this read snapshot. Save it after committing."""
+    row = db.execute(
+        "SELECT revision FROM review_guide_cache WHERE room=?", (room,)
+    ).fetchone()
+    previous = None
+    current = _guide_key(revision)
+    old = _guide_key(row[0]) if row else None
+    if old and current and old[1] == current[1] and old[0] <= current[0]:
+        previous = cached_guides(db, room, row[0])
+    if stats is not None:
+        stats.update(replayed=0, reused=0, history_updated=0)
+    if previous is None:
+        return _index_hands(db, room, progress, _sessions(db), stats=stats)
+    changed = {
+        r[0]
+        for r in db.execute(
+            """SELECT u.hand FROM hand_changes u
+        JOIN hands h ON h.id=u.hand WHERE u.revision>? AND u.revision<=?
+        AND (?='Both' OR h.room=?)""",
+            (old[0], current[0], room, room),
+        )
+    }
+    affected = _history_dependents(db, changed, previous)
+    dirty = changed | affected
+    if stats is not None:
+        total = db.execute("""SELECT count(*) FROM cohort q JOIN hands h ON h.id=q.hand
+            WHERE EXISTS (SELECT 1 FROM json_each(h.cards) c WHERE c.key=q.hero)""").fetchone()[
+            0
+        ]
+        stats["history_updated"] = len(affected)
+    if not dirty:
+        if stats is not None:
+            stats["reused"] = total
+        return previous
+    sessions = _sessions(db)
+    fresh = _index_hands(db, room, progress, sessions, hands=dirty, stats=stats)
+    if stats is not None:
+        stats["reused"] = total - stats["replayed"]
+
+    def merge(older, newer, key):
+        kept = [entry for entry in older if entry.hand not in dirty]
+        kept.extend(newer)
+        return tuple(sorted(kept, key=key))
+
+    counts = {
+        street: tuple(
+            sorted(
+                [r for r in previous.counts[street] if r[0] not in dirty]
+                + list(fresh.counts[street]),
+                reverse=True,
+            )
+        )
+        for street in STREETS
+    }
+    items = merge(previous.items, fresh.items, lambda item: -item.hand)
+    # An older inserted hand can bridge two sessions even if no advice changes.
+    items = tuple(
+        replace(i, session=sessions.get(i.hand, ""))
+        if i.session != sessions.get(i.hand, "")
+        else i
+        for i in items
+    )
+    study = merge(previous.study, fresh.study, lambda i: (-i.pot_bb, -i.hand))
+    critiques = merge(previous.critiques, fresh.critiques, lambda i: -i.hand)
+    return GuideIndex(counts, items, study, critiques)
+
+
 def index_guides(db, room, progress=None, *, audit=None):
     """Replay each card-known Hero hand once across all streets."""
+    return _index_hands(db, room, progress, _sessions(db), audit=audit)
+
+
+def _index_hands(db, room, progress, sessions, *, hands=None, audit=None, stats=None):
     items = []
     study = []
     critiques = []
     covered = {street: [] for street in STREETS}
     history = None
-    sessions = _sessions(db)
-    rows = db.execute("""SELECT q.hand,q.hero FROM cohort q
+    source = (
+        "cohort q"
+        if hands is None
+        else "json_each(?) ids JOIN cohort q ON q.hand=ids.value"
+    )
+    rows = db.execute(
+        f"""SELECT q.hand,q.hero FROM {source}
         JOIN hands h ON h.id=q.hand
         WHERE EXISTS (SELECT 1 FROM json_each(h.cards) c WHERE c.key=q.hero)
-        ORDER BY q.hand DESC""")
+        ORDER BY q.hand DESC""",
+        () if hands is None else (json.dumps(sorted(hands)),),
+    )
     for index, (hid, hero) in enumerate(rows, 1):
+        if stats is not None:
+            stats["replayed"] += 1
         counts = Counter()
         for event, snap in hero_decisions(db, hid, hero, "All streets"):
             advice = advice_at(snap)
             if advice and river_opponent(snap):
                 if history is None:
-                    # prepare_hands already selected this room's cohort. Reusing
-                    # it avoids SQLite schema writes while the hand cursor reads.
-                    history = OpponentHistory(observations(db, room, prepared=True))
+                    history = OpponentHistory(
+                        observations(db, room, prepared=True, opponent_hands=hands)
+                    )
                 advice = apply_history(snap, advice, history)
             if audit is not None:
                 audit(event, snap, advice)
@@ -532,18 +715,33 @@ def has_saved_batch(db):
     return bool(db.execute("SELECT 1 FROM review_batch LIMIT 1").fetchone())
 
 
-def remember_batch(db, source_ids):
-    """Remember successful files from one chooser operation, including repeat imports."""
+def remember_batch(db, source_ids, *, after_revision=None):
+    """Remember the newly inserted hands from the last chooser operation with additions."""
     ids = sorted(set(source_ids))
     with db:
         sources = db.execute(
-            "SELECT id FROM imports WHERE id IN (SELECT value FROM json_each(?)) ORDER BY id",
-            (json.dumps(ids),),
+            """SELECT DISTINCT source FROM import_delta
+               WHERE source IN (SELECT value FROM json_each(?)) AND revision>=? ORDER BY source""",
+            (json.dumps(ids), 0 if after_revision is None else after_revision + 1),
         ).fetchall()
         if sources:
             db.execute("DELETE FROM review_batch")
             db.executemany("INSERT INTO review_batch(source) VALUES(?)", sources)
+            db.execute(
+                "INSERT OR REPLACE INTO review_batch_bound VALUES(1,?)",
+                (0 if after_revision is None else after_revision + 1,),
+            )
     return len(sources)
+
+
+def latest_batch_rooms(db):
+    return [
+        r[0]
+        for r in db.execute("""SELECT DISTINCT h.room FROM review_batch b
+        JOIN import_delta d ON d.source=b.source
+        JOIN hands h ON h.id=d.hand WHERE h.conflict=0
+        AND d.revision>=coalesce((SELECT minimum FROM review_batch_bound WHERE id=1),0)""")
+    ]
 
 
 # First listed descriptive situation wins if several metrics describe one action.
@@ -667,8 +865,9 @@ def prepare_hands(db, room, scope):
     if latest:
         db.execute("""INSERT OR IGNORE INTO review_hands
             SELECT c.hand,c.hero FROM review_batch b
-            CROSS JOIN origins o ON o.source=b.source
-            JOIN cohort c ON c.hand=o.hand""")
+            CROSS JOIN import_delta d ON d.source=b.source
+            JOIN cohort c ON c.hand=d.hand
+            WHERE d.revision>=coalesce((SELECT minimum FROM review_batch_bound WHERE id=1),0)""")
         selected = db.execute("SELECT count(*) FROM review_hands").fetchone()[0]
     elif scope == "Last 5 sessions":
         sessions = _sessions(db)

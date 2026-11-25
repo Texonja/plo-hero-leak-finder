@@ -1,17 +1,30 @@
 """Integration checks using original hand rows and explicit manufactured scenarios."""
 
 import json
+import os
 import unittest
 import zlib
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from unittest.mock import patch
 from xml.etree import ElementTree as ET
 from zipfile import ZIP_DEFLATED, ZipFile
 
 from leakfinder.analysis import Cell, analyze, evidence, summarize, wilson
+from leakfinder.engine import replay
+from leakfinder.replay_view import hero_decisions
+from leakfinder.review_queue import prepare_hands, remember_batch
 from leakfinder.statistics import BITS
-from leakfinder.storage import connect, import_file, initialize, profile, set_profile
+from leakfinder.storage import (
+    connect,
+    data_revision,
+    import_file,
+    import_file_with_source,
+    initialize,
+    profile,
+    set_profile,
+)
 from leakfinder.vendor.hm2_backup import HM2BackupError
 
 FIX = Path(__file__).parent / "fixtures"
@@ -75,7 +88,7 @@ class LibraryTests(unittest.TestCase):
         path.write_bytes(data if isinstance(data, bytes) else data.encode("utf-8"))
         return path
 
-    def test_two_xml_games_match_hm2_sql_and_zip_and_keep_each_origin(self):
+    def test_two_xml_games_match_hm2_sql_and_zip_and_keep_distinct_sources(self):
         r1, r2 = original("ip-1.hh"), original("ip-601.hh")
         root = repaired_session(r1)
         root.append(repaired_session(r2).find("game"))
@@ -91,10 +104,10 @@ class LibraryTests(unittest.TestCase):
         with ZipFile(backup, "w", ZIP_DEFLATED) as archive:
             archive.writestr("db/HoldemManager2.sql", dump)
         self.assertEqual(import_file(self.db, xml)["new hands"], 2)
-        for source in (sql, backup):
-            self.assertEqual(import_file(self.db, source)["duplicate origins"], 2)
+        self.assertEqual(import_file(self.db, sql), {"duplicate origins": 2})
+        self.assertEqual(import_file(self.db, backup), {"known hands skipped": 2})
         self.assertEqual(
-            self.db.execute("select count(*) from origins").fetchone()[0], 6
+            self.db.execute("select count(*) from origins").fetchone()[0], 4
         )
         self.assertEqual(
             self.db.execute("select sum(conflict) from hands").fetchone()[0], 0
@@ -225,6 +238,94 @@ class LibraryTests(unittest.TestCase):
         self.assertEqual(self.db.execute("select count(*) from hands").fetchone()[0], 1)
         self.assertEqual(
             self.db.execute("select count(*) from origins").fetchone()[0], 1
+        )
+
+    def test_growing_coin_file_replays_only_new_hand_and_latest_has_only_additions(
+        self,
+    ):
+        a, b = original("coin-30.hh"), original("coin-heads-up.hh")
+        path = self.save("daily.txt", a)
+        _, first = import_file_with_source(self.db, path)
+        before = data_revision(self.db)
+        remember_batch(self.db, [first])
+        self.save("daily.txt", a + "\n\n" + b)
+        with patch("leakfinder.storage.replay", wraps=replay) as checked:
+            counts, second = import_file_with_source(self.db, path)
+        self.assertEqual(counts, {"known hands skipped": 1, "new hands": 1})
+        self.assertEqual(checked.call_count, 1)
+        self.assertEqual(
+            self.db.execute("SELECT count(*) FROM origins").fetchone()[0], 2
+        )
+        remember_batch(self.db, [first, second], after_revision=before)
+        set_profile(self.db, {"CoinPoker": ["Hero"]})
+        self.assertEqual(prepare_hands(self.db, "Both", "Latest import")[1:3], (1, 2))
+        self.assertEqual(
+            self.db.execute("SELECT hand FROM review_hands").fetchone()[0], 2
+        )
+        self.db.commit()
+        after = data_revision(self.db)
+        with patch(
+            "leakfinder.storage.sources",
+            side_effect=AssertionError("parsed identical file"),
+        ):
+            moved = self.save("moved.txt", path.read_bytes())
+            self.assertEqual(
+                import_file_with_source(self.db, moved),
+                ({"already imported": 1}, second),
+            )
+            self.assertEqual(import_file(self.db, path), {"already imported": 1})
+        self.assertEqual(data_revision(self.db), after)
+
+    def test_growing_native_xml_with_revised_session_totals(self):
+        root = repaired_session(original("ip-601.hh"))
+        path = self.save("growing.xml", ET.tostring(root, encoding="utf-8"))
+        import_file(self.db, path)
+        root.find("general/gamecount").text = "26"
+        root.find("general/duration").text = "01:20:02"
+        root.append(repaired_session(original("ip-1.hh")).find("game"))
+        self.save("growing.xml", ET.tostring(root, encoding="utf-8"))
+        with patch("leakfinder.storage.replay", wraps=replay) as checked:
+            counts = import_file(self.db, path)
+        self.assertEqual(counts, {"new hands": 1, "known hands skipped": 1})
+        self.assertEqual(checked.call_count, 1)
+        self.assertEqual(
+            self.db.execute("SELECT count(*) FROM origins").fetchone()[0], 2
+        )
+
+    def test_later_copy_supplies_dealt_evidence_despite_same_showdown_cards(self):
+        rich = repaired_session(original("ip-601.hh"))
+        poor = repaired_session(original("ip-601.hh"))
+        pre = poor.find('game/round[@no="1"]')
+        pocket = pre.find('cards[@player="BigNeonMax"]')
+        pre.remove(pocket)
+        poor.find('game/round[@no="3"]').append(pocket)
+        import_file(self.db, self.save("first.xml", ET.tostring(poor)))
+        before = data_revision(self.db)
+        self.assertFalse(list(hero_decisions(self.db, 1, "BigNeonMax", "All streets")))
+        import_file(self.db, self.save("more.xml", ET.tostring(rich)))
+        self.assertTrue(list(hero_decisions(self.db, 1, "BigNeonMax", "All streets")))
+        self.assertGreater(data_revision(self.db), before)
+        self.assertEqual(
+            self.db.execute("SELECT count(*) FROM origins").fetchone()[0], 2
+        )
+
+    def test_same_size_rewrite_with_restored_mtime_still_detected(self):
+        raw = original("coin-30.hh")
+        path = self.save("session.txt", raw)
+        import_file(self.db, path)
+        stat = path.stat()
+        self.save("session.txt", raw.replace("9000000030", "9000000031"))
+        os.utime(path, ns=(stat.st_atime_ns, stat.st_mtime_ns))
+        self.assertEqual(import_file(self.db, path), {"new hands": 1})
+
+    def test_duplicate_hm2_text_with_different_container_id_is_checked(self):
+        raw = original("ip-601.hh")
+        import_file(self.db, self.save("valid.sql", as_copy([(1, "9000000601", raw)])))
+        wrong = self.save("wrong.sql", as_copy([(1, "9000000602", raw)]))
+        self.assertEqual(import_file(self.db, wrong), {"excluded": 1})
+        self.assertEqual(
+            self.db.execute("SELECT reason FROM rejected").fetchone()[0],
+            "Container and hand ID conflict",
         )
 
 

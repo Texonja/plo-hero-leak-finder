@@ -6,6 +6,7 @@ import os
 import stat
 import sys
 import threading
+import time
 import tkinter as tk
 import traceback
 import webbrowser
@@ -17,7 +18,12 @@ from tkinter import filedialog, messagebox, ttk
 from tkinter.scrolledtext import ScrolledText
 
 from . import __version__
-from .analysis import analyze, cached_comparison, save_comparison
+from .analysis import (
+    cached_comparison,
+    comparison_revision,
+    save_comparison,
+    update_comparison,
+)
 from .demo import demo_path, load_demo
 from .engine import METRICS
 from .home import BG, INK, MUTED, NAV, NAV_ACTIVE, ORANGE, HandReview
@@ -29,17 +35,18 @@ from .review_queue import (
     cached_guides,
     guide_revision,
     has_saved_batch,
-    index_guides,
+    latest_batch_rooms,
     preview_decisions,
     remember_batch,
     review_selection,
     save_guides,
+    update_guides,
 )
 from .storage import (
     cohort,
     connect,
+    data_revision,
     import_file_with_source,
-    import_revision,
     initialize,
     profile,
     set_profile,
@@ -677,35 +684,31 @@ class Workspace:
         )
         if not folder:
             return
-        try:
-            paths = list(hand_history_files(folder))
-        except OSError as exc:
-            messagebox.showerror("Import folder", str(exc), parent=self.root)
-            return
-        if paths:
-            self.import_paths(paths)
-        else:
-            messagebox.showinfo(
-                "Import folder",
-                "No supported hand histories were found in this folder or its subfolders.",
-                parent=self.root,
-            )
+        self.import_paths(hand_history_files(folder))
 
     def import_paths(self, paths):
         if not self.switch_library(False, refresh=False):
             return
         self.show_view("home")
-        self.home.clear("Reading the selected files…")
+        if self.queue is None:
+            self.home.clear("Reading the selected files…")
         self.import_notice("")
-        self.status.set("Importing completed histories…")
+        previous_status = self.status.get()
+        self.status.set("Checking the selected files…")
 
         def run(db):
+            before = data_revision(db)
             sources, failures = [], []
             totals = {}
-            for index, path in enumerate(paths, 1):
-                current = f"File {index:,} of {len(paths):,} · {Path(path).name}"
+            files = list(paths)
+            last_progress = 0.0
+            for index, path in enumerate(files, 1):
+                current = f"File {index:,} of {len(files):,} · {Path(path).name}"
                 try:
-                    self.jobs.put(("progress", current))
+                    now = time.monotonic()
+                    if now - last_progress >= 0.1 or index == len(files):
+                        self.jobs.put(("progress", current))
+                        last_progress = now
                     counts, source_id = import_file_with_source(
                         db,
                         path,
@@ -713,17 +716,18 @@ class Workspace:
                             ("progress", f"{label} · {n:,} source hands read")
                         ),
                     )
-                    sources.append(source_id)
+                    if counts.get("new hands"):
+                        sources.append(source_id)
                     for key, value in counts.items():
                         totals[key] = totals.get(key, 0) + value
                 except Exception as exc:  # noqa: BLE001 - isolate each file in a batch
                     failures.append(f"{Path(path).name} · {exc}")
-            remember_batch(db, sources)
-            return sources, totals, failures
+            remember_batch(db, sources, after_revision=before)
+            return bool(sources), totals, failures, len(files)
 
         def done(result):
-            sources, totals, failures = result
-            if sources:
+            added, totals, failures, file_count = result
+            if added:
                 self.home.show_hands = None
                 self.home.show_critiques = False
                 self.home.differences.set(False)
@@ -733,16 +737,29 @@ class Workspace:
                 msg = "Import complete    " + "   ·   ".join(
                     f"{n:,} {key}" for key, n in totals.items()
                 )
+            elif totals:
+                msg = "No new hands. " + "   ·   ".join(
+                    f"{n:,} {key}" for key, n in totals.items()
+                )
+            elif not file_count:
+                msg = "No supported hand histories were found in this folder or its subfolders."
             else:
                 msg = "Import failed. Showing the previous library selection."
             if failures:
                 msg += f"   ·   {len(failures)} failed file(s)"
                 self.show_import_errors(failures)
             self.import_notice(msg)
-            saved = profile(self.db)
-            rooms = self.db.execute("""SELECT DISTINCT h.room FROM review_batch b
-                JOIN origins o ON o.source=b.source JOIN hands h ON h.id=o.hand WHERE h.conflict=0""")
-            if sources and any(not saved[r[0]] for r in rooms):
+            cached = self.room_results.get(self.room.get())
+            aliases = profile(self.db)
+            names = tuple((r, n) for r in sorted(aliases) for n in aliases[r])
+            if (
+                not added
+                and self.queue is not None
+                and cached
+                and cached[0] == (self.room.get(), data_revision(self.db), names)
+            ):
+                self.status.set(previous_status)
+            elif added and any(not aliases[r] for r in latest_batch_rooms(self.db)):
                 self.home.clear(
                     "Select your Hero screen name to see the imported decisions."
                 )
@@ -884,7 +901,7 @@ class Workspace:
             # change only while both its source data and Hero profile still match.
             key = (
                 room,
-                import_revision(db),
+                data_revision(db),
                 tuple(
                     tuple(row)
                     for row in db.execute(
@@ -906,14 +923,15 @@ class Workspace:
                     sample = preview_decisions(db, street)
                     if sample:
                         self.jobs.put(("review-preview", sample))
-            population_key = json.dumps((3, key), separators=(",", ":"))
+            high = db.execute("SELECT coalesce(max(id),0) FROM hands").fetchone()[0]
+            population_key = comparison_revision(room, key[1], high, key[2])
             comparison = (
                 previous_comparison[1:]
                 if previous_comparison and previous_comparison[0] == key
                 else cached_comparison(db, room, population_key)
             )
             if comparison is None:
-                items, e, t = analyze(db, room)
+                items, e, t = update_comparison(db, room, population_key)
                 findings = {f.node: f for f in items}
             else:
                 findings, e, t = comparison
@@ -924,15 +942,14 @@ class Workspace:
             )
             needs_index = guide is None
             if needs_index:
-                self.jobs.put(
-                    ("progress", "Building the review index for this library…")
-                )
+                self.jobs.put(("progress", "Updating the hand review index…"))
                 cohort(db, "Both")
-                guide = index_guides(
+                guide = update_guides(
                     db,
                     "Both",
+                    revision,
                     lambda n: self.jobs.put(
-                        ("progress", f"Building the review index · {n:,} hands checked")
+                        ("progress", f"Updating the review index · {n:,} hands checked")
                     ),
                 )
             queue = build_queue(

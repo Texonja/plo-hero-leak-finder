@@ -27,6 +27,7 @@ from leakfinder.review_queue import (
 from leakfinder.storage import (
     cohort,
     connect,
+    data_revision,
     import_file_with_source,
     initialize,
     set_profile,
@@ -260,28 +261,26 @@ class QueueTests(unittest.TestCase):
         self.assertEqual(counts, {"new hands": 1})
         _, second = self.ingest("session.txt", original("coin-heads-up.hh"))
         self.assertNotEqual(first, second)
+        remember_batch(self.db, [second])
+        start = data_revision(self.db)
         counts, old = self.ingest("session.txt", original_text)
         self.assertEqual((counts, old), ({"already imported": 1}, first))
         counts, copy = self.ingest("copy.txt", original_text)
-        self.assertEqual(counts, {"duplicate origins": 1})
-        remember_batch(self.db, [old, copy])
+        self.assertEqual((counts, copy), ({"already imported": 1}, first))
+        self.assertEqual(remember_batch(self.db, [old, copy], after_revision=start), 0)
         latest = build_queue(self.db)
         self.assertEqual(
-            (latest.hand_count, latest.library_hands, latest.source_count), (1, 2, 2)
+            (latest.hand_count, latest.library_hands, latest.source_count), (1, 2, 1)
         )
-        self.assertEqual([r.number for r in latest.items], ["9000000030"])
+        self.assertEqual({r.hand for r in latest.items}, {2})
         self.assertEqual(remember_batch(self.db, []), 0)
         self.assertEqual(build_queue(self.db), latest)
         counts, bad = self.ingest(
             "invalid.txt", original_text.replace("Hero: checks", "Hero: calls ₮150")
         )
         self.assertEqual(counts, {"excluded": 1})
-        remember_batch(self.db, [bad])
-        latest = build_queue(self.db)
-        self.assertEqual(
-            (latest.scope, latest.hand_count, latest.library_hands, latest.items),
-            ("Latest import", 0, 2, ()),
-        )
+        self.assertEqual(remember_batch(self.db, [bad], after_revision=start), 0)
+        self.assertEqual(build_queue(self.db), latest)
         self.assertEqual(len(build_queue(self.db, scope="All hands").items), 2)
 
     def test_supported_node_needs_an_aligned_action_and_a_matching_cell(self):

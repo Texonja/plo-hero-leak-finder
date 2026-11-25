@@ -20,7 +20,10 @@ Importing completed hands
 
 Use Import > Import files to select individual files. Use Import > Import
 folder to select an archive root. Folder import includes all subfolders.
-The status bar displays the current file and total file count.
+You can select the same folder after each session. Latest import shows
+only newly added hands. If every hand is already present, your previous
+selection stays open. A changed copy can supply missing information or
+flag conflicting records. The review index updates affected hands.
 Importing from HeroDemo opens your personal library.
 
 CoinPoker uses native text. iPoker uses XML with one or more hands or

@@ -9,7 +9,7 @@ from leakfinder.demo import load_demo
 from leakfinder.engine import replay
 from leakfinder.explorer import SIZE_ORDER
 from leakfinder.statistics import observations, sizing
-from leakfinder.storage import connect, initialize
+from leakfinder.storage import LIBRARY_VERSION, connect, initialize
 from tests.test_engine import decoded, paired
 
 
@@ -155,7 +155,9 @@ class BetSizingTests(unittest.TestCase):
             )
             db.execute("DROP TRIGGER fail_clear")
             initialize(db)
-            self.assertEqual(db.execute("PRAGMA user_version").fetchone()[0], 4)
+            self.assertEqual(
+                db.execute("PRAGMA user_version").fetchone()[0], LIBRARY_VERSION
+            )
             self.assertEqual([tuple(r) for r in db.execute(query)], fresh)
             self.assertEqual(
                 [

@@ -1,5 +1,6 @@
 """Walk-forward postflop evidence for a named opponent in the local library."""
 
+import json
 import re
 import xml.etree.ElementTree as ET
 import zlib
@@ -153,7 +154,7 @@ class Observation:
     street: str = "River"
 
 
-def observations(db, room, opponent=None, *, prepared=False):
+def observations(db, room, opponent=None, *, prepared=False, opponent_hands=None):
     if not prepared:
         cohort(db, room)
     query = """SELECT h.id,h.room,h.number,c.hero,o.actor,o.opp,o.ref,s.locator,s.raw
@@ -161,7 +162,14 @@ def observations(db, room, opponent=None, *, prepared=False):
         JOIN origins s ON s.rowid=(SELECT min(p.rowid) FROM origins p WHERE p.hand=c.hand)
         WHERE (o.eligible & ?)<>0 AND (c.hero=o.actor OR c.hero=o.opp)
         AND (? IS NULL OR (c.hero=o.actor AND o.opp=?) OR (c.hero=o.opp AND o.actor=?))"""
-    for row in db.execute(query, (BITS["RIVERC"], opponent, opponent, opponent)):
+    params = [BITS["RIVERC"], opponent, opponent, opponent]
+    if opponent_hands is not None:
+        # For a batch of new reviews, load relevant opponents in one pass.
+        query += """ AND (h.room, CASE WHEN o.actor=c.hero THEN o.opp ELSE o.actor END) IN (
+            SELECT target.room,s.name FROM json_each(?) ids JOIN hands target ON target.id=ids.value
+            JOIN cohort q ON q.hand=target.id JOIN seats s ON s.hand=q.hand AND s.name<>q.hero)"""
+        params.append(json.dumps(sorted(opponent_hands)))
+    for row in db.execute(query, params):
         hid, room, number, hero, responder, bettor, ref, locator, raw = row
         record = Record(room, zlib.decompress(raw).decode(), locator, number)
         hand = decode(record)

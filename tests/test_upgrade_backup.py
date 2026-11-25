@@ -11,7 +11,7 @@ from pathlib import Path
 from tempfile import TemporaryDirectory
 from threading import Barrier
 
-from leakfinder.storage import connect, import_file, initialize
+from leakfinder.storage import LIBRARY_VERSION, connect, import_file, initialize
 from tests.test_library import original
 
 
@@ -35,10 +35,10 @@ class UpgradeBackupTests(unittest.TestCase):
         with self.db:
             self.db.execute("PRAGMA user_version=3")
             self.db.execute("INSERT INTO aliases VALUES('CoinPoker','SnapshotHero')")
-        # The main file still shows v4. Only the WAL contains this v3 state.
+        # The main file still shows the current version. Only the WAL contains this v3 state.
         with self.path.open("rb") as f:
             f.seek(60)
-            self.assertEqual(int.from_bytes(f.read(4), "big"), 4)
+            self.assertEqual(int.from_bytes(f.read(4), "big"), LIBRARY_VERSION)
         initialize(self.db)
         (backup,) = self.snapshots()
         self.assertEqual(list(backup.parent.iterdir()), [backup])
@@ -70,7 +70,9 @@ class UpgradeBackupTests(unittest.TestCase):
         blocked.unlink()
         initialize(self.db)
         self.assertEqual(len(self.snapshots()), 1)
-        self.assertEqual(self.db.execute("PRAGMA user_version").fetchone()[0], 4)
+        self.assertEqual(
+            self.db.execute("PRAGMA user_version").fetchone()[0], LIBRARY_VERSION
+        )
 
     def test_retries_preserve_changed_states_without_accumulating_identical_copies(
         self,
@@ -113,7 +115,9 @@ class UpgradeBackupTests(unittest.TestCase):
                 return db.execute("PRAGMA user_version").fetchone()[0]
 
         with ThreadPoolExecutor(max_workers=2) as pool:
-            self.assertEqual(list(pool.map(open_library, range(2))), [4, 4])
+            self.assertEqual(
+                list(pool.map(open_library, range(2))), [LIBRARY_VERSION] * 2
+            )
         self.assertEqual(len(self.snapshots()), 1)
 
     def test_restart_after_process_stops_mid_upgrade(self):
@@ -148,7 +152,9 @@ initialize(db)
         )
         (backup,) = self.snapshots()
         initialize(self.db)
-        self.assertEqual(self.db.execute("PRAGMA user_version").fetchone()[0], 4)
+        self.assertEqual(
+            self.db.execute("PRAGMA user_version").fetchone()[0], LIBRARY_VERSION
+        )
         self.assertEqual(self.snapshots(), [backup])
 
     def test_v1_snapshot_contains_original_schema_and_replay_rebuilds_all_facts(self):

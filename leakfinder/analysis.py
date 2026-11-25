@@ -75,6 +75,28 @@ def cached_comparison(db, room, revision):
         return None
 
 
+def comparison_revision(room, generation, last_hand, aliases):
+    return json.dumps((4, room, generation, last_hand, aliases), separators=(",", ":"))
+
+
+def migrate_v4_comparisons(db):
+    """Reuse only comparison caches that matched the pre-upgrade library."""
+    from .storage import import_revision
+
+    source = import_revision(db)
+    aliases = db.execute("SELECT room,name FROM aliases ORDER BY room,name").fetchall()
+    aliases = [tuple(row) for row in aliases]
+    last_hand = db.execute("SELECT coalesce(max(id),0) FROM hands").fetchone()[0]
+    for room, revision in db.execute(
+        "SELECT room,revision FROM review_comparison_cache"
+    ).fetchall():
+        if revision == json.dumps((3, (room, source, aliases)), separators=(",", ":")):
+            db.execute(
+                "UPDATE review_comparison_cache SET revision=? WHERE room=?",
+                (comparison_revision(room, 0, last_hand, aliases), room),
+            )
+
+
 def save_comparison(db, room, revision, findings, eligible, total):
     rows = [
         vars(f)
@@ -175,9 +197,8 @@ def summarize(node, cells, room):
     return f
 
 
-def analyze(db, room="Both"):
-    cohort(db, room)
-    by_node = defaultdict(dict)
+def _add_cohort(db, by_node, room, after_hand):
+    cohort(db, room, after_hand=after_hand)
     for r in db.execute("""SELECT d.node,d.cell,h.day,d.actor=c.hero AS ishero,
             sum(d.success) AS x,count(*) AS n FROM cohort c
             JOIN hands h ON h.id=c.hand JOIN decisions d ON d.hand=h.id
@@ -187,11 +208,22 @@ def analyze(db, room="Both"):
         if r["ishero"]:
             cell.h += r["n"]
             cell.hx += r["x"]
-            day[0:2] = [r["x"], r["n"]]
+            day[0] += r["x"]
+            day[1] += r["n"]
         else:
             cell.p += r["n"]
             cell.px += r["x"]
-            day[2:4] = [r["x"], r["n"]]
+            day[2] += r["x"]
+            day[3] += r["n"]
+    eligible = db.execute("SELECT count(*) FROM cohort").fetchone()[0]
+    total = db.execute(
+        "SELECT count(*) FROM hands WHERE id>? AND (?='Both' OR room=?)",
+        (after_hand, room, room),
+    ).fetchone()[0]
+    return eligible, total
+
+
+def _findings(by_node, room):
     results = [
         summarize(node, by_node[node], room) for node in METRICS if node in by_node
     ]
@@ -203,11 +235,52 @@ def analyze(db, room="Both"):
             else list(METRICS).index(f.node),
         )
     )
-    eligible = db.execute("SELECT count(*) FROM cohort").fetchone()[0]
-    total = db.execute(
-        "SELECT count(*) FROM hands WHERE ?='Both' OR room=?", (room, room)
-    ).fetchone()[0]
-    return results, eligible, total
+    return results
+
+
+def analyze(db, room="Both"):
+    by_node = defaultdict(dict)
+    eligible, total = _add_cohort(db, by_node, room, 0)
+    return _findings(by_node, room), eligible, total
+
+
+def update_comparison(db, room, revision):
+    """Extend population cells for new hands, including new actions on an existing day."""
+    row = db.execute(
+        "SELECT revision FROM review_comparison_cache WHERE room=?", (room,)
+    ).fetchone()
+    if row:
+        try:
+            version, prior_room, generation, last, aliases = json.loads(row[0])
+            _, _, current, high, current_aliases = json.loads(revision)
+            append = (
+                version == 4
+                and prior_room == room
+                and aliases == current_aliases
+                and 0 <= generation <= current
+                and 0 <= last <= high
+            )
+        except (ValueError, TypeError):
+            append = False
+        if append:
+            # A conflict, recovered Hero identity, or enriched copy can change an
+            # earlier contribution. Rebuild the comparison in that case.
+            amended = db.execute(
+                """SELECT 1 FROM hand_changes c JOIN hands h ON h.id=c.hand
+                   WHERE c.revision>? AND c.hand<=? AND (?='Both' OR h.room=?) LIMIT 1""",
+                (generation, last, room, room),
+            ).fetchone()
+            prior = None if amended else cached_comparison(db, room, row[0])
+            if prior is not None:
+                findings, eligible, total = prior
+                cells = defaultdict(dict, {n: f.cells for n, f in findings.items()})
+                new_eligible, new_total = _add_cohort(db, cells, room, last)
+                return (
+                    _findings(cells, room),
+                    eligible + new_eligible,
+                    total + new_total,
+                )
+    return analyze(db, room)
 
 
 def describe(key):
