@@ -81,7 +81,7 @@ def band(value, breaks):
     return sum(value >= boundary for boundary in breaks)
 
 
-def replay(h):
+def replay(h, *, metrics=True):
     order = [h.seats[s] for s in sorted(h.seats)]
     button = order.index(h.seats[h.button])
     order = order[button + 1 :] + order[: button + 1]
@@ -273,7 +273,8 @@ def replay(h):
         pending.pop(0)
         if street == "Preflop":
             if (
-                not raises
+                metrics
+                and not raises
                 and not limps
                 and owed
                 and can_raise
@@ -281,7 +282,8 @@ def replay(h):
             ):
                 emit("OPEN", e, "")
             if (
-                raises == 1
+                metrics
+                and raises == 1
                 and clean_open
                 and not limps
                 and can_raise
@@ -331,6 +333,8 @@ def replay(h):
     h.last_preflop_raiser = pfa
     h.events = {s.upper(): ev for s, ev in events.items()}
     h.active_players = lambda s: start_order.get(s.title(), [])
+    if not metrics:
+        return decisions, events
     rows = postflop(h)
 
     def called(st):

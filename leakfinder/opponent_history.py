@@ -30,7 +30,7 @@ def clock(value):
         return None
 
 
-def finished_by(record, started):
+def finished_by(record, started, *, hand=None):
     """Require a recorded end or a containing iPoker session's upper bound."""
     if started is None:
         return None
@@ -44,12 +44,16 @@ def finished_by(record, started):
             return None
         end = clock(match[1] + COIN_OFFSETS[match[2]])
     else:
-        xml = record.raw.strip()
-        if record.locator.startswith("HM2") and xml.endswith("</game>"):
-            xml += "</session>"
-        session = ET.fromstring(xml)
-        start = clock(session.findtext("general/startdate"))
-        duration = session.findtext("general/duration") or ""
+        if hand is None:
+            xml = record.raw.strip()
+            if record.locator.startswith("HM2") and xml.endswith("</game>"):
+                xml += "</session>"
+            session = ET.fromstring(xml)
+            session_start = session.findtext("general/startdate")
+            duration = session.findtext("general/duration") or ""
+        else:
+            session_start, duration = hand.ipoker_session
+        start = clock(session_start)
         match = re.fullmatch(r"(\d{1,3}):([0-5]\d):([0-5]\d)", duration.strip())
         if (
             not start
@@ -154,12 +158,16 @@ class Observation:
     street: str = "River"
 
 
-def observations(db, room, opponent=None, *, prepared=False, opponent_hands=None):
+def observations(db, room, opponent=None, *, prepared=False, opponent_hands=None, minimum=1):
     if not prepared:
         cohort(db, room)
-    query = """SELECT h.id,h.room,h.number,c.hero,o.actor,o.opp,o.ref,s.locator,s.raw
+    count = (
+        """,count(*) OVER (PARTITION BY h.room,
+            CASE WHEN c.hero=o.actor THEN o.opp ELSE o.actor END, c.hero=o.actor) AS volume"""
+        if minimum > 1 else ""
+    )
+    query = f"""SELECT h.id,h.room,h.number,c.hero,o.actor,o.opp,o.ref{count}
         FROM cohort c JOIN hands h ON h.id=c.hand JOIN obs o ON o.hand=c.hand
-        JOIN origins s ON s.rowid=(SELECT min(p.rowid) FROM origins p WHERE p.hand=c.hand)
         WHERE (o.eligible & ?)<>0 AND (c.hero=o.actor OR c.hero=o.opp)
         AND (? IS NULL OR (c.hero=o.actor AND o.opp=?) OR (c.hero=o.opp AND o.actor=?))"""
     params = [BITS["RIVERC"], opponent, opponent, opponent]
@@ -169,15 +177,24 @@ def observations(db, room, opponent=None, *, prepared=False, opponent_hands=None
             SELECT target.room,s.name FROM json_each(?) ids JOIN hands target ON target.id=ids.value
             JOIN cohort q ON q.hand=target.id JOIN seats s ON s.hand=q.hand AND s.name<>q.hero)"""
         params.append(json.dumps(sorted(opponent_hands)))
+    # The raw count is an upper bound on chronologically matched observations.
+    # Guide indexing only needs groups that could ever reach its evidence minimum.
+    volume = "WHERE q.volume>=?" if minimum > 1 else ""
+    if minimum > 1:
+        params.append(minimum)
+    query = f"""SELECT q.id,q.room,q.number,q.hero,q.actor,q.opp,q.ref,s.locator,s.raw
+        FROM ({query}) q
+        JOIN origins s ON s.rowid=(SELECT min(p.rowid) FROM origins p WHERE p.hand=q.id)
+        {volume}"""
     for row in db.execute(query, params):
         hid, room, number, hero, responder, bettor, ref, locator, raw = row
         record = Record(room, zlib.decompress(raw).decode(), locator, number)
         hand = decode(record)
         start = clock(record_stamp(record, hand.date))
-        end = finished_by(record, start)
+        end = finished_by(record, start, hand=hand)
         if end is None:
             continue
-        _, streets = replay(hand)
+        _, streets = replay(hand, metrics=False)
         events = streets["River"]
         event = next(
             (e for e in events if e.ref == ref and e.player == responder), None
@@ -250,10 +267,10 @@ def early_observations(db, room, opponent, street, *, prepared=False):
         record = Record(network, zlib.decompress(raw).decode(), locator, number)
         hand = decode(record)
         start = clock(record_stamp(record, hand.date))
-        end = finished_by(record, start)
+        end = finished_by(record, start, hand=hand)
         if end is None:
             continue
-        _, streets = replay(hand)
+        _, streets = replay(hand, metrics=False)
         actions = streets[street]
         if not actions or len(actions[0].live) != 2 or hero not in actions[0].live:
             continue

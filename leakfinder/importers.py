@@ -71,6 +71,8 @@ class Hand:
     reported_bets: dict = field(default_factory=dict)
     fees: int = 0
     reported_pot: int | None = None
+    ipoker_session: tuple[str, str] = ("", "")
+    ipoker_hero_dealt: bool = False
 
     def validate(self):
         if not self.number or self.bb <= 0 or not 0 < self.sb <= self.bb:
@@ -394,6 +396,7 @@ def ipoker(raw, fragment=False):
         -1,
         meta.findtext("nickname", "").strip(),
     )
+    h.ipoker_session = (meta.findtext("startdate") or "", meta.findtext("duration") or "")
     for p in g.findall("general/players/player"):
         seat = int(p.get("seat", "0"))
         name = p.get("name", "").strip()
@@ -447,9 +450,12 @@ def ipoker(raw, fragment=False):
                         raise Excluded("Unsupported iPoker pocket count")
                     pocket_evidence = True
                     if "X" not in slots:
+                        name = el.get("player", "")
                         remember(
-                            h.cards, el.get("player", ""), [ip_card(x) for x in slots]
+                            h.cards, name, [ip_card(x) for x in slots]
                         )
+                        if rnd.get("no") == "1" and name == h.hint:
+                            h.ipoker_hero_dealt = True
                 elif typ in STREETS[1:] and typ == street:
                     if street in h.boards:
                         raise Excluded("Multiple runouts")

@@ -15,6 +15,7 @@ from .engine import METRICS, replay
 from .explorer import session_keys
 from .importers import STREETS, Record, decode
 from .opponent_history import (
+    MIN_CASES,
     OpponentHistory,
     apply_history,
     clock,
@@ -152,6 +153,11 @@ def _guide_key(revision):
         and type(watermark) is int
         and watermark >= 0
         and isinstance(aliases, list)
+        and all(
+            isinstance(pair, list) and len(pair) == 2
+            and all(isinstance(value, str) for value in pair)
+            for pair in aliases
+        )
     ):
         return watermark, aliases
     return None
@@ -292,7 +298,29 @@ def _sessions(db):
     return {hand: session for session, hand in session_keys(rows)}
 
 
-def _history_dependents(db, changed, previous):
+def _profile_changes(db, room, previous_aliases):
+    """Compare the old alias membership with the prepared current cohort."""
+    return {
+        hand for (hand,) in db.execute(
+            """WITH old_aliases(room,name) AS (
+                SELECT json_extract(value,'$[0]'),json_extract(value,'$[1]') FROM json_each(?)
+            ), old_cohort(hand,hero) AS MATERIALIZED (
+                SELECT h.id,min(s.name) FROM hands h JOIN seats s ON s.hand=h.id
+                JOIN old_aliases a ON a.room=h.room AND a.name=s.name
+                WHERE h.conflict=0 AND (?='Both' OR h.room=?) GROUP BY h.id
+                HAVING count(*)=1 AND (h.hint='' OR h.hint=min(s.name))
+            )
+            SELECT old.hand FROM old_cohort old
+            LEFT JOIN cohort q ON q.hand=old.hand AND q.hero=old.hero WHERE q.hand IS NULL
+            UNION
+            SELECT q.hand FROM cohort q
+            LEFT JOIN old_cohort old ON old.hand=q.hand AND old.hero=q.hero WHERE old.hand IS NULL""",
+            (json.dumps(previous_aliases), room, room),
+        )
+    }
+
+
+def _history_dependents(db, changed, previous, aliases):
     """Find cached river decisions that could now see different *prior* evidence."""
     river_hands = {
         entry.hand
@@ -305,13 +333,16 @@ def _history_dependents(db, changed, previous):
     # Include now-conflicting hands: their evidence was visible before the import.
     # The original record provides the same session end bound used by observations().
     rows = db.execute(
-        """SELECT h.room,h.number,f.stamp,s.locator,s.raw,o.actor,o.opp
+        """WITH profile_aliases(room,name) AS (
+            SELECT json_extract(value,'$[0]'),json_extract(value,'$[1]') FROM json_each(?)
+        )
+        SELECT h.room,h.number,f.stamp,s.locator,s.raw,o.actor,o.opp
         FROM json_each(?) ids JOIN hands h ON h.id=ids.value
         JOIN facts f ON f.hand=h.id JOIN obs o ON o.hand=h.id
         JOIN origins s ON s.rowid=(SELECT min(rowid) FROM origins WHERE hand=h.id)
         WHERE (o.eligible & ?)<>0 AND EXISTS (
-            SELECT 1 FROM aliases a WHERE a.room=h.room AND a.name IN (o.actor,o.opp))""",
-        (json.dumps(sorted(changed)), BITS["RIVERC"]),
+            SELECT 1 FROM profile_aliases a WHERE a.room=h.room AND a.name IN (o.actor,o.opp))""",
+        (json.dumps(aliases), json.dumps(sorted(changed)), BITS["RIVERC"]),
     )
     cutoffs = {}
     for room, number, stamp, locator, raw, responder, bettor in rows:
@@ -359,7 +390,7 @@ def _history_dependents(db, changed, previous):
     return affected
 
 
-def update_guides(db, room, revision, progress=None, *, stats=None):
+def update_guides(db, room, revision, progress=None, *, stats=None, workload=None):
     """Extend a persisted index in this read snapshot. Save it after committing."""
     row = db.execute(
         "SELECT revision FROM review_guide_cache WHERE room=?", (room,)
@@ -367,12 +398,12 @@ def update_guides(db, room, revision, progress=None, *, stats=None):
     previous = None
     current = _guide_key(revision)
     old = _guide_key(row[0]) if row else None
-    if old and current and old[1] == current[1] and old[0] <= current[0]:
+    if old and current and old[0] <= current[0]:
         previous = cached_guides(db, room, row[0])
     if stats is not None:
         stats.update(replayed=0, reused=0, history_updated=0)
     if previous is None:
-        return _index_hands(db, room, progress, _sessions(db), stats=stats)
+        return _index_hands(db, room, progress, _sessions(db), stats=stats, workload=workload)
     changed = {
         r[0]
         for r in db.execute(
@@ -382,7 +413,10 @@ def update_guides(db, room, revision, progress=None, *, stats=None):
             (old[0], current[0], room, room),
         )
     }
-    affected = _history_dependents(db, changed, previous)
+    if old[1] != current[1]:
+        changed.update(_profile_changes(db, room, old[1]))
+    aliases = sorted(set(map(tuple, old[1] + current[1])))
+    affected = _history_dependents(db, changed, previous, aliases)
     dirty = changed | affected
     if stats is not None:
         total = db.execute("""SELECT count(*) FROM cohort q JOIN hands h ON h.id=q.hand
@@ -395,7 +429,7 @@ def update_guides(db, room, revision, progress=None, *, stats=None):
             stats["reused"] = total
         return previous
     sessions = _sessions(db)
-    fresh = _index_hands(db, room, progress, sessions, hands=dirty, stats=stats)
+    fresh = _index_hands(db, room, progress, sessions, hands=dirty, stats=stats, workload=workload)
     if stats is not None:
         stats["reused"] = total - stats["replayed"]
 
@@ -461,7 +495,7 @@ def _large_river_call(snap, event):
     )
 
 
-def _index_hands(db, room, progress, sessions, *, hands=None, audit=None, stats=None):
+def _index_hands(db, room, progress, sessions, *, hands=None, audit=None, stats=None, workload=None):
     items = []
     study = []
     critiques = []
@@ -472,13 +506,13 @@ def _index_hands(db, room, progress, sessions, *, hands=None, audit=None, stats=
         if hands is None
         else "json_each(?) ids JOIN cohort q ON q.hand=ids.value"
     )
-    rows = db.execute(
-        f"""SELECT q.hand,q.hero FROM {source}
+    eligible = f"""FROM {source}
         JOIN hands h ON h.id=q.hand
-        WHERE EXISTS (SELECT 1 FROM json_each(h.cards) c WHERE c.key=q.hero)
-        ORDER BY q.hand DESC""",
-        () if hands is None else (json.dumps(sorted(hands)),),
-    )
+        WHERE EXISTS (SELECT 1 FROM json_each(h.cards) c WHERE c.key=q.hero)"""
+    params = () if hands is None else (json.dumps(sorted(hands)),)
+    if workload is not None:
+        workload(db.execute(f"SELECT count(*) {eligible}", params).fetchone()[0])
+    rows = db.execute(f"SELECT q.hand,q.hero {eligible} ORDER BY q.hand DESC", params)
     for index, (hid, hero) in enumerate(rows, 1):
         if stats is not None:
             stats["replayed"] += 1
@@ -488,7 +522,7 @@ def _index_hands(db, room, progress, sessions, *, hands=None, audit=None, stats=
             if advice and river_opponent(snap):
                 if history is None:
                     history = OpponentHistory(
-                        observations(db, room, prepared=True, opponent_hands=hands)
+                        observations(db, room, prepared=True, opponent_hands=hands, minimum=MIN_CASES)
                     )
                 advice = apply_history(snap, advice, history)
             if audit is not None:

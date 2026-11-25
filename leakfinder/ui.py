@@ -919,7 +919,7 @@ class Workspace:
                 selection = previous_selection[1]
             else:
                 selection = review_selection(db, room, scope)
-                if cached_index is None and selection[1] > 1000:
+                if (cached_index is None or cached_index[0] != revision) and selection[1] > 1000:
                     sample = preview_decisions(db, street)
                     if sample:
                         self.jobs.put(("review-preview", sample))
@@ -944,13 +944,23 @@ class Workspace:
             if needs_index:
                 self.jobs.put(("progress", "Updating the hand review index…"))
                 cohort(db, "Both")
+                todo = 0
+
+                def plan(total):
+                    nonlocal todo
+                    todo = total
+                    if todo:
+                        self.jobs.put(("progress", f"Updating the review index · {todo:,} hands to check"))
+
+                def checked(n):
+                    self.jobs.put(("progress", f"Updating the review index · {n:,} of {todo:,} hands checked"))
+
                 guide = update_guides(
                     db,
                     "Both",
                     revision,
-                    lambda n: self.jobs.put(
-                        ("progress", f"Updating the review index · {n:,} hands checked")
-                    ),
+                    checked,
+                    workload=plan,
                 )
             queue = build_queue(
                 db,

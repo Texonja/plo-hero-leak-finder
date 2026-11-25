@@ -7,7 +7,6 @@ recorded point-of-view player's dealt cards can enter a snapshot.
 import zlib
 from collections import defaultdict
 from dataclasses import dataclass, replace
-from xml.etree import ElementTree as ET
 
 from .engine import replay
 from .importers import SCALE, STREETS, Record, decode
@@ -147,7 +146,7 @@ def _canonical(records):
 
 def _ledger(record):
     hand = decode(record)
-    _, streets = replay(hand)
+    _, streets = replay(hand, metrics=False)
     events = {e.ref: e for street in STREETS for e in streets[street]}
     return hand, events
 
@@ -175,18 +174,9 @@ def _visible_cards(record, hand, event):
             return tuple(cards)
         return None
 
-    xml = record.raw.strip()
-    if record.locator.startswith("HM2") and xml.endswith("</game>"):
-        xml += "</session>"
     # XML card elements belong to a betting round. Some exports serialize
     # them after the actions in that round, including the recorded player's deal.
-    dealt = ET.fromstring(xml).findall('game/round[@no="1"]/cards[@type="Pocket"]')
-    if any(
-        node.get("player") == name and "X" not in (node.text or "").split()
-        for node in dealt
-    ):
-        return tuple(cards)
-    return None
+    return tuple(cards) if hand.ipoker_hero_dealt else None
 
 
 def _apply_token(token, event, commits):
@@ -398,7 +388,7 @@ def _alternate_cards(view, records, event, hero):
     for alternate in records:
         other = decode(alternate)
         if hero == other.hint and hero in other.cards:
-            _, streets = replay(other)
+            _, streets = replay(other, metrics=False)
             same = streets[event.street][event.idx - 1]
             if same.player == hero:
                 cards = _visible_cards(alternate, other, same)

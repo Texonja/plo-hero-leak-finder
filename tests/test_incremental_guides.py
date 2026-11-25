@@ -8,6 +8,7 @@ from tempfile import TemporaryDirectory
 from unittest.mock import patch
 
 from leakfinder.importers import sources
+from leakfinder.opponent_history import MIN_CASES, observations
 from leakfinder.review_queue import (
     cached_guides,
     guide_revision,
@@ -91,6 +92,34 @@ class IncrementalGuideTests(unittest.TestCase):
         empty, _ = self.refresh()
         self.assertFalse(any((empty.items, empty.study, empty.critiques)))
 
+    def test_adding_and_removing_an_alias_reuses_other_hands(self):
+        first = original("ip-41.hh")
+        second = (
+            first.replace("9000000041", "9000900041")
+            .replace("2026-04-19", "2026-04-20")
+            .replace("BigNeonMax", "OtherAlias")
+        )
+        self.ingest("first.xml", first)
+        self.ingest("second.xml", second)
+        baseline, _ = self.refresh()
+
+        set_profile(self.db, {"iPoker": ["BigNeonMax", "OtherAlias"]})
+        _, added = self.refresh()
+        self.assertEqual(added, {"replayed": 1, "reused": 1, "history_updated": 0})
+
+        set_profile(self.db, {"iPoker": ["BigNeonMax"]})
+        result, removed = self.refresh()
+        self.assertEqual(removed, {"replayed": 0, "reused": 1, "history_updated": 0})
+        self.assertEqual(result, baseline)
+
+        # Two configured aliases seated in the same hand make Hero ambiguous.
+        rival = self.db.execute(
+            "SELECT s.name FROM cohort q JOIN seats s ON s.hand=q.hand WHERE s.name<>q.hero"
+        ).fetchone()[0]
+        set_profile(self.db, {"iPoker": ["BigNeonMax", rival]})
+        ambiguous, _ = self.refresh()
+        self.assertFalse(any(ambiguous.counts.values()))
+
     def test_session_bridge_relabels_old_guide_items_without_replay(self):
         demo = Path(__file__).resolve().parents[1] / "demo" / "CoinPoker-HeroDemo.txt"
         raw = next(
@@ -132,6 +161,16 @@ class IncrementalGuideTests(unittest.TestCase):
             ),
         )
         before, _ = self.refresh()
+        unfiltered = list(observations(self.db, "Both", prepared=True))
+        self.assertEqual(len(unfiltered), MIN_CASES)
+        self.assertEqual(
+            list(observations(self.db, "Both", prepared=True, minimum=MIN_CASES + 1)),
+            [],
+        )
+        self.assertEqual(
+            list(observations(self.db, "Both", prepared=True, minimum=MIN_CASES)),
+            unfiltered,
+        )
         self.ingest("older-session.txt", copy(10029, 24))
         after, stats = self.refresh()
 
