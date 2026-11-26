@@ -27,13 +27,9 @@ the cited MIT component. Sample derivation details are in demo/README.txt.
 
 Preflop reference
 
-The small-blind first-in fold reference is derived from the downloadable
-PokerData PLO4 six-max 100 BB sample, 5% rake capped at 1 BB.
-Only the first decision after four folds is used. The fold column gives
-no split between completing and raising and supplies no EV loss.
-Source: https://pokerdata.io/samples/plo6-6max-100bb-sample.zip
-Downloaded-pack terms: https://pokerdata.io/terms
-The original archive checksum and branch are in pilots/build_sb_reference.py.
+Small-blind first-in fold frequencies are derived from the PokerData PLO4
+six-max 100 BB sample (5% rake, capped at 1 BB).
+https://pokerdata.io/samples/plo6-6max-100bb-sample.zip
 
 Windows runtime
 
