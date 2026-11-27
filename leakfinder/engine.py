@@ -320,11 +320,7 @@ def replay(h, *, metrics=True):
             pending = [n for n in pending if commits[n] < price]
     if not events["Preflop"] or unfinished():
         raise Excluded("Incomplete action sequence")
-    if (
-        len(live) > 1
-        and sum(stacks[n] > 0 for n in live) > 1
-        and not h.boards.get("River")
-    ):
+    if len(live) > 1 and not h.boards.get("River"):
         raise Excluded("Incomplete runout")
     h.spent = {n: h.stacks[n] - stacks[n] for n in stacks}
     h.final_commits = dict(commits)

@@ -5,7 +5,7 @@ import xml.etree.ElementTree as ET
 from pathlib import Path
 from zipfile import BadZipFile
 
-from .importers import money, sources
+from .importers import ipoker_money_reader, money, sources
 from .vendor.common import parse_header
 from .vendor.hm2_backup import HM2BackupError
 
@@ -35,7 +35,8 @@ def descriptor(record, reason):
             )
             if isinstance(blind, ET.Element):
                 blind = blind.get("sum")
-            bb = money(blind) if blind else None
+            if blind and game is not None and root.find("general") is not None:
+                bb = ipoker_money_reader(root.find("general"), game)(blind)
         elif room == "CoinPoker":
             meta = parse_header(raw.splitlines()[0])
             if meta:

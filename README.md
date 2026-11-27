@@ -2,7 +2,7 @@
 
 PLO Hero Leak Finder is a desktop app for offline PLO4 hand review on CoinPoker and iPoker, and your hands never leave your computer.
 
-**0.3.16 beta** · [Release notes](docs/RELEASE-0.3.16-beta.md) · [Download for Windows](https://github.com/Texonja/plo-hero-leak-finder/releases/latest)
+**0.3.17 beta** · [Release notes](docs/RELEASE-0.3.17-beta.md) · [Latest public download for Windows](https://github.com/Texonja/plo-hero-leak-finder/releases/latest)
 
 ![Leak Finder](docs/screenshots/main.png)
 

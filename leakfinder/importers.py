@@ -31,9 +31,13 @@ class Excluded(ValueError):
     """A hand outside coverage or with unverified semantics."""
 
 
+MONEY_PREFIX = re.compile(r"^(?:€|\$|£|₮|EUR|USD|GBP)\s*")
+GROUPED = re.compile(r"[1-9]\d{0,2}([.,])\d{3}(?:\1\d{3})*")
+
+
 @lru_cache(maxsize=32768)
 def money(raw):
-    token = re.sub(r"^(?:€|\$|£|₮|EUR|USD|GBP)\s*", "", (raw or "").strip())
+    token = MONEY_PREFIX.sub("", (raw or "").strip())
     if "," in token and "." in token:
         decimal_sep = "," if token.rfind(",") > token.rfind(".") else "."
         token = token.replace("." if decimal_sep == "," else ",", "")
@@ -41,6 +45,58 @@ def money(raw):
     if not re.fullmatch(r"\d+(?:\.\d{1,6})?", token):
         raise Excluded("Invalid or missing chip amount")
     return int(Decimal(token) * SCALE)
+
+
+def ipoker_amount_fields(meta, game, *, include_totals=False):
+    tags = ("smallblind", "bigblind")
+    if include_totals:
+        tags += ("bets", "wins", "chipsin", "chipsout")
+    for tag in tags:
+        value = meta.findtext(tag)
+        if value:
+            yield value
+    for player in game.iterfind("general/players/player"):
+        for key in ("chips", "bet", "win", "rakeamount"):
+            if key in player.attrib:
+                yield player.attrib[key]
+    for action in game.iterfind("round/action"):
+        if "sum" in action.attrib:
+            yield action.attrib["sum"]
+
+
+@lru_cache(maxsize=32768)
+def _number_parts(raw):
+    token = MONEY_PREFIX.sub("", raw.strip())
+    grouped = GROUPED.fullmatch(token)
+    return token, grouped[1] if grouped else ""
+
+
+def ipoker_money_reader(meta, game):
+    """Resolve 1,234 / 1.234 only with evidence from this original record."""
+    decimal = None
+
+    def read(raw):
+        nonlocal decimal
+        token, mark = _number_parts(raw or "")
+        if not mark:
+            return money(raw)
+        if token.count(mark) > 1:
+            return money(token.replace(mark, ""))
+        if decimal is None:
+            evidence = set()
+            for value in ipoker_amount_fields(meta, game, include_totals=True):
+                other, sep = _number_parts(value)
+                if sep:
+                    if other.count(sep) > 1:
+                        evidence.add("." if sep == "," else ",")
+                elif re.fullmatch(r"\d+(?:[.,]\d+)+", other):
+                    evidence.add(other[max(other.rfind("."), other.rfind(","))])
+            if len(evidence) != 1:
+                raise Excluded("Ambiguous iPoker chip separators")
+            decimal = evidence.pop()
+        return money(token if mark == decimal else token.replace(mark, ""))
+
+    return read
 
 
 @dataclass
@@ -348,11 +404,15 @@ IP_ACTION = {
 }
 
 
-def ipoker(raw, fragment=False):
+def ipoker_session(raw, fragment=False):
     sample = raw.strip()
     if fragment and sample.endswith("</game>") and "</session>" not in sample:
         sample += "</session>"
-    root = ET.fromstring(sample)
+    return ET.fromstring(sample)
+
+
+def ipoker(raw, fragment=False):
+    root = ipoker_session(raw, fragment)
     games = root.findall("game")
     if root.tag != "session" or len(games) != 1:
         raise Excluded("Expected one iPoker game")
@@ -376,15 +436,16 @@ def ipoker(raw, fragment=False):
     cur = meta.findtext("tablecurrency") or meta.findtext("currency")
     if not cur:
         raise Excluded("Missing table currency")
+    amount = ipoker_money_reader(meta, g)
 
     def blind(tag, code):
         value = meta.findtext(tag)
         if value:
-            return money(value)
+            return amount(value)
         posts = g.findall(f'round[@no="0"]/action[@type="{code}"]')
         if len(posts) != 1:
             raise Excluded("Ambiguous blind amount")
-        return money(posts[0].get("sum"))
+        return amount(posts[0].get("sum"))
 
     h = Hand(
         "iPoker",
@@ -403,13 +464,13 @@ def ipoker(raw, fragment=False):
         if seat in h.seats or not name:
             raise Excluded("Invalid player seat")
         h.seats[seat] = name
-        h.stacks[name] = money(p.get("chips"))
+        h.stacks[name] = amount(p.get("chips"))
         if p.get("bet") is not None:
-            h.reported_bets[name] = money(p.get("bet"))
+            h.reported_bets[name] = amount(p.get("bet"))
         if p.get("win") is not None:
-            h.awards[name] = money(p.get("win"))
+            h.awards[name] = amount(p.get("win"))
         if p.get("rakeamount") is not None:
-            h.fees += money(p.get("rakeamount"))
+            h.fees += amount(p.get("rakeamount"))
         if p.get("dealer") == "1":
             if h.button != -1:
                 raise Excluded("Multiple dealer buttons")
@@ -436,7 +497,7 @@ def ipoker(raw, fragment=False):
                         street,
                         el.get("player", ""),
                         IP_ACTION[typ],
-                        money(
+                        amount(
                             el.get("sum", "0") if typ in {"0", "4"} else el.get("sum")
                         ),
                         f"Action {no}",

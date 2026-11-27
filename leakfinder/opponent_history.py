@@ -96,23 +96,23 @@ def context(snap, actor, size, opening_pot):
         len({c[0] for c in snap.board}) < len(snap.board),
         max(sum(c[1] == s for c in snap.board) for s in "cdhs") >= 3,
     )
+    # Reconstruct both stacks before the first bet, also when observing its response.
+    effective = min(s.stack + s.committed for s in order if s.live)
     if snap.street in {"Flop", "Turn"}:
-        effective = min(s.stack + s.committed for s in order if s.live) / opening_pot
         shape += (
             max(sum(c[1] == s for c in snap.board) for s in "cdhs") == 2,
-            sum(effective >= limit for limit in (1, 3, 6)),
         )
     elif snap.street == "River":
-        effective = min(s.stack + s.committed for s in order if s.live)
         suits = Counter(c[1] for c in snap.board)
         ranks = Counter(c[0] for c in snap.board)
         shape += (
             tuple(sorted(ranks.values())),
             max(suits.values()),
-            sum(effective >= limit * opening_pot for limit in (1, 3, 6)),
-            size >= effective,
         )
-        size = min(size, effective)
+    shape += (
+        sum(effective >= limit * opening_pot for limit in (1, 3, 6)),
+        size >= effective,
+    )
     ip = bool(active and active[-1] == actor)
     return (
         snap.currency,
@@ -124,7 +124,7 @@ def context(snap, actor, size, opening_pot):
         ip,
         turn_role,
         shape,
-        bet_size_key(size / opening_pot),
+        bet_size_key(min(size, effective) / opening_pot),
     )
 
 

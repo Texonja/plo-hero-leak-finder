@@ -21,7 +21,8 @@ def demo_path(personal):
 def load_demo(db):
     sources = db.execute(
         "SELECT id,path,digest,EXISTS(SELECT 1 FROM rejected WHERE source=imports.id "
-        "AND reason='Fold with no price') AS needs_retry FROM imports"
+        "AND reason='Fold with no price') OR EXISTS(SELECT 1 FROM amount_retry "
+        "WHERE source=imports.id) AS needs_retry FROM imports"
     ).fetchall()
     for name in ("CoinPoker-HeroDemo.txt", "iPoker-HeroDemo.sql"):
         # A release can be extracted at a new location. Read the same logical

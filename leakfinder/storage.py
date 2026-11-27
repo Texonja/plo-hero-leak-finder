@@ -19,7 +19,8 @@ from .importers import Excluded, Record, decode, sources
 from .library_backup import backup_before_upgrade
 from .statistics import observations, settlements, tags
 
-LIBRARY_VERSION = 5
+LIBRARY_VERSION = 6
+POSSIBLE_GROUP = re.compile(r"[.,]\d{3}(?![\d.,])|&#")
 
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS imports(id INTEGER PRIMARY KEY, path TEXT, digest TEXT, summary TEXT, UNIQUE(path,digest));
@@ -43,6 +44,7 @@ CREATE TABLE IF NOT EXISTS aliases(room TEXT,name TEXT, PRIMARY KEY(room,name));
 CREATE TABLE IF NOT EXISTS rejected(source INTEGER,locator TEXT,reason TEXT,number TEXT);
 CREATE INDEX IF NOT EXISTS rejected_import ON rejected(source);
 CREATE TABLE IF NOT EXISTS excluded_records(digest BLOB PRIMARY KEY) WITHOUT ROWID;
+CREATE TABLE IF NOT EXISTS amount_retry(source INTEGER,locator TEXT,PRIMARY KEY(source,locator)) WITHOUT ROWID;
 CREATE TABLE IF NOT EXISTS facts(hand INTEGER PRIMARY KEY,stamp TEXT,bb INTEGER,currency TEXT);
 CREATE TABLE IF NOT EXISTS players(hand INTEGER,name TEXT,pos TEXT,tags TEXT,net REAL,PRIMARY KEY(hand,name));
 CREATE TABLE IF NOT EXISTS obs(hand INTEGER,actor TEXT,ref TEXT,opp TEXT,depth INTEGER,chosen REAL,faced REAL,eligible INTEGER,hits INTEGER);
@@ -75,6 +77,10 @@ def initialize(db):
         # executescript() would commit the lock before creating these tables.
         for statement in SCHEMA.strip().splitlines():
             db.execute(statement)
+        if version:
+            from .runout_upgrade import repair_records
+
+            repair_records(db)
         if version == 1:
             # These four derived tables can be rebuilt from the v1 original records.
             for table in ("decisions", "facts", "players", "obs"):
@@ -102,7 +108,7 @@ def initialize(db):
                 AND json_extract(d.cell,'$[10]') <> lf_bet_size_key(o.faced)""")
         if version in (1, 2, 3):
             db.execute("DELETE FROM review_comparison_cache")
-        if version:
+        if version in (1, 2, 3, 4):
             # Only the previous selection needs reconstruction. Older releases
             # recorded a source for each copy, even when the hand was already known.
             db.execute("""INSERT OR IGNORE INTO import_delta
@@ -324,6 +330,8 @@ def _record_digest(record):
         record.skip,
     )
     digest = hashlib.sha256(json.dumps(metadata).encode() + b"\0")
+    if record.room == "iPoker" and POSSIBLE_GROUP.search(record.raw):
+        digest.update(b"localized-amounts-v2\0")
     digest.update(record.raw.rstrip("\r\n").encode())
     return digest.digest()
 
@@ -340,6 +348,130 @@ def import_revision(db):
     return source if revision is None else (source, revision)
 
 
+def _import_record(db, src, record, revision, *, retry=False, restored_id=None):
+    # Compare against the actual accepted source, including its carrier
+    # rules. A reused game number alone cannot establish a duplicate.
+    old = _known_hand(db, record)
+    if restored_id is None and old and not record.skip and _same_record(db, old["id"], record):
+        return "known hands skipped"
+    record_key = _record_digest(record) if record.raw else None
+    if (
+        not retry
+        and record_key is not None
+        and db.execute(
+            "SELECT 1 FROM excluded_records WHERE digest=?", (record_key,)
+        ).fetchone()
+    ):
+        return "previously excluded"
+    try:
+        hand = decode(record)
+        decisions, events = replay(hand)
+        fp = hand.fingerprint()
+    except (Excluded, ET.ParseError, ValueError) as exc:
+        reason = str(exc)
+        db.execute(
+            "INSERT INTO rejected VALUES(?,?,?,?)",
+            (src, record.locator, reason, record.expected),
+        )
+        from .luck_exclusions import remember as remember_rejection
+        remember_rejection(db, src, record, reason)
+        if record_key is not None and reason != "Fold with no price":
+            db.execute(
+                "INSERT OR IGNORE INTO excluded_records VALUES(?)",
+                (record_key,),
+            )
+        return "excluded"
+    changed = False
+    if old:
+        hid = old["id"]
+        cards = json.loads(old["cards"])
+        mismatch = old["fingerprint"] != fp or bool(
+            old["hint"] and hand.hint and old["hint"] != hand.hint
+        )
+        mismatch |= any(
+            name in cards and set(pocket) != set(cards[name])
+            for name, pocket in hand.cards.items()
+        )
+        merged = cards | hand.cards
+        known = [card for pocket in merged.values() for card in pocket]
+        mismatch |= len(known) != len(set(known))
+        verified = settlements(hand)
+        previous = {
+            r["name"]: r["net"]
+            for r in db.execute(
+                "SELECT name,net FROM players WHERE hand=? AND net IS NOT NULL",
+                (hid,),
+            )
+        }
+        mismatch |= bool(previous and verified and previous != verified)
+        if mismatch or old["conflict"]:
+            changed = not old["conflict"]
+            db.execute("UPDATE hands SET conflict=1 WHERE id=?", (hid,))
+            result = "conflicting copies"
+        else:
+            # Even identical showdown cards may now be provably visible
+            # before a decision. Recheck this hand when adding an origin.
+            changed = True
+            if verified and not previous:
+                db.executemany(
+                    "UPDATE players SET net=? WHERE hand=? AND name=?",
+                    ((value, hid, n) for n, value in verified.items()),
+                )
+                db.executemany(
+                    "UPDATE obs SET eligible=?,hits=? WHERE hand=? AND actor=? AND ref=?",
+                    (
+                        (eligible, hits, hid, n, ref)
+                        for n, ref, _, _, _, _, eligible, hits in observations(
+                            hand, decisions, events
+                        )
+                        if ref.startswith("Seat ")
+                    ),
+                )
+            cards.update(hand.cards)
+            db.execute(
+                "UPDATE hands SET cards=?,hint=? WHERE id=?",
+                (json.dumps(cards), old["hint"] or hand.hint, hid),
+            )
+            db.executemany(
+                "UPDATE players SET tags=? WHERE hand=? AND name=?",
+                (
+                    (json.dumps(tags(hole)), hid, n)
+                    for n, hole in hand.cards.items()
+                ),
+            )
+            result = "duplicate origins"
+    else:
+        hid = db.execute(
+            "INSERT INTO hands(id,room,number,day,hint,fingerprint,cards) VALUES(?,?,?,?,?,?,?)",
+            (
+                restored_id,
+                hand.room,
+                hand.number,
+                hand.date[:10].replace("/", "-"),
+                hand.hint,
+                fp,
+                json.dumps(hand.cards),
+            ),
+        ).lastrowid
+        db.executemany(
+            "INSERT INTO seats VALUES(?,?)", ((hid, n) for n in hand.stacks)
+        )
+        store_facts(db, hid, hand, decisions, events)
+        changed = True
+        if restored_id is None:
+            db.execute("INSERT INTO import_delta VALUES(?,?,?)", (src, hid, revision))
+        result = "new hands"
+    if changed:
+        db.execute(
+            "INSERT OR REPLACE INTO hand_changes VALUES(?,?)", (hid, revision)
+        )
+    db.execute(
+        "INSERT INTO origins VALUES(?,?,?,?)",
+        (hid, src, record.locator, zlib.compress(record.raw.encode(), 1)),
+    )
+    return result
+
+
 def import_file_with_source(db, path, progress=lambda n: None, *, retry_source=None):
     """Return both the existing summary format and the exact committed source ID."""
     path = Path(path).resolve()
@@ -348,7 +480,8 @@ def import_file_with_source(db, path, progress=lambda n: None, *, retry_source=N
         unchanged = db.execute(
             """SELECT f.source FROM file_stamps f
             WHERE f.path=? AND f.stamp=? AND NOT EXISTS
-            (SELECT 1 FROM rejected r WHERE r.source=f.source AND r.reason='Fold with no price')""",
+            (SELECT 1 FROM rejected r WHERE r.source=f.source AND r.reason='Fold with no price')
+            AND NOT EXISTS (SELECT 1 FROM amount_retry a WHERE a.source=f.source)""",
             (str(path), stamp),
         ).fetchone()
         if unchanged:
@@ -374,8 +507,9 @@ def import_file_with_source(db, path, progress=lambda n: None, *, retry_source=N
             retry = {
                 row[0]
                 for row in db.execute(
-                    "SELECT locator FROM rejected WHERE source=? AND reason='Fold with no price'",
-                    (src,),
+                    """SELECT locator FROM rejected WHERE source=? AND reason='Fold with no price'
+                       UNION SELECT locator FROM amount_retry WHERE source=?""",
+                    (src, src),
                 )
             }
             if not retry:
@@ -397,132 +531,11 @@ def import_file_with_source(db, path, progress=lambda n: None, *, retry_source=N
                     continue
                 retry.remove(record.locator)
                 db.execute(
-                    "DELETE FROM rejected WHERE source=? AND locator=? AND reason='Fold with no price'",
+                    "DELETE FROM rejected WHERE source=? AND locator=?",
                     (src, record.locator),
                 )
-            # Compare against the actual accepted source, including its carrier
-            # rules. A reused game number alone cannot establish a duplicate.
-            old = _known_hand(db, record)
-            if old and not record.skip and _same_record(db, old["id"], record):
-                count["known hands skipped"] += 1
-                continue
-            record_key = _record_digest(record) if record.raw else None
-            if (
-                retry is None
-                and record_key is not None
-                and db.execute(
-                    "SELECT 1 FROM excluded_records WHERE digest=?", (record_key,)
-                ).fetchone()
-            ):
-                count["previously excluded"] += 1
-                continue
-            try:
-                hand = decode(record)
-                decisions, events = replay(hand)
-                fp = hand.fingerprint()
-            except (Excluded, ET.ParseError, ValueError) as exc:
-                reason = str(exc)
-                count["excluded"] += 1
-                db.execute(
-                    "INSERT INTO rejected VALUES(?,?,?,?)",
-                    (src, record.locator, reason, record.expected),
-                )
-                from .luck_exclusions import remember as remember_rejection
-                remember_rejection(db, src, record, reason)
-                if record_key is not None and reason != "Fold with no price":
-                    db.execute(
-                        "INSERT OR IGNORE INTO excluded_records VALUES(?)",
-                        (record_key,),
-                    )
-                continue
-            changed = False
-            if old:
-                hid = old["id"]
-                cards = json.loads(old["cards"])
-                mismatch = old["fingerprint"] != fp or bool(
-                    old["hint"] and hand.hint and old["hint"] != hand.hint
-                )
-                mismatch |= any(
-                    name in cards and set(pocket) != set(cards[name])
-                    for name, pocket in hand.cards.items()
-                )
-                merged = cards | hand.cards
-                known = [card for pocket in merged.values() for card in pocket]
-                mismatch |= len(known) != len(set(known))
-                verified = settlements(hand)
-                previous = {
-                    r["name"]: r["net"]
-                    for r in db.execute(
-                        "SELECT name,net FROM players WHERE hand=? AND net IS NOT NULL",
-                        (hid,),
-                    )
-                }
-                mismatch |= bool(previous and verified and previous != verified)
-                if mismatch or old["conflict"]:
-                    changed = not old["conflict"]
-                    db.execute("UPDATE hands SET conflict=1 WHERE id=?", (hid,))
-                    count["conflicting copies"] += 1
-                else:
-                    # Even identical showdown cards may now be provably visible
-                    # before a decision. Recheck this hand when adding an origin.
-                    changed = True
-                    if verified and not previous:
-                        db.executemany(
-                            "UPDATE players SET net=? WHERE hand=? AND name=?",
-                            ((value, hid, n) for n, value in verified.items()),
-                        )
-                        db.executemany(
-                            "UPDATE obs SET eligible=?,hits=? WHERE hand=? AND actor=? AND ref=?",
-                            (
-                                (eligible, hits, hid, n, ref)
-                                for n, ref, _, _, _, _, eligible, hits in observations(
-                                    hand, decisions, events
-                                )
-                                if ref.startswith("Seat ")
-                            ),
-                        )
-                    cards.update(hand.cards)
-                    db.execute(
-                        "UPDATE hands SET cards=?,hint=? WHERE id=?",
-                        (json.dumps(cards), old["hint"] or hand.hint, hid),
-                    )
-                    db.executemany(
-                        "UPDATE players SET tags=? WHERE hand=? AND name=?",
-                        (
-                            (json.dumps(tags(hole)), hid, n)
-                            for n, hole in hand.cards.items()
-                        ),
-                    )
-                    count["duplicate origins"] += 1
-            else:
-                hid = db.execute(
-                    "INSERT INTO hands(room,number,day,hint,fingerprint,cards) VALUES(?,?,?,?,?,?)",
-                    (
-                        hand.room,
-                        hand.number,
-                        hand.date[:10].replace("/", "-"),
-                        hand.hint,
-                        fp,
-                        json.dumps(hand.cards),
-                    ),
-                ).lastrowid
-                db.executemany(
-                    "INSERT INTO seats VALUES(?,?)", ((hid, n) for n in hand.stacks)
-                )
-                store_facts(db, hid, hand, decisions, events)
-                changed = True
-                db.execute(
-                    "INSERT INTO import_delta VALUES(?,?,?)", (src, hid, revision)
-                )
-                count["new hands"] += 1
-            if changed:
-                db.execute(
-                    "INSERT OR REPLACE INTO hand_changes VALUES(?,?)", (hid, revision)
-                )
-            db.execute(
-                "INSERT INTO origins VALUES(?,?,?,?)",
-                (hid, src, record.locator, zlib.compress(record.raw.encode(), 1)),
-            )
+                db.execute("DELETE FROM amount_retry WHERE source=? AND locator=?", (src, record.locator))
+            count[_import_record(db, src, record, revision, retry=retry is not None)] += 1
         if retry:
             raise ValueError(
                 "Could not locate previously excluded hands in the original file."
