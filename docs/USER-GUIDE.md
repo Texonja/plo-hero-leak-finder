@@ -3,8 +3,8 @@
 ## Getting started
 
 1. Right-click the ZIP in File Explorer and choose Extract all.
-2. Open the PLO Hero Leak Finder folder and double-click START.BAT.
-   It sits beside PLO Hero Leak Finder.exe. Python is included.
+2. Open the extracted folder and double-click START.BAT. Both the Windows
+   release and GitHub's Code > Download ZIP include the Windows x64 runtime.
 3. Select Library > HeroDemo to try the public sample from both networks.
 
 ## Upgrading an existing library

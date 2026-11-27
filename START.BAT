@@ -1,25 +1,9 @@
 @echo off
 setlocal EnableExtensions DisableDelayedExpansion
 set "appdir=%~dp0."
-if exist "%appdir%\runtime\" goto portable
-if not exist "%appdir%\launch.pyw" goto incomplete
-if not exist "%appdir%\leakfinder\ui.py" goto incomplete
-
-rem Source checkout: use an installed Python.
-where.exe py.exe >nul 2>&1
-if errorlevel 1 goto source_python
-py.exe -3 "%appdir%\launch.pyw" %*
-goto source_done
-
-:source_python
-python.exe "%appdir%\launch.pyw" %*
-:source_done
-if not errorlevel 1 exit /b 0
-echo Starting from source requires Python 3 with Tk.
-goto failed
-
-:portable
 if not exist "%appdir%\runtime\pythonw.exe" goto incomplete
+if not exist "%appdir%\runtime\python314.zip" goto incomplete
+if not exist "%appdir%\runtime\DLLs\_tkinter.pyd" goto incomplete
 if not exist "%appdir%\launch.pyw" goto incomplete
 if not exist "%appdir%\leakfinder\ui.py" goto incomplete
 start "" "%appdir%\runtime\pythonw.exe" -B "%appdir%\launch.pyw" %*
@@ -28,8 +12,10 @@ echo Windows could not start PLO Hero Leak Finder.
 goto failed
 
 :incomplete
-echo The application files are missing. Open the ZIP in File Explorer,
-echo choose "Extract all", then open the PLO Hero Leak Finder folder and run START.BAT.
+echo Application files are missing. Choose "Extract all" in File Explorer,
+echo open the extracted folder and double-click START.BAT.
+echo Download the complete Windows x64 package from:
+echo https://github.com/Texonja/plo-hero-leak-finder/releases/latest
 :failed
 pause
 exit /b 1

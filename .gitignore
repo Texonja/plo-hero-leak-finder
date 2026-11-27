@@ -1,9 +1,9 @@
 __pycache__/
 *.py[cod]
+!/runtime/DLLs/*.pyd
 .pytest_cache/
 .ruff_cache/
 .venv/
-runtime/
 *.sqlite
 *.sqlite3
 *.sqlite3-*
