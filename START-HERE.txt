@@ -2,9 +2,10 @@ PLO Hero Leak Finder for Windows x64
 
 Getting started
 
-1. Right-click the ZIP in File Explorer and choose Extract all.
-2. Open the extracted folder and double-click START.BAT. Both the Windows
-   release and GitHub's Code > Download ZIP include the Windows x64 runtime.
+1. Download the Windows x64 ZIP from the latest GitHub release.
+   Right-click the ZIP in File Explorer and choose Extract all.
+2. Open the extracted folder and double-click START.BAT. The Windows ZIP
+   includes Python and Tk, so the app starts offline without installation.
 3. Select Library > HeroDemo to try the public sample from both networks.
 
 Upgrading an existing library

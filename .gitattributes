@@ -2,4 +2,3 @@ Feature-coverage.html linguist-documentation -linguist-detectable
 pilots/btn_co/*.html linguist-documentation -linguist-detectable
 START.BAT text eol=crlf
 "Start Leak Finder.cmd" text eol=crlf
-/runtime/** -text linguist-vendored

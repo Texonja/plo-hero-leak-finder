@@ -1,6 +1,6 @@
 __pycache__/
 *.py[cod]
-!/runtime/DLLs/*.pyd
+/runtime/
 .pytest_cache/
 .ruff_cache/
 .venv/
