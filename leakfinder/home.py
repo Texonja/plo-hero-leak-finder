@@ -27,8 +27,10 @@ SUITS = {
     "c": ("♣", "#23715c"),
 }
 CRITIQUE_SPOTS = {
-    "Flop c-bet defense": ("flop-cbet-",),
+    "Flop c-bet defense": ("flop-cbet-", "flop_cbet_"),
+    "Facing a flop raise": ("flop_raise_call_",),
     "Flop value & sizing": ("flop-value-", "flop-size-"),
+    "Squeezes & backraises": ("aa_closing_squeeze", "low_blind_backraise"),
     "First-in opens": (
         "rfi_",
         "sb_fold_reference",
@@ -336,6 +338,8 @@ class HandReview(ttk.Frame):
             "Last 5 sessions": "last 5 sessions per room",
         }.get(queue.scope, "library")
         count = f"{queue.hand_count:,} Hero hand{'s' if queue.hand_count != 1 else ''} in {basis}"
+        if queue.day:
+            count = f"{queue.hand_count:,} Hero hands played on {queue.day}"
         summary = f"{n} selected hand{'s' if n != 1 else ''}   ·   {count}"
         if heading and n:
             summary = (
@@ -355,6 +359,8 @@ class HandReview(ttk.Frame):
                     f"({queue.guide_choices / total_indexed:.1%}) · {len(queue.guide_items):,} guide differences."
                     f"  Action critiques: {len(queue.critiques):,}."
                 )
+            elif queue.day:
+                summary += "\nAction critiques: 0."
         if self.show_critiques:
             summary += "\nOne per rule first: solver comparisons, equity bounds, river value, then other critiques. Larger pots first within a rule. EV is unevaluated."
         self._clear_cards(summary)

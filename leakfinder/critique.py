@@ -13,6 +13,21 @@ class Critique:
     review_priority: int = 0
 
 
+def stack_context(snap):
+    """Chips still behind at the decision, before Hero acts."""
+    live = [seat for seat in snap.seats if seat.live]
+    hero = next((seat for seat in live if seat.name == snap.hero), None)
+    if not hero or len(live) < 2 or snap.bb <= 0:
+        return ""
+    field = "Heads-up" if len(live) == 2 else f"{len(live)}-way"
+    stacks = [f"Hero {hero.stack / snap.bb:g}"]
+    for seat in live:
+        if seat != hero:
+            position = seat.position or f"Seat {seat.seat}"
+            stacks.append(f"{position} {seat.stack / snap.bb:g}")
+    return " · ".join((field, "Stacks behind (BB)", *stacks))
+
+
 def evidence_label(rule):
     if rule == "fold_free_check":
         return "Recorded free check option"

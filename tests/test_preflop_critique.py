@@ -183,9 +183,9 @@ class PreflopCritiqueTests(unittest.TestCase):
             review(replace(snap, hero_cards=("Ad", "Jh", "2c", "7h")), "fold")
         )
 
-    def test_overlimp_needs_aces_position_and_a_single_limp(self):
+    def test_overlimped_aces_can_induce_a_raise(self):
         snap = view("As Ah 7c 9h", "BTN", prior=[move("CO", "call", 1)])
-        self.assertEqual(review(snap, "call", 1).rule, "preflop_overlimped_aces")
+        self.assertIsNone(review(snap, "call", 1))
         self.assertIsNone(review(snap, "raise", 3.5))
         self.assertIsNone(
             review(replace(snap, hero_cards=("As", "Ah", "Ad", "9h")), "call", 1)

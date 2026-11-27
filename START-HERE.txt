@@ -38,7 +38,9 @@ one per line and under the correct network. The app analyzes hands
 with a single matching Hero.
 
 Hands to review opens after import with up to twelve hands. Action critiques
-shows all flagged decisions, the alternative, and what could favor your line.
+shows the flagged action, an alternative and the reason to review it.
+Blind reviews distinguish a closing call from a limp with players behind. Flop
+call reviews use the actual price, players still in the hand and effective stacks.
 Use the spot filter for preflop openings, 3-bet responses, flop c-bet
 defense or flop value and sizing. Flop c-bet replay shows the actual call
 price and draws on supported heads-up lines, even without a flagged action.

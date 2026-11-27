@@ -2,7 +2,7 @@
 
 PLO Hero Leak Finder is a desktop app for offline PLO4 hand review on CoinPoker and iPoker, and your hands never leave your computer.
 
-**[Public beta · v0.3.15](https://github.com/Texonja/plo-hero-leak-finder/releases/latest)**
+**0.3.16 beta** · [Release notes](docs/RELEASE-0.3.16-beta.md) · [Download for Windows](https://github.com/Texonja/plo-hero-leak-finder/releases/latest)
 
 ![Leak Finder](docs/screenshots/main.png)
 
@@ -11,7 +11,7 @@ PLO Hero Leak Finder is a desktop app for offline PLO4 hand review on CoinPoker 
 - **Decisions worth replaying.** Action critiques flag spots such as a check-back with a possible value bet or a costly call, and show what could make your original line reasonable.
 - **Recurring spots.** Review patterns groups decisions with comparable spots and highlights differences from the guide. It shows the number of opportunities and whether differences recur across sessions.
 - **Questions about ranges.** On supported postflop lines, inspect example value hands and bluffs, see the equity you need to call, or compare bet sizes under explicit assumptions.
-- **Trends and comparisons.** Cash reports break down action frequencies and sample sizes by position, street, bet size, hand class, and session. Population review compares similar decisions in your local library.
+- **Trends and comparisons.** Cash reports break down action frequencies and sample sizes by position, street, bet size, hand class, and session. Population review compares similar decisions in your local library. Luck and variance compares your deals and draw completions with their exact PLO4 card probabilities.
 
 In HeroDemo's CoinPoker hand `9000004202`, Hero called **45.6 BB** on a river with four hearts and held no heart to block a flush. The call needed **31.8% equity before rake**. The app asks you to compare calling with folding and explains what could justify the call. Open the replay at the river decision to see the original board, bet, and action, then reveal what happened.
 
@@ -21,7 +21,7 @@ On HeroDemo, the guide compares **26 of 1,008 indexed decisions (2.6%)** and pre
 
 ## Quality
 
-The source suite has **299 tests** covering imports, chip accounting, replay, reports, and the standalone river pilot. Selected parsing and hand-strength results are cross-checked against the separate engines and source records listed in SOURCES.txt. The tests also check that incremental review updates agree with a fresh pass through the hands.
+The source suite has **321 tests** covering imports, chip accounting, replay, reports, and the standalone river pilot. Selected parsing and hand-strength results are cross-checked against the separate engines and source records listed in SOURCES.txt. The tests also check that incremental review updates agree with a fresh pass through the hands.
 
 ## Quick start
 

@@ -38,7 +38,9 @@ one per line and under the correct network. The app analyzes hands
 with a single matching Hero.
 
 Hands to review opens after import with up to twelve hands. Action critiques
-shows all flagged decisions, the alternative, and what could favor your line.
+shows the flagged action, an alternative and the reason to review it.
+Blind reviews distinguish a closing call from a limp with players behind. Flop
+call reviews use the actual price, players still in the hand and effective stacks.
 Use the spot filter for preflop openings, 3-bet responses, flop c-bet
 defense or flop value and sizing. Flop c-bet replay shows the actual call
 price and draws on supported heads-up lines, even without a flagged action.
@@ -66,6 +68,10 @@ sessions come first, then the lower end of the descriptive 95% interval.
 Compare decisions opens both differences and agreements at the original
 action. Selected hands opens the individual hand shortlist.
 Use Room, Street and Hands to filter. Last 5 sessions applies per room.
+To review a specific day, choose **Hands → By date**, enter the date shown in
+the hand histories (YYYY-MM-DD) and click **Review date**. The date starts at
+yesterday. The review opens with action critiques when available. Study
+spots, guide differences and the replay links also use the selected day.
 Reimporting an identical file makes its hands available once.
 Import > Import history shows duplicates and exclusion reasons.
 The title bar shows the application version. If startup fails, the error
@@ -191,3 +197,13 @@ Run the suite from the extracted folder with the bundled Python.
 
 [Feature-coverage.html](../Feature-coverage.html) documents the metrics. [SOURCES.txt](../SOURCES.txt) lists the code
 and public sample provenance.
+
+## Luck and variance
+
+Open **Reports → Luck and variance**. Room, stake (currency and big blind), date and active Hero aliases filter the table. Dates use YYYY-MM-DD and include both endpoints. The first visit indexes the library. Later visits reuse each hand's saved contribution. Imports also update the current selection's totals incrementally.
+
+Each preflop opportunity is one deal. The two pocket-pair flop rows count a flop that hits the rank of an original pair. Flop rows default to hands where Hero saw the flop. Use the checkbox to include all recorded flops after preflop folds. Turn and river rows always include recorded cards after a Hero fold. Each draw is classified before the card is dealt. A single card can contribute to more than one target. Combined rows pool turn and river opportunities. The denominator is 45 unseen cards on the turn and 44 on the river. Only Hero's dealt pocket and the board so far remove cards from the deck.
+
+Expected is the sum of the individual hit probabilities. Difference is observed minus expected, and Δ pp is that difference divided by opportunities, times 100. The z-score measures the difference in standard deviations. Below 30 expected hits the percentile uses the exact Poisson-binomial mid-distribution (half the probability of a tie). Larger samples use the normal approximation. A dash means the quantity is undefined. The thresholds are descriptive and the rows overlap. A parser alert opens examples for inspection. Opponent actions can select which boards get recorded. Luck has no bearing on the quality of your decisions.
+
+Exclusions are grouped by reason. Older libraries may need their original files to identify the room, Hero, stake and date of rejected records. Unattributable records are shown separately.

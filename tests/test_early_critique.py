@@ -3,11 +3,13 @@ import unittest
 from dataclasses import replace
 from types import SimpleNamespace
 
+from leakfinder.critique import critique_for
 from leakfinder.demo import SAMPLES
 from leakfinder.early_critique import review_early
 from leakfinder.early_equity import showdown_example
 from leakfinder.importers import sources
 from leakfinder.replay_view import _ledger, _snapshot
+from leakfinder.strategy_guide import advice_at
 from tests.test_early_audit import equity, spot
 
 
@@ -23,12 +25,23 @@ def all_in_opponent(snap):
 
 
 class EarlyCritiqueTests(unittest.TestCase):
+    def test_a_large_bluff_alone_creates_no_critique_in_either_demo(self):
+        cases = (("CoinPoker-HeroDemo.txt", "9000009975", "Line 32"),
+                 ("iPoker-HeroDemo.sql", "9000005995", "Action 9"))
+        for file, number, ref in cases:
+            with self.subTest(number=number):
+                for record in sources(SAMPLES / file):
+                    hand, events = _ledger(record)
+                    if str(hand.number) == number:
+                        snap = _snapshot(record, hand, events, hand.hint, ref)
+                        self.assertEqual(events[ref].action, "bet")
+                        self.assertIsNone(critique_for(snap, events[ref], advice_at(snap)))
+                        break
+                else:
+                    self.fail(f"Missing demo hand {number}")
+
     def test_both_networks_match_the_actual_wager_and_bet_alternative(self):
         expected = {
-            ("CoinPoker", "9000009975", "Line 32"): (
-                "large-weak-hand-bet", "bet", "50.0%", "0 unseen next cards"),
-            ("iPoker", "9000005995", "Action 9"): (
-                "large-weak-hand-bet", "bet", "44.4%", "4 unseen next cards"),
             ("CoinPoker", "9000000016", "Line 36"): (
                 "turn-set-raise-straight-possible", "raise", "78.48 BB", "9 make Hero"),
             ("iPoker", "9000008012", "Action 14"): (
@@ -36,8 +49,6 @@ class EarlyCritiqueTests(unittest.TestCase):
         }
         found = set()
         line_evidence = {
-            "9000009975": ("BB checked", "set on 4 next cards"),
-            "9000005995": ("led into the preflop raiser (BTN)",),
             "9000000016": ("61.64 BB of that can be matched", "44.64 BB beyond calling", "Holding Ad reduces"),
             "9000008012": ("Holding 5c reduces",),
         }
@@ -63,25 +74,18 @@ class EarlyCritiqueTests(unittest.TestCase):
                     found.add(key)
         self.assertEqual(found, set(expected))
 
-    def test_stronger_draw_small_bet_and_uncontestable_excess(self):
-        weak = spot("7h 7d 5s 5c", "Ad Jd 9h")
-        self.assertIsNotNone(review(weak, "bet", 80))
-        self.assertIsNone(review(weak, "bet", 33))
-        self.assertIsNone(review(weak, "bet", 100))  # Only 90 chips left to contest.
-        wrap = spot("Ts 9s 8h 7h", "8d 6s Qc")
-        self.assertIsNone(review(wrap, "bet", 80))
+    def test_few_immediate_draws_are_not_evidence_against_a_bluff(self):
+        for hole, board in (("7h 7d 5s 5c", "Ad Jd 9h"),
+                            ("Kd Ks 8d 3h", "Ah Qd Jc Ts"),
+                            ("Ad 8s 4c 3h", "Jd 7d 2d"),
+                            ("Ac 2c Ks 7s", "Jc 2h Ts")):
+            with self.subTest(hole=hole):
+                self.assertIsNone(review(spot(hole, board), "bet", 80))
 
-    def test_bluff_defense_uses_the_actual_blockers(self):
-        kings = spot("Kd Ks 8d 3h", "Ah Qd Jc Ts")
-        item = review(kings, "bet", 80)
-        self.assertIn("24 of the 48 two-card combinations", item.reason)
-        self.assertEqual(-1, item.review_priority)
-        nut_blocker = spot("Ad 8s 4c 3h", "Jd 7d 2d")
-        self.assertIn("Ad blocks the strongest ordinary flush", review(nut_blocker, "bet", 80).reason)
-        backdoors = spot("Ac 2c Ks 7s", "Jc 2h Ts")
-        backdoor_bluff = review(backdoors, "bet", 80)
-        self.assertIn("Ac gives Hero a backdoor draw", backdoor_bluff.reason)
-        self.assertEqual(0, backdoor_bluff.review_priority)
+    def test_short_stack_trips_are_not_judged_against_boats_alone(self):
+        for hole in ("Kh 7c Qh 2c", "7c 5d 6c 2s"):
+            snap = all_in_opponent(spot(hole, "7s 7h 4c Td", owed=40, pot=100))
+            self.assertIsNone(review(snap, "call", 40))
 
     def test_set_with_a_flush_redraw_counts_distinct_rivers(self):
         snap = spot("Ah 6c 6d 2h", "6h 5h Ac 9s", owed=12, pot=40)

@@ -11,7 +11,7 @@ import tkinter as tk
 import traceback
 import webbrowser
 from contextlib import suppress
-from datetime import datetime
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from queue import Empty, Queue
 from tkinter import filedialog, messagebox, ttk
@@ -41,6 +41,7 @@ from .review_queue import (
     review_selection,
     save_guides,
     update_guides,
+    validate_review_day,
 )
 from .storage import (
     cohort,
@@ -53,6 +54,7 @@ from .storage import (
 )
 
 REPORTS = [
+    ("Luck and variance", "Luck"),
     ("By position", "Position"),
     ("By street", "Street"),
     ("By sizing", "Faced sizing"),
@@ -174,6 +176,8 @@ class Workspace:
         self.scope = tk.StringVar(
             value="Latest import" if has_saved_batch(self.db) else "All hands"
         )
+        self.date_input = tk.StringVar()
+        self.active_review_date = ""
         self.status = tk.StringVar(value="Ready")
         self.hero_text = tk.StringVar()
         self.detail = tk.StringVar()
@@ -350,14 +354,24 @@ class Workspace:
         self.scope_box = ttk.Combobox(
             self.scope_controls,
             textvariable=self.scope,
-            values=("Latest import", "Last 5 sessions", "All hands"),
+            values=("Latest import", "Last 5 sessions", "By date", "All hands"),
             state="readonly",
             width=13,
         )
         self.scope_box.pack(side="left", padx=6)
-        self.scope_box.bind(
-            "<<ComboboxSelected>>", lambda _: self.refresh(filters_only=True)
+        self.scope_box.bind("<<ComboboxSelected>>", self.select_hand_scope)
+        self.date_controls = ttk.Frame(self.scope_controls)
+        ttk.Label(self.date_controls, text="Date (YYYY-MM-DD)").pack(side="left")
+        self.review_date_entry = ttk.Entry(
+            self.date_controls, textvariable=self.date_input, width=12
         )
+        self.review_date_entry.pack(side="left", padx=5)
+        self.review_date_entry.bind("<Return>", self.apply_review_date)
+        self.review_date_button = ttk.Button(
+            self.date_controls, text="Review date", command=self.apply_review_date
+        )
+        self.review_date_button.pack(side="left")
+        self.scope.trace_add("write", self.sync_date_controls)
         self.notice = tk.StringVar()
         self.notice_label = ttk.Label(
             self.container, textvariable=self.notice, foreground=INK, wraplength=650
@@ -517,8 +531,7 @@ class Workspace:
         self.scope_controls.pack_forget()
         if view == "home":
             self.heading.set("Hands to review")
-            if not self.is_demo:
-                self.scope_controls.pack(side="left", padx=(12, 0))
+            self.scope_controls.pack(side="left", padx=(12, 0))
             self.home.pack(fill="both", expand=True)
         else:
             self.heading.set("Population review")
@@ -527,6 +540,38 @@ class Workspace:
         for label, (button, marker) in self.nav_items.items():
             button.configure(bg="#ffd7ae" if label == active else NAV)
             marker.configure(bg=INK if label == active else NAV)
+
+    def sync_date_controls(self, *_):
+        if self.scope.get() == "By date":
+            self.date_controls.pack(side="left", padx=(5, 0))
+        else:
+            self.date_controls.pack_forget()
+
+    def select_hand_scope(self, _event=None):
+        if self.scope.get() == "By date":
+            self.date_input.set(
+                self.active_review_date or (date.today() - timedelta(days=1)).isoformat()
+            )
+            self.apply_review_date()
+        else:
+            self.refresh(filters_only=True)
+
+    def apply_review_date(self, _event=None):
+        if self.busy:
+            return
+        try:
+            self.active_review_date = validate_review_day(self.date_input.get().strip())
+        except ValueError as exc:
+            self.status.set(str(exc))
+            self.review_date_entry.focus_set()
+            return
+        self.date_input.set(self.active_review_date)
+        self.home.show_hands = True
+        self.home.show_critiques = True
+        self.home.show_study = False
+        self.home.differences.set(False)
+        self.home.critique_spot.current(0)
+        self.refresh(filters_only=True)
 
     def import_notice(self, text):
         self.notice.set(text)
@@ -544,6 +589,10 @@ class Workspace:
     def explore(self, dimension):
         if self.busy:
             return
+        if dimension == "Luck":
+            from .luck_ui import LuckWindow
+
+            return LuckWindow(self.root, self.path, self.room.get())
         from .explorer import open_explorer
 
         return open_explorer(self.root, self.path, self.room.get(), dimension=dimension)
@@ -560,6 +609,8 @@ class Workspace:
             self.street.set("All streets")
             self.results = {}
             self.scope.set("Latest import" if has_saved_batch(self.db) else "All hands")
+            self.active_review_date = ""
+            self.date_input.set("")
             self.library_counts = (0, 0)
             self.room_results.clear()
             self.review_selections.clear()
@@ -607,6 +658,8 @@ class Workspace:
         self.room_box.configure(state="disabled")
         self.street_box.configure(state="disabled")
         self.scope_box.configure(state="disabled")
+        self.review_date_entry.state(["disabled"])
+        self.review_date_button.state(["disabled"])
         for label in ("Library", "Import", "Player", "Reports"):
             self.menu.entryconfigure(label, state="disabled")
         current_path = self.path
@@ -643,9 +696,9 @@ class Workspace:
                 self.hero_btn.state(["!disabled"])
                 self.room_box.configure(state="readonly")
                 self.street_box.configure(state="readonly")
-                self.scope_box.configure(
-                    state="readonly" if has_saved_batch(self.db) else "disabled"
-                )
+                self.scope_box.configure(state="readonly")
+                self.review_date_entry.state(["!disabled"])
+                self.review_date_button.state(["!disabled"])
                 for label in ("Library", "Import", "Player", "Reports"):
                     self.menu.entryconfigure(label, state="normal")
                 if msg[0] == "error":
@@ -838,6 +891,7 @@ class Workspace:
             return
         room = self.room.get()
         street, scope = self.street.get(), self.scope.get()
+        day = self.active_review_date if scope == "By date" else ""
         self.status.set(
             "Finding hands to review…"
             if filters_only
@@ -879,6 +933,8 @@ class Workspace:
             elif self.queue.scope == "Latest import" and not self.queue.hand_count:
                 empty = "This import contains no eligible hands for the selected Hero and room. Import history lists excluded records."
                 action = ("Import history", self.diagnostics)
+            elif self.queue.day and not self.queue.hand_count:
+                empty = f"No eligible Hero hands were played on {self.queue.day} in the selected room."
             else:
                 empty = "No reviewable Hero decision fits these filters. The reports also include hands with no decision on the selected street."
             self.home.paint(self.queue, pockets, empty, action)
@@ -914,11 +970,11 @@ class Workspace:
                 r[0]
                 for r in db.execute("SELECT source FROM review_batch ORDER BY source")
             )
-            selection_key = (key, batch)
+            selection_key = (key, batch, day)
             if previous_selection and previous_selection[0] == selection_key:
                 selection = previous_selection[1]
             else:
-                selection = review_selection(db, room, scope)
+                selection = review_selection(db, room, scope, day=day)
                 if (cached_index is None or cached_index[0] != revision) and selection[1] > 1000:
                     sample = preview_decisions(db, street)
                     if sample:
@@ -968,6 +1024,7 @@ class Workspace:
                 findings=findings,
                 street=street,
                 scope=scope,
+                day=day,
                 guide_index=guide,
                 selection=selection,
             )

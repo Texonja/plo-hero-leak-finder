@@ -25,6 +25,8 @@ class FlopCritiqueTests(unittest.TestCase):
         snap = spot("8h 6c 5s 3d", "Kh 8d 2s", owed=75, pot=175)
         self.assertIsNone(review_flop(snap, decision("call", 75)))
         snap = preflop_raiser(snap, "BB")
+        self.assertIsNone(review_flop(snap, decision("call", 75)))  # Little left on the turn.
+        snap = replace(snap, seats=tuple(replace(s, stack=300) for s in snap.seats))
         result = review_flop(snap, decision("call", 75))
         self.assertEqual(result.rule, "flop-cbet-call-thin")
         self.assertIn("30.0%", result.reason)

@@ -32,6 +32,9 @@ def flop_context(snap):
         ),
         None,
     )
+    if (snap.to_call and actions == ((hero.name, "bet"), (opponent.name, "raise"))
+            and not any(s.committed for s in snap.seats if not s.live)):
+        return "raised", hero, opponent, raiser
     if (
         snap.to_call
         and raiser == opponent.name
@@ -96,6 +99,58 @@ def flop_cbet_note(snap):
     return note
 
 
+def _weak_oop_call(snap, hero, opponent, hole, board, facing_raise):
+    """Only direct heads-up calls with a meaningful turn bet still available."""
+    call = snap.to_call
+    flat_pot = snap.pot + call
+    left = min(hero.stack - call, opponent.stack)
+    if (opponent.all_in or call != snap.price_to_match or not call
+            or left < flat_pot / 2 or len({c[0] for c in board}) != 3
+            or len({c[1] for c in board}) != 3):
+        return None
+    pre = [a for a in snap.history if a.street == "Preflop" and a.action == "raise"]
+    rank, kicks, *_ = best_plo_hand(hole, board)
+    board_high = max(RANK_VALUE[c[0]] for c in board)
+    if facing_raise:
+        # Hero bet first and faces the in-position player's raise, not a
+        # check-raise against Hero in position or a cheap minraise.
+        if (not pre or pre[-1].name != hero.name or rank != 0
+                or call / flat_pot < 0.25):
+            return None
+        draws = next_draws(hole, board)
+        if draws.total:
+            return None
+        # Several distinct overcards can turn a strong pair even on this texture.
+        if sum(RANK_VALUE[c[0]] > board_high for c in hole) > 1:
+            return None
+        return Critique(
+            "flop_raise_call_no_draw", "Called a flop raise with high card", "Prefer folding",
+            f"Calling the raise costs {call / snap.bb:g} BB out of position with only high card. "
+            f"No turn makes a straight or flush, and {left / snap.bb:g} BB can still go in.",
+            "",
+        )
+    # A large c-bet in a 3-bet pot against a low pocket pair. Limit this
+    # review to short, non-nut straight draws and modest implied odds.
+    if (len(pre) != 2 or pre[-1].name != opponent.name or call / flat_pot < 0.29
+            or left > 3 * flat_pot or rank != 1 or kicks[0] > 9
+            or kicks[0] >= board_high
+            or sum(RANK_VALUE[c[0]] == kicks[0] for c in hole) != 2
+            or _nut_backdoor(hole, board)
+            or max(RANK_VALUE[c[0]] for c in hole) > board_high):
+        return None
+    draws = next_draws(hole, board)
+    if not 0 < draws.straight <= 4 or draws.nuts or draws.flush:
+        return None
+    return Critique(
+        "flop_cbet_call_low_gutshot", "Paid a large c-bet with a low pair and a weak draw",
+        "Prefer folding",
+        f"You paid {call / snap.bb:g} BB out of position with a low pocket pair. "
+        f"Only {draws.straight} turns make a straight, none make the nuts, "
+        f"and {left / snap.bb:g} BB remains effective.",
+        "",
+    )
+
+
 def _cbet(snap, hero, opponent, hole, board):
     details = _cbet_price(snap, opponent)
     if not details:
@@ -114,7 +169,8 @@ def _cbet(snap, hero, opponent, hole, board):
         # realization and facing another bet cannot justify a fold here.
         return _closing_call(hole, board, price, cost)
     if (
-        texture <= 2
+        left >= (snap.pot + snap.to_call) / 2
+        and texture <= 2
         and len({c[0] for c in board}) == 3
         and (rank == 0 or rank == 1 and kicks[0] < top)
     ):
@@ -323,6 +379,14 @@ def review_flop(snap, event):
     if context is None:
         return None
     spot, hero, opponent, raiser = context
+    if event.action == "call" and spot in {"raised", "cbet"}:
+        # The first flop action identifies who actually acted out of position,
+        # including tables that started with only two seats.
+        first = next(a for a in snap.history if a.street == "Flop")
+        if first.name == hero.name:
+            idea = _weak_oop_call(snap, hero, opponent, hole, board, spot == "raised")
+            if idea:
+                return idea
     if spot == "cbet" and event.action == "call":
         return _cbet(snap, hero, opponent, hole, board)
     if spot == "checked" and event.action in {"bet", "check"}:

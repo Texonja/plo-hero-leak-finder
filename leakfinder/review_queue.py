@@ -5,11 +5,11 @@ import sqlite3
 import zlib
 from collections import Counter
 from dataclasses import dataclass, replace
-from datetime import timedelta
+from datetime import date, timedelta
 from typing import NamedTuple
 
 from .analysis import analyze, wilson
-from .critique import critique_for, evidence_label
+from .critique import critique_for, evidence_label, stack_context
 from .early_postflop import next_draws
 from .engine import METRICS, replay
 from .explorer import session_keys
@@ -32,7 +32,7 @@ from .vendor.common import RANK_VALUE
 from .vendor.primitives import best_plo_hand
 
 REVIEW_PAGE_SIZE = 12
-GUIDE_CACHE_VERSION = 14
+GUIDE_CACHE_VERSION = 15
 
 
 @dataclass(frozen=True)
@@ -129,6 +129,7 @@ class ReviewQueue:
     patterns: tuple = ()
     study: tuple = ()
     critiques: tuple = ()
+    day: str = ""
 
 
 @dataclass(frozen=True)
@@ -545,7 +546,7 @@ def _index_hands(db, room, progress, sessions, *, hands=None, audit=None, stats=
                         event.action,
                         critique.title,
                         "",
-                        "Case for the played action: " + critique.counterargument,
+                        stack_context(snap),
                         "Critique",
                         snap.hero_cards,
                         position,
@@ -906,7 +907,16 @@ MATCHED_SPOTS = {
 }
 
 
-def prepare_hands(db, room, scope):
+def validate_review_day(value):
+    try:
+        if date.fromisoformat(value).isoformat() == value:
+            return value
+    except ValueError:
+        pass
+    raise ValueError("Enter a valid date in YYYY-MM-DD format.")
+
+
+def prepare_hands(db, room, scope, *, day=""):
     cohort(db, room)
     library = db.execute("SELECT count(*) FROM cohort").fetchone()[0]
     source_count = db.execute("SELECT count(*) FROM review_batch").fetchone()[0]
@@ -919,7 +929,6 @@ def prepare_hands(db, room, scope):
             CROSS JOIN import_delta d ON d.source=b.source
             JOIN cohort c ON c.hand=d.hand
             WHERE d.revision>=coalesce((SELECT minimum FROM review_batch_bound WHERE id=1),0)""")
-        selected = db.execute("SELECT count(*) FROM review_hands").fetchone()[0]
     elif scope == "Last 5 sessions":
         sessions = _sessions(db)
         recent = {}
@@ -931,16 +940,22 @@ def prepare_hands(db, room, scope):
             "INSERT INTO review_hands SELECT * FROM cohort WHERE hand=?",
             ((hid,) for hid, session in sessions.items() if session in keep),
         )
-        selected = db.execute("SELECT count(*) FROM review_hands").fetchone()[0]
-        return scope, selected, library, source_count
+    elif scope == "By date":
+        db.execute(
+            """INSERT INTO review_hands
+               SELECT c.hand,c.hero FROM cohort c JOIN hands h ON h.id=c.hand
+               WHERE h.day=?""",
+            (validate_review_day(day),),
+        )
     else:
         db.execute("INSERT INTO review_hands SELECT * FROM cohort")
-        selected = library
-    return ("Latest import" if latest else "All hands", selected, library, source_count)
+        return "All hands", library, library, source_count
+    selected = db.execute("SELECT count(*) FROM review_hands").fetchone()[0]
+    return scope, selected, library, source_count
 
 
-def review_selection(db, room, scope):
-    details = prepare_hands(db, room, scope)
+def review_selection(db, room, scope, *, day=""):
+    details = prepare_hands(db, room, scope, day=day)
     _, count, library, _ = details
     selected = (
         frozenset(r[0] for r in db.execute("SELECT hand FROM review_hands"))
@@ -1107,14 +1122,15 @@ def build_queue(
     limit=REVIEW_PAGE_SIZE,
     street="All streets",
     scope="Latest import",
+    day="",
     guide_index=None,
     selection=None,
 ):
-    """Use current library evidence; restrict displayed examples to the selected source files."""
+    """Filter Hero review items while retaining the room's population baseline."""
     db.execute("SAVEPOINT read_home_queue")
     try:
         return _read_queue(
-            db, room, findings, limit, street, scope, guide_index, selection
+            db, room, findings, limit, street, scope, day, guide_index, selection
         )
     except BaseException:
         db.execute("ROLLBACK TO read_home_queue")
@@ -1123,20 +1139,22 @@ def build_queue(
         db.execute("RELEASE read_home_queue")
 
 
-def _read_queue(db, room, findings, limit, street, scope, guide_index, selection):
+def _read_queue(db, room, findings, limit, street, scope, day, guide_index, selection):
     if street not in ("All streets", *STREETS) or scope not in (
         "All hands",
         "Latest import",
         "Last 5 sessions",
+        "By date",
     ):
         raise ValueError("Unknown review filter.")
     if limit < 0:
         raise ValueError("The review limit must be nonnegative.")
+    day = validate_review_day(day) if scope == "By date" else ""
     actual_scope, count, library, source_count, selected = (
-        selection or review_selection(db, room, scope)
+        selection or review_selection(db, room, scope, day=day)
     )
     if not count or not limit:
-        return ReviewQueue(actual_scope, count, library, (), source_count)
+        return ReviewQueue(actual_scope, count, library, (), source_count, day=day)
     if findings is None:
         findings = analyze(db, room)[0]
     if not isinstance(findings, dict):
@@ -1179,7 +1197,7 @@ def _read_queue(db, room, findings, limit, street, scope, guide_index, selection
                     break
     if len(items) < limit:
         if selection is not None:
-            prepare_hands(db, room, scope)
+            prepare_hands(db, room, scope, day=day)
         fallback = candidates(db, findings, street, limit)
     for row in fallback:
         if len(items) == limit:
@@ -1244,4 +1262,5 @@ def _read_queue(db, room, findings, limit, street, scope, guide_index, selection
         patterns,
         study,
         critiques,
+        day=day,
     )

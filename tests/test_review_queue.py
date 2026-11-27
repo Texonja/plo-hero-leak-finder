@@ -279,6 +279,25 @@ class QueueTests(unittest.TestCase):
         finally:
             reopened.close()
 
+    def test_date_selection_includes_older_imports_and_filters_fallback(self):
+        _, ip = self.both()
+        remember_batch(self.db, [ip])
+        day = "2026-01-01"
+        selection = review_selection(self.db, "Both", "By date", day=day)
+        self.assertEqual(selection[:4], ("By date", 1, 2, 1))
+        # A reused selection must also rebuild the fallback's temporary table.
+        review_selection(self.db, "Both", "Latest import")
+        queue = build_queue(
+            self.db, scope="By date", day=day, street="Flop", selection=selection
+        )
+        self.assertEqual(queue.day, day)
+        self.assertEqual([i.number for i in queue.items], ["9000000030"])
+        self.assertEqual(
+            build_queue(self.db, "iPoker", scope="By date", day=day).hand_count, 0
+        )
+        with self.assertRaisesRegex(ValueError, "YYYY-MM-DD"):
+            build_queue(self.db, scope="By date", day="2026-02-30")
+
     def test_duplicates_path_revisions_and_excluded_batches(self):
         original_text = original("coin-30.hh")
         counts, first = self.ingest("session.txt", original_text)

@@ -8,7 +8,7 @@ from .early_equity import showdown_example
 from .early_postflop import _straight_pairs, next_draws
 from .opponent_history import heads_up_price
 from .postflop_value import RANK_LABEL
-from .river_holdings import DECK, RANKS, nuts
+from .river_holdings import DECK, nuts
 from .vendor.common import RANK_VALUE
 from .vendor.primitives import best_plo_hand
 
@@ -56,7 +56,10 @@ def _turn_response(snap, action, hero, villain, hole, board):
         minimum, segment = 5, "a flush or better"
     else:
         minimum, segment = 3, "a set or better"
-    if best_plo_hand(hole, board)[0] >= minimum:
+    made = best_plo_hand(hole, board)[0]
+    # A paired-board value bound against boats alone does not justify
+    # questioning a stack-off with trips. The opponent may shove worse trips or draws.
+    if made >= minimum or (minimum == 6 and made >= 3):
         return None
     # Sensitivity to a possible value range, not a claim that it was actually held.
     # A fixed villain leaves 40 possible rivers. Blockers can REMOVE eligible
@@ -166,80 +169,6 @@ def _set_raise(snap, amount, opponent, hole, board):
     )
 
 
-def _bluff_blockers(hole, board):
-    suits = Counter(c[1] for c in board)
-    notes = []
-    strong_blocker = False
-    for suit, n in suits.items():
-        highest = next(r + suit for r in reversed(RANKS) if r + suit not in board)
-        if highest not in hole:
-            continue
-        if n >= 3:
-            notes.append(f"{highest} blocks the strongest ordinary flush.")
-            strong_blocker = True
-        if n == 1 and len(board) == 3 and sum(c[1] == suit for c in hole) >= 2:
-            notes.append(f"{highest} gives Hero a backdoor draw to the highest ordinary flush in that suit.")
-    ranks = Counter(RANK_VALUE[c[0]] for c in board)
-    pairs = _straight_pairs(frozenset(ranks))
-    if max(suits.values()) < 3 and pairs:
-        top = max(high for _, high in pairs)
-        used = Counter(RANK_VALUE[c[0]] for c in hole)
-        before = after = 0
-        for (a, b), high in pairs:
-            if high == top:
-                before += (4 - ranks[a]) * (4 - ranks[b])
-                after += (4 - ranks[a] - used[a]) * (4 - ranks[b] - used[b])
-        if after < before:
-            # A half or greater reduction affects review order only.
-            strong_blocker |= 2 * after <= before
-            notes.append(
-                f"Hero blocks {before - after} of the {before} two-card combinations "
-                "that make the highest straight available on this board."
-            )
-    return " ".join(notes), strong_blocker
-
-
-def _large_weak_bet(snap, amount, opponents, hole, board):
-    if amount * 4 < snap.pot * 3 or any(s.all_in or s.stack < amount for s in opponents):
-        return None
-    if len({c[0] for c in board}) < len(board):
-        return None
-    rank, kicks, *_ = best_plo_hand(hole, board)
-    if rank > 1 or rank == 1 and kicks[0] >= max(RANK_VALUE[c[0]] for c in board):
-        return None
-    draws = next_draws(hole, board).total
-    if draws > 4:
-        return None
-    required = amount / (amount + snap.pot)
-    made = "high card" if rank == 0 else "a pair below the top board card"
-    players = "one opponent" if len(opponents) == 1 else f"{len(opponents)} opponents"
-    removal, strong_blocker = _bluff_blockers(hole, board)
-    line = ""
-    if snap.street == "Flop" and len(opponents) == 1:
-        raiser = next((a.name for a in reversed(snap.history) if a.street == "Preflop" and a.action == "raise"), None)
-        flop_actions = [a for a in snap.history if a.street == "Flop"]
-        if not flop_actions and raiser == opponents[0].name:
-            line = f"You led into the preflop raiser ({opponents[0].position}). Checking lets them bet or check back. "
-        elif any(a.name == opponents[0].name and a.action == "check" for a in flop_actions):
-            line = f"{opponents[0].position} checked. Checking back takes a free turn. "
-    pairs = {r for r, count in Counter(c[0] for c in hole).items() if count == 2}
-    set_cards = sum(c[0] in pairs and c not in hole + board for c in DECK)
-    improvement = (f" A pocket pair can also improve to a set on {set_cards} next cards. "
-                   "A set can still lose." if set_cards else "")
-    prefix = f"{removal} " if removal else ""
-    return Critique(
-        "large-weak-hand-bet", "Large bet with few immediate straight or flush cards",
-        "Review the blocker bluff and checking" if strong_blocker else "Compare checking to the large bet",
-        f"{line}Hero bet {amount / snap.pot:.0%} pot into {players} with "
-        f"{made}. {draws} unseen next cards make a straight or flush for Hero.{improvement} "
-        f"{prefix}If every continuation beats Hero and no more chips go in, everyone must "
-        f"fold {required:.1%} of the time to break even before rake.",
-        "Folds from better hands, later barrels and equity when called can favor the bet. "
-        "Checking also retains showdown equity. Card removal alone gives no fold frequency.",
-        review_priority=-1 if strong_blocker else 0,
-    )
-
-
 def review_early(snap, event, advice):
     """The recorded action selects the comparison. All evidence stops before it."""
     length = {"Flop": 3, "Turn": 4}.get(snap.street)
@@ -262,6 +191,4 @@ def review_early(snap, event, advice):
         return None
     if event.action == "check" and len(opponents) == 1 and not opponents[0].all_in:
         return _checked_back(snap, opponents[0], hole, board)
-    if event.action == "bet":
-        return _large_weak_bet(snap, event.amount, opponents, hole, board)
     return None

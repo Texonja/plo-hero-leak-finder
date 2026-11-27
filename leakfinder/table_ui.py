@@ -10,7 +10,7 @@ from tkinter import messagebox, ttk
 from tkinter.font import Font
 from tkinter.scrolledtext import ScrolledText
 
-from .critique import critique_for
+from .critique import critique_for, stack_context
 from .engine import replay
 from .flop_critique import flop_cbet_note
 from .home import BG, INK, MUTED, NAV, NAV_ACTIVE, ORANGE, SUITS
@@ -677,10 +677,9 @@ class TableDialog:
                     "active",
                 )
                 add(
-                    critique.reason
-                    + "\nCase for the played action: "
-                    + critique.counterargument
-                    + "\n",
+                    "\n".join(filter(None, (
+                        stack_context(snap), critique.reason, critique.counterargument
+                    ))) + "\n",
                     "amount",
                 )
         reference = sb_reference(snap) if self.actor == self.profile else None
@@ -702,7 +701,7 @@ class TableDialog:
                 add("\nFACING A 3-BET\n", "street")
                 add(price_note + "\n", "amount")
         if self.actor == self.profile and (
-            not critique or not critique.rule.startswith("flop-cbet-")
+            not critique or not critique.rule.startswith(("flop-cbet-", "flop_cbet_"))
         ):
             price_note = flop_cbet_note(snap)
             if price_note:

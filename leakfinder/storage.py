@@ -427,6 +427,8 @@ def import_file_with_source(db, path, progress=lambda n: None, *, retry_source=N
                     "INSERT INTO rejected VALUES(?,?,?,?)",
                     (src, record.locator, reason, record.expected),
                 )
+                from .luck_exclusions import remember as remember_rejection
+                remember_rejection(db, src, record, reason)
                 if record_key is not None and reason != "Fold with no price":
                     db.execute(
                         "INSERT OR IGNORE INTO excluded_records VALUES(?)",

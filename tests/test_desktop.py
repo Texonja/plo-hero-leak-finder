@@ -63,6 +63,33 @@ class DesktopTests(unittest.TestCase):
         )
         self.assertEqual(self.errors, [])
 
+    def test_luck_report_filters_and_chart_on_herodemo(self):
+        report = self.app.explore("Luck")
+
+        def wait_report():
+            end = time.monotonic() + 20
+            while report.busy and time.monotonic() < end:
+                self.root.update()
+                time.sleep(0.01)
+            self.root.update()
+            self.assertFalse(report.busy, report.status.get())
+            self.assertEqual(self.errors, [])
+
+        try:
+            wait_report()
+            self.assertEqual(report.result["hands"], 640)
+            self.assertEqual(len(report.table.get_children()), 19)
+            report.chart_on.set(True)
+            report.chart()
+            self.root.update()
+            self.assertTrue(report.canvas.find_all())
+            report.room.set("CoinPoker")
+            report.run()
+            wait_report()
+            self.assertEqual(report.result["hands"], 320)
+        finally:
+            report.win.destroy()
+
     def test_demo_uses_real_hands_from_both_rooms_and_marks_xml_action(self):
         self.assertTrue(self.app.is_demo)
         self.assertFalse(self.personal.exists())
@@ -179,6 +206,63 @@ class DesktopTests(unittest.TestCase):
         self.assertIn(item.title, text)
         self.assertIn(item.evidence, text)
         self.assertIn(item.explanation, text)
+
+    def test_review_date_shows_only_that_days_critiques_and_replay(self):
+        app = self.app
+        all_critiques = app.queue.critiques
+        days = dict(app.db.execute("SELECT id, day FROM hands"))
+        target = days[all_critiques[0].hand]
+        other = next(days[i.hand] for i in all_critiques if days[i.hand] != target)
+        self.assertIn("By date", app.scope_box.cget("values"))
+        with patch(
+            "leakfinder.ui.update_guides", side_effect=AssertionError("reindexed")
+        ):
+            app.scope.set("By date")
+            app.scope_box.event_generate("<<ComboboxSelected>>")
+            self.wait()
+            self.assertTrue(app.date_controls.winfo_manager())
+            for day in (target, other, target):
+                app.date_input.set(day)
+                app.review_date_button.invoke()
+                self.wait()
+                self.assertEqual(app.queue.day, day)
+                self.assertEqual(
+                    app.queue.hand_count, sum(d == day for d in days.values())
+                )
+                self.assertCountEqual(
+                    app.queue.critiques, (i for i in all_critiques if days[i.hand] == day)
+                )
+                self.assertIn("Action critiques 1", app.home.summary.get())
+                self.assertIn(day, app.home.summary.get())
+                self.assertTrue(all(days[i.hand] == day for i in app.queue.study))
+            critique = app.queue.critiques[0]
+            button = next(
+                widget
+                for widget in child_widgets(app.home.rows.winfo_children()[0])
+                if isinstance(widget, ttk.Button) and "Open table" in widget.cget("text")
+            )
+            opened = []
+            with patch.object(
+                app.home, "open_hand", side_effect=lambda item: opened.append(app.open_item(item))
+            ) as open_hand:
+                button.invoke()
+            self.assertEqual(open_hand.call_args.args[0], critique)
+            dialog, = opened
+            try:
+                self.assertEqual(dialog.snapshot.number, critique.number)
+                self.assertEqual(dialog.snapshot.ref, critique.ref)
+            finally:
+                dialog.win.destroy()
+            prior = app.queue
+            app.date_input.set("2026-02-30")
+            app.review_date_button.invoke()
+            self.assertIs(app.queue, prior)
+            self.assertIn("YYYY-MM-DD", app.status.get())
+            app.date_input.set("2000-01-01")
+            app.review_date_button.invoke()
+            self.wait()
+            self.assertEqual(app.queue.hand_count, 0)
+            self.assertFalse(app.queue.critiques)
 
     def test_first_in_critique_filter_opens_demo_hand_at_its_recorded_fold(self):
         home = self.app.home

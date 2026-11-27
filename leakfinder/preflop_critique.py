@@ -7,6 +7,7 @@ from math import sqrt
 from random import Random
 
 from .critique import Critique
+from .postflop_value import RANK_LABEL
 from .river_holdings import CARD_ID, _score, _scores
 from .vendor.common import RANK_VALUE
 from .vendor.primitives import classify_known_hand
@@ -237,6 +238,67 @@ def _discounted_blind_fold(snap, opening, live, price):
     )
 
 
+def _crowded_blind(snap, event, hero, others, entries):
+    """Review a blind closing a single raise after multiple complete calls."""
+    if (event.action not in {"raise", "call"} or hero.position not in {"SB", "BB"}
+            or len(others) < 3 or not snap.to_call):
+        return None
+    raises = [i for i, a in enumerate(entries) if a.action == "raise"]
+    if len(raises) != 1:
+        return None
+    pivot = raises[0]
+    opening, callers = entries[pivot], entries[pivot + 1:]
+    if not opening.raised_to or len(callers) < 2 or any(a.action != "call" for a in callers):
+        return None
+    # Every other live seat must have matched this price. No one can reopen
+    # after a flat, including a blind or an earlier limper yet to respond.
+    if (opening.raised_to != hero.committed + snap.to_call
+            or any(s.committed != opening.raised_to for s in others)):
+        return None
+    flat_pot = snap.pot + snap.to_call
+    effective = [min(hero.stack - snap.to_call, s.stack) for s in others]
+    high = max(effective)
+    # Require at least two opponents who can cover a full pot raise. If only
+    # short stacks can continue, the pricing and the multiway pot are different.
+    if sum(stack >= flat_pot for stack in effective) < 2:
+        return None
+    bb = snap.bb
+    ranks = sorted(RANK_VALUE[c[0]] for c in snap.hero_cards)
+    if hero.position == "BB" and event.action == "call" and not pivot and ranks.count(14) == 2:
+        # A deep caller with position on the big blind can keep stacks deep
+        # even after a pot squeeze. The small blind acts before Hero postflop.
+        deepest_in_position = max(stack for seat, stack in zip(others, effective)
+                                  if seat.position != "SB")
+        pot_with_one_caller = 3 * flat_pot
+        if deepest_in_position - flat_pot > 3 * pot_with_one_caller:
+            return None
+        target = (opening.raised_to + flat_pot) / bb
+        return Critique(
+            "aa_closing_squeeze", "Closed a multiway pot with aces", "Squeeze for value",
+            f"Calling takes {len(others) + 1} players to the flop with no one left to raise. "
+            f"You can raise to {target:g} BB with AA before the flop.",
+            "",
+        )
+    if (hero.position != "SB" or event.action != "raise"
+            or not any(s.name == opening.name and s.position == "BB" for s in others)
+            or not any(a.name == hero.name and a.action == "call" for a in entries[:pivot])):
+        return None
+    extra = min(event.amount - snap.to_call, high)
+    # Focus on a large backraise with a weak suit and gapped low cards.
+    # A well-connected or double-suited rundown has different playability.
+    suits = Counter(c[1] for c in snap.hero_cards)
+    if (ranks[-1] > 8 or len(set(ranks)) != 4 or ranks[-1] - ranks[0] <= 3
+            or sorted(suits.values()) == [2, 2] or extra < 0.75 * flat_pot):
+        return None
+    return Critique(
+        "low_blind_backraise", "Limp-reraised low cards from the small blind", "Prefer the call",
+        f"You could close the action for {snap.to_call / bb:g} BB into {snap.pot / bb:g} BB. "
+        f"Raising to {(hero.committed + event.amount) / bb:g} BB builds a pot out of position "
+        f"against {len(others)} live opponents with {RANK_LABEL[ranks[-1]]}-high.",
+        "",
+    )
+
+
 def review_preflop(snap, event, advice):
     """Assess only the recorded choice against a specific, available alternative."""
     if advice is None or snap.street != "Preflop" or snap.board or not snap.can_raise:
@@ -258,14 +320,6 @@ def review_preflop(snap, event, advice):
         return None
     if any(s.all_in for s in live.values()):
         return None
-    if any(
-        not 40
-        <= min(hero.stack + hero.committed, s.stack + s.committed) / snap.bb
-        <= 150
-        for s in live.values()
-        if s != hero
-    ):
-        return None
     antes = [a for a in snap.history if a.action == "posts_ante"]
     if antes and (
         len(antes) != len(snap.seats)
@@ -275,28 +329,22 @@ def review_preflop(snap, event, advice):
     ):
         return None
     entries = [a for a in snap.history if a.action in {"raise", "call", "check"}]
+    crowded = _crowded_blind(snap, event, hero, [s for s in live.values() if s != hero], entries)
+    if crowded:
+        return crowded
+    if any(
+        not 40
+        <= min(hero.stack + hero.committed, s.stack + s.committed) / snap.bb
+        <= 150
+        for s in live.values()
+        if s != hero
+    ):
+        return None
     pos = hero.position
     played = event.action
     if pos == "BB" and played == "fold" and len(entries) == 1 and snap.to_call:
         return _discounted_blind_fold(
             snap, entries[0], live, snap.to_call / (snap.pot + snap.to_call)
-        )
-    if (
-        played == "call"
-        and pos in {"CO", "BTN"}
-        and len(entries) == 1
-        and entries[0].action == "call"
-        and snap.to_call == snap.bb
-        and sum(c[0] == "A" for c in cards) == 2
-        and entries[0].name in live
-    ):
-        return Critique(
-            "preflop_overlimped_aces",
-            "Overlimped aces in position on a limper",
-            "Compare an isolation raise",
-            f"The {live[entries[0].name].position} limped. Paying one blind from {pos} gives the blinds a cheap way into the pot. "
-            "With two aces, raising can charge weaker hands and narrow the field.",
-            "Overlimping can induce a raise behind. Poor side cards or a limper who only continues with strong hands can favor keeping the pot small.",
         )
     if played == "raise" and len(entries) == 3:
         challenge = _large_fivebet(snap, event, entries, hero, live)
