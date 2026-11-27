@@ -123,9 +123,9 @@ def paired_targets(hole, board, rank, kicks):
     ]
     parts = []
     if boats:
-        parts.append("full house (" + ", ".join(boats[:3]) + ")")
+        parts.append("weaker full houses")
     if trips and rank >= 6:
-        parts.append("trips (" + ", ".join(r + "x" for r in trips) + ")")
+        parts.append("trips")
     if rank >= 6 and board_counts.most_common(1)[0][1] == 2:
         one = max(
             (r for r, n in board_counts.items() if n == 1 and counts[r] < 4),
@@ -139,7 +139,7 @@ def paired_targets(hole, board, rank, kicks):
                 else "some Tx with another playable card"
             )
         if overpairs and len(parts) < 3:
-            parts.append("some overpairs (" + ", ".join(overpairs[:2]) + ")")
+            parts.append("overpairs")
     return parts, blocked
 
 
@@ -235,7 +235,7 @@ def value_plan(
                 "A value bet depends on whether a set or two pair can call on this connected river.",
                 None,
             )
-        target = "weaker straights (" + ", ".join(weaker) + ") and occasional sets"
+        target = "weaker straights and occasional sets"
         fraction = 50 if called else 40
         checked = {a.name for a in actions if a.action == "check"}
         if all(s.name in checked or s.all_in for s in opponents):
@@ -253,7 +253,7 @@ def value_plan(
                 if RANK_VALUE[c[0]] < kicks[0] and used[c[0]] <= 2
             ]
             target = (
-                ("lower sets (" + ", ".join(pairs) + ") and two pair")
+                "lower sets and two pair"
                 if pairs
                 else "two pair"
             )
@@ -278,7 +278,7 @@ def value_plan(
         else:
             weaker = weaker_straights(hole, board, kicks[0])
             target = (
-                "weaker straights (" + ", ".join(weaker) + ") and sets"
+                "weaker straights and sets"
                 if weaker
                 else "sets and two pair"
             )

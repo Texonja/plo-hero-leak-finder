@@ -181,9 +181,9 @@ class IncrementalGuideTests(unittest.TestCase):
                 if s.number == "20000" and s.ref == "Line 39"
             )
 
-        self.assertNotIn("30/30", explanation(before))
-        self.assertIn("30/30 past bets", explanation(after))
-        self.assertIn("Consider a call", explanation(after))
+        self.assertNotIn("30 of 30", explanation(before))
+        self.assertIn("30 of 30 comparable bets", explanation(after))
+        self.assertIn("supports a call", explanation(after))
         self.assertEqual(stats, {"replayed": 2, "reused": 29, "history_updated": 1})
 
     def test_v4_guide_rebuilds_once_then_extends_after_first_new_import(self):

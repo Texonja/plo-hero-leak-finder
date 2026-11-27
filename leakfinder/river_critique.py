@@ -31,8 +31,8 @@ def river_line_review(snap, hero, opponents, result):
             return None
         target = _example(p for p in result.weaker if p.category == 2)
         value = _example(p for p in result.stronger if p.category == 5)
-        missed = _example(result.missed_straight)
-        bluff = f" A possible missed draw is {missed}." if missed else ""
+        missed = bool(result.missed_straight)
+        bluff = " Missed straight draws can bluff." if missed else ""
         if not target or not value:
             return None
         return "fold", Critique(
@@ -40,7 +40,7 @@ def river_line_review(snap, hero, opponents, result):
             f"After calling your flop raise and checking the turn, {opponents[0].position} led "
             f"{snap.to_call / snap.bb:g} BB into {(snap.pot - snap.to_call) / snap.bb:g} BB. "
             f"The call closes the action and needs {snap.to_call / (snap.pot + snap.to_call):.1%} equity before rake. "
-            f"You beat two pair such as {target} if it bets this small, as well as bluffs.{bluff}",
+            f"You beat two pair that takes this sizing.{bluff}",
             f"You have no card of the flush suit. A flush such as {value} fits this line too. "
             "Folding is defensible if the bettor seldom bets worse for this size.",
         )
@@ -55,8 +55,8 @@ def river_line_review(snap, hero, opponents, result):
             return "check", Critique(
                 "river_broadway_checked_to", "Broadway after three checks", "Consider a small value bet",
                 f"{opponents[0].position} checked all three streets. You have the highest straight. "
-                f"Compare checking back with a value bet around {size.amount/snap.bb:.2f} BB targeting lower straights such as {weaker}.",
-                f"A flush such as {flush} beats you and can check again.{removal} A bet gains only if enough "
+                f"Compare checking back with a value bet around {size.amount/snap.bb:.2f} BB targeting lower straights.",
+                f"A flush beats you and can check again.{removal} A bet gains only if enough "
                 "weaker hands call to cover stronger calls or check-raises.",
             )
     if (not heads_up and sorted(ranks.values()) == [1,1,3] and result.hero_category == 6
@@ -73,16 +73,16 @@ def river_line_review(snap, hero, opponents, result):
             size = bet_size(snap, hero, opponents, 33)
             return "check", Critique(
                 "river_trips_board_boat", "Full house on a three-of-a-kind board", "Consider a small value bet",
-                f"The flop and turn checked through. Weaker full houses such as {boat} and trips with an "
-                f"ace kicker such as {trips} are possible calls to a small bet around {size.amount/snap.bb:.2f} BB.{position}",
-                f"Any of the remaining opponents could hold the last card of the tripled rank or a higher full house such as {better}. "
+                "The flop and turn checked through. Weaker full houses and trips with an "
+                f"ace kicker are possible calls to a small bet around {size.amount/snap.bb:.2f} BB.{position}",
+                f"Any of the remaining opponents could hold the last card of the tripled rank or a higher full house. "
                 "Checking can save a bet if the weaker hands rarely call.",
             )
     return None
 
 
 def _example(pairs):
-    return next((p.text for p in pairs), None)
+    return next((p.label for p in pairs), None)
 
 
 def _turn_bet_called(snap, bettor, caller):
@@ -120,13 +120,9 @@ def _value(snap, action, hero, opponent, result, facing, guide_size=None):
     if better == 0:
         strength = "No legal four-card holding beats you."
     elif better == 1:
-        a, b = result.stronger[0].cards
-        strength = f"Every holding that beats you must contain both {a} and {b}."
+        strength = "Only one hole-card pair can beat you."
     else:
-        strength = (
-            f"Only {better} available two-card combinations beat your full house. "
-            f"One is {' '.join(result.stronger[0].cards)}."
-        )
+        strength = f"Only {better} available hole-card pairs can beat your full house."
     if action == "fold":
         if not better:
             return None  # The established guide already flags folding the nuts.
@@ -150,7 +146,7 @@ def _value(snap, action, hero, opponent, result, facing, guide_size=None):
         if size.contestable < snap.bb:
             return None
         lead = f"{opponent.position} checked and your check closed the betting. "
-        alternative = f"A small value bet around {size.amount / snap.bb:.1f} BB tests a weaker caller."
+        alternative = f"Bet around {size.amount / snap.bb:.1f} BB for value against weaker made hands."
         uid, title, label = "river_check_back_value", "Checked back a value hand", "Consider a value bet"
     caveat = (
         "If worse hands always fold, there is no added value from their calls. Extra rake can matter."
@@ -158,7 +154,7 @@ def _value(snap, action, hero, opponent, result, facing, guide_size=None):
         "Compare worse hands that actually pay with stronger hands that continue or reraise. "
         "If callers are mostly stronger, keeping the pot smaller is defensible."
     )
-    return Critique(uid, title, label, f"{lead}{strength} {alternative} A possible target is {target}.", caveat)
+    return Critique(uid, title, label, f"{lead}{strength} {alternative}", caveat)
 
 
 def _bluff_catch(snap, opponent, result, price, raised):

@@ -10,7 +10,7 @@ from tkinter import messagebox, ttk
 from tkinter.font import Font
 from tkinter.scrolledtext import ScrolledText
 
-from .critique import critique_for, stack_context
+from .critique import action_critique, stack_context
 from .engine import replay
 from .flop_critique import flop_cbet_note
 from .home import BG, INK, MUTED, NAV, NAV_ACTIVE, ORANGE, SUITS
@@ -69,10 +69,10 @@ def _read_hand(room, row):
     return decode(Record(room, zlib.decompress(row["raw"]).decode(), row["locator"]))
 
 
-def open_table(parent, dbpath, hand_id, action_ref, hero=None, actor=None):
+def open_table(parent, dbpath, hand_id, action_ref, hero=None, actor=None, *, study=False):
     """Open the clicked opportunity. hand_id is the local hands.id, ref its source anchor."""
     try:
-        return TableDialog(parent, dbpath, hand_id, action_ref, hero, actor)
+        return TableDialog(parent, dbpath, hand_id, action_ref, hero, actor, study=study)
     except (ValueError, LookupError) as exc:
         messagebox.showinfo("Table replay", str(exc), parent=parent)
         return None
@@ -171,8 +171,9 @@ def _button(parent, text, command, accent=False):
 
 
 class TableDialog:
-    def __init__(self, parent, dbpath, hand_id, ref, hero=None, actor=None):
+    def __init__(self, parent, dbpath, hand_id, ref, hero=None, actor=None, *, study=False):
         self.path = dbpath
+        self.study = study
         self.hand_id = hand_id
         self.opponent_histories = {}
         with closing(connect(dbpath)) as db:
@@ -669,7 +670,7 @@ class TableDialog:
             suggestion = apply_history(snap, suggestion, self._opponent_history(snap))
         critique = None
         if self.revealed and self.actor == self.profile:
-            critique = critique_for(snap, self.played_event, suggestion)
+            critique = action_critique(snap, self.played_event, suggestion)
             if critique:
                 add("\nACTION CRITIQUE · " + critique.title + "\n", "street")
                 add(
@@ -678,12 +679,12 @@ class TableDialog:
                 )
                 add(
                     "\n".join(filter(None, (
-                        stack_context(snap), critique.reason, critique.counterargument
+                        stack_context(snap), critique.reason
                     ))) + "\n",
                     "amount",
                 )
         reference = sb_reference(snap) if self.actor == self.profile else None
-        if reference is not None:
+        if reference is not None and (self.study or (suggestion and suggestion.difference(self.played_event.action, self.played_event.amount))):
             weight, depth = reference
             add("\nSOLVER REFERENCE · FIRST IN FROM SB\n", "street")
             add(f"Fold {weight:.1%} · continue {1 - weight:.1%}\n", "active")
@@ -693,21 +694,24 @@ class TableDialog:
                 "can differ. The sample does not split completing from raising here.\n",
                 "amount",
             )
-        if self.actor == self.profile and (
+        if self.study and self.actor == self.profile and (
             not critique or not critique.rule.startswith("threebet_")
         ):
             price_note = threebet_price_note(snap)
             if price_note:
                 add("\nFACING A 3-BET\n", "street")
                 add(price_note + "\n", "amount")
-        if self.actor == self.profile and (
+        if self.study and self.actor == self.profile and (
             not critique or not critique.rule.startswith(("flop-cbet-", "flop_cbet_"))
         ):
             price_note = flop_cbet_note(snap)
             if price_note:
                 add("\nFACING A FLOP C-BET\n", "street")
                 add(price_note + "\n", "amount")
-        if suggestion is not None:
+        if suggestion and suggestion.why and not critique and (
+            self.study or (suggestion.can_compare(snap)
+                           and suggestion.difference(self.played_event.action, self.played_event.amount))
+        ):
             add("\nGUIDE · " + suggestion.title.upper() + "\n", "street")
             add(
                 (suggestion.play.capitalize() or "Manual review") + "\n",
@@ -722,7 +726,7 @@ class TableDialog:
                 note += " The bet size is an example."
             add(suggestion.why + "\n" + note, "amount")
             if (
-                eligible
+                self.study and eligible
                 and snap.street == "River"
                 and snap.to_call
                 and river_opponent(snap)

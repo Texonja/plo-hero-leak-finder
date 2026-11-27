@@ -37,16 +37,13 @@ Use Player > Personal Hero aliases to enter your exact screen names,
 one per line and under the correct network. The app analyzes hands
 with a single matching Hero.
 
-Hands to review opens after import with up to twelve hands. Action critiques
-shows the flagged action, an alternative and the reason to review it.
-Blind reviews distinguish a closing call from a limp with players behind. Flop
-call reviews use the actual price, players still in the hand and effective stacks.
-Use the spot filter for preflop openings, 3-bet responses, flop c-bet
-defense or flop value and sizing. Flop c-bet replay shows the actual call
-price and draws on supported heads-up lines, even without a flagged action.
-Each opens the original decision. Reveal the played action to see its critique
-at the table. The guide coverage count shows how often its rules could compare
-actions. Agreement with a rule does not establish optimal play.
+Hands to review lists each flagged hand once, with up to twelve per page.
+Open Action critiques to see individual decisions, or Guide differences only
+to see where your action differed from a comparable guide recommendation.
+Select Study spots to explore other decisions, including range-dependent calls.
+Open a table to replay the hand. Reveal action & outcome shows the recorded
+play and any specific alternative. The coverage count shows how many decisions
+the guide could compare in this selection.
 The small-blind solver reference covers six seats, four folds, no ante and
 95–105 BB effective blinds. Its 100 BB reference uses 5% rake capped at 1 BB.
 The guide compares fold versus continue when the model chooses one at least
@@ -104,9 +101,7 @@ Each entry shows the original action and opens the table at that decision.
 Why review this first? explains the priority. Open Related hands to see
 more examples of the same pattern. Previous and Next move between pages.
 The app saves the review index and population comparisons locally.
-When rebuilding a large library, you can open recent decisions while
-the ranked review loads. The replay also explains hand structures
-that have too little evidence for an action recommendation.
+While the index is being built, the review shows its progress.
 
 Range and History
 
@@ -126,8 +121,8 @@ model uses the same sizing groups as the cash reports.
 Smaller samples remain visible for review. The historical sizing comparison
 assumes a fold to a raise and no further betting after a call. The heads-up turn scenarios
 also compare calling the raise and facing a half-pot river bet on the same
-possible runouts. The river call view gives the break-even equity, example
-holdings and how much the modeled range would need to change.
+possible runouts. The river call view gives the break-even equity, hand categories
+and how much the modeled range would need to change.
 River comparisons with personal history also require at least
 30 comparable decisions across three dates. Hidden cards widen the
 range of plausible outcomes. Use Open source to inspect earlier hands.

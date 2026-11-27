@@ -24,7 +24,7 @@ def load_demo(db):
         "AND reason='Fold with no price') OR EXISTS(SELECT 1 FROM amount_retry "
         "WHERE source=imports.id) AS needs_retry FROM imports"
     ).fetchall()
-    for name in ("CoinPoker-HeroDemo.txt", "iPoker-HeroDemo.sql"):
+    for name in ("CoinPoker-HeroDemo.txt", "iPoker-HeroDemo.sql", "iPoker-HeroDemo-Review.xml"):
         # A release can be extracted at a new location. Read the same logical
         # fixture only once even when the path that originally supplied it moves.
         known = [row for row in sources if Path(row["path"]).name == name]

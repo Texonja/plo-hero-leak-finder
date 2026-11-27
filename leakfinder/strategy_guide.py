@@ -229,7 +229,7 @@ def preflop_advice(snap, hero, seats):
         return advice(
             "Short stack or all-in",
             (),
-            "Check the price, effective stack and possible side pots. The opening guidelines assume enough stack depth to play.",
+            "",
         )
     if not 3 <= len(snap.seats) <= 6:
         return advice(
@@ -727,7 +727,7 @@ def postflop_advice(snap, hero, seats):
     if allin and not heads_up:
         return advice(
             (),
-            "A player is already all-in. Consider which part of the pot you can win and who can still bet.",
+            "",
         )
     if street in {"Flop", "Turn"} and facing:
         if snap.price_to_match > snap.to_call:
@@ -738,14 +738,14 @@ def postflop_advice(snap, hero, seats):
             ):
                 return advice(
                     (),
-                    "The stack cap creates different pot entitlements. Count only chips Hero can win before comparing the price with equity.",
+                    "",
                 )
             price = heads_up_price(snap)
         cost = f"The call costs {price:.1%} of the contestable pot after calling, before rake."
         if best and rank == 4:
             lower = weaker_straights(cards, board, kicks[0])
             targets = (
-                f"Lower straights made with {' or '.join(lower)} can be in the betting range."
+                "Lower straights can be in the betting range."
                 if lower else
                 "Only this straight is possible here. The weaker part of the betting range could include sets, two pair or draws."
             )
@@ -758,7 +758,7 @@ def postflop_advice(snap, hero, seats):
         ):
             return advice(
                 (),
-                f"{cost} An all-in call depends on showdown equity against the opponent's range. Count ties, redraws and the cards still to come.",
+                "",
             )
         if not heads_up and top_set:
             high = max(s.committed for s in seats)

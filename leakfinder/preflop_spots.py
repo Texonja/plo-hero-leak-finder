@@ -246,8 +246,7 @@ def _review_open(snap, event, hero, live, shape):
                 "rfi_supported_hand",
                 "Passed on a first-in open with a playable hand",
                 "Consider an open-raise",
-                f"{support} The unopened pot reached {hero.position}, with {len(live) - 1} players left. "
-                "Raising can win the blinds immediately or build a pot with a hand that can improve.",
+                f"{hero.position} first in with {len(live) - 1} players behind: {support[0].lower() + support[1:]}",
                 "A limp can be an intentional trap at a table that raises often, particularly from the small blind."
                 if event.action == "call"
                 else "Tightening up can pay under heavy 3-bet pressure or high rake.",
@@ -255,13 +254,11 @@ def _review_open(snap, event, hero, live, shape):
     if event.action == "raise" and hero.position in {"UTG", "HJ"} and len(live) >= 4:
         weak = _thin_structure(*shape)
         if weak:
-            risk = event.amount / (event.amount + snap.pot)
             return Critique(
                 "rfi_thin_early_raise",
                 "Opened early with limited ways to improve",
                 "Consider folding first in",
-                f"{weak} You raised from {hero.position} with {len(live) - 1} players yet to act. "
-                f"A pure steal at this size needs all of them to fold {risk:.1%} of the time to break even.",
+                f"Your {hero.position} open still has {len(live) - 1} players behind. {weak}",
                 "That threshold assumes zero return when anyone continues. "
                 "Players who fold too much or give up after the flop can make a raise profitable.",
             )
@@ -326,7 +323,7 @@ def _review_threebet(snap, event, hero, opponent, actions, shape):
             "threebet_thin_oop_call",
             "Called a large 3-bet out of position",
             "Consider folding",
-            f"{_threebet_line(snap, hero, opponent, actions)} {weak} Raw equity can be hard to realize when acting first.",
+            f"You called {snap.to_call / snap.bb:g} BB out of position against a 3-bet ({price:.1%} of the final preflop pot). {weak}",
             "A wide 3-bettor or a near-all-in stack makes a call more attractive. Compare against "
             "their real reraising range. The pot price excludes rake and future betting.",
         )

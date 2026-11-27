@@ -68,15 +68,15 @@ class BetSizingTests(unittest.TestCase):
                     self.assertEqual(sizing(row[5]), label)
                     self.assertIn(label, describe(response.context))
 
-    def test_standard_sizes_in_original_demo_stay_together(self):
+    def test_standard_sizes_in_demo_stay_together(self):
         with closing(connect(":memory:")) as db:
             initialize(db)
             load_demo(db)
             for fraction, total, expected_key in (
                 (1 / 3, 41, "bet-0"),
                 (0.5, 92, "bet-1"),
-                (0.75, 58, "bet-2"),
-                (1, 130, "bet-3"),
+                (0.75, 59, "bet-2"),
+                (1, 132, "bet-3"),
             ):
                 rows = db.execute(
                     "SELECT h.room,o.faced FROM obs o JOIN hands h ON h.id=o.hand WHERE o.faced BETWEEN ? AND ?",

@@ -4,7 +4,6 @@ from collections import Counter
 from functools import lru_cache
 
 from .critique import Critique
-from .early_equity import showdown_example
 from .early_postflop import _straight_pairs, next_draws
 from .opponent_history import heads_up_price
 from .postflop_value import RANK_LABEL
@@ -38,12 +37,10 @@ def _turn_response(snap, action, hero, villain, hole, board):
             return None
         return Critique(
             "turn-fold-guaranteed-share", "Fold at a price covered by a showdown bound",
-            "Compare calling to folding",
+            "Call",
             f"The call costs {price:.1%} of the contestable pot after calling. "
-            f"{count} unseen rivers guarantee at least a tie for Hero. Even if the "
-            f"opponent holds four of them, at least {count - 4} of the 40 possible rivers "
-            f"earn at least half the pot. Hero can secure that {floor:.1%} share "
-            "before rake by continuing only on the guaranteed rivers against a further bet.",
+            f"Of {count} unseen rivers that secure a share, at least {count - 4} of 40 remain unblocked and "
+            f"guarantee half the pot or more, covering the call before rake ({floor:.1%} minimum).",
             "A sufficiently large rake can change a thin price. Recheck the amount "
             "Hero can win after fees before treating the fold as a mistake.",
         )
@@ -69,7 +66,6 @@ def _turn_response(snap, action, hero, villain, hole, board):
     if ceiling + 0.05 > price:
         return None
     weaker = (price - ceiling) / (1 - ceiling)
-    example = showdown_example(hole, board, minimum, price)
     return Critique(
         "turn-closing-call-value-bound", "Closing turn call against different betting ranges",
         "Compare call and fold by range",
@@ -78,7 +74,7 @@ def _turn_response(snap, action, hero, villain, hole, board):
         f"40 possible rivers per opposing hand can even reach that category for Hero. "
         f"Counting them all as wins caps equity against that group at {ceiling:.1%}. "
         f"Even if Hero always beats the rest, at least {weaker:.1%} of the betting "
-        f"range must come from outside that group to cover the call. {example}".strip(),
+        f"range must come from outside that group to cover the call.",
         "Draws, weaker value or bluffs can justify calling if numerous enough. "
         "The hand history gives the price but cannot establish that range.",
     )

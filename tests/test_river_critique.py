@@ -5,6 +5,7 @@ from dataclasses import replace
 from leakfinder.demo import load_demo
 from leakfinder.replay_view import hero_decisions
 from leakfinder.river_critique import review_river
+from leakfinder.river_holdings import river_holdings
 from leakfinder.storage import connect, initialize
 from leakfinder.strategy_guide import advice_at
 from leakfinder.vendor.primitives import best_plo_hand
@@ -26,11 +27,15 @@ class RiverCritiqueTests(unittest.TestCase):
         return review_river(snap, event, advice_at(snap))
 
     def verify_witness(self, snap, text, stronger=False):
-        cards = re.search(r"((?:[2-9TJQKA][cdhs] ){3}[2-9TJQKA][cdhs]) \(", text).group(1).split()
-        self.assertEqual(len({*snap.hero_cards, *snap.board, *cards}), 13)
-        theirs = best_plo_hand(cards, snap.board)[:2]
+        self.assertNotRegex(text, r"(?:[2-9TJQKA][cdhs] ){3}[2-9TJQKA][cdhs]")
+        candidates = river_holdings(snap.hero_cards, snap.board)
+        group = candidates.stronger if stronger else candidates.weaker
+        self.assertTrue(group)
         ours = best_plo_hand(snap.hero_cards, snap.board)[:2]
-        self.assertTrue(theirs > ours if stronger else theirs < ours)
+        for hand in group:
+            self.assertEqual(len({*hand.holding, *snap.hero_cards, *snap.board}), 13)
+            theirs = best_plo_hand(hand.holding, snap.board)[:2]
+            self.assertTrue(theirs > ours if stronger else theirs < ours)
 
     def test_real_calls_on_both_networks_with_independent_witness_and_price(self):
         for room, number, ref, rule in (
@@ -47,7 +52,7 @@ class RiverCritiqueTests(unittest.TestCase):
                 self.verify_witness(s, critique.reason, stronger=True)
                 self.verify_witness(s, critique.counterargument)
                 if room == "CoinPoker":
-                    self.assertIn("flush)", critique.reason)
+                    self.assertIn("flush", critique.reason)
                 else:
                     self.assertIn("Q-T straights", critique.counterargument)
                 self.assertIsNone(self.flag(s, replace(e, action="fold")))
@@ -68,7 +73,7 @@ class RiverCritiqueTests(unittest.TestCase):
 
     def test_checked_lines_and_a_small_set_fold_are_only_conditional_reviews(self):
         cases = (
-            ("CoinPoker", "9000009999", "Line 39", "river_broadway_checked_to", "King-high straight"),
+            ("CoinPoker", "9000009999", "Line 39", "river_broadway_checked_to", "lower straights"),
             ("CoinPoker", "9000008585", "Line 44", "river_trips_board_boat", "BTN can still act"),
             ("iPoker", "9000014007", "Action 16", "river_set_small_lead", "20.0%"),
         )
@@ -144,8 +149,7 @@ class RiverCritiqueTests(unittest.TestCase):
         for action, rule in (("call", "river_flat_value"), ("fold", "river_fold_near_nuts")):
             c = self.flag(s, replace(e, action=action))
             self.assertEqual(c.rule, rule)
-            self.assertIn("Qh", c.reason)
-            self.assertIn("Qs", c.reason)
+            self.assertIn("Only one hole-card pair", c.reason)
             self.verify_witness(s, c.reason)
         self.assertIsNone(self.flag(s, replace(e, action="raise")))
         self.assertIsNone(self.flag(replace(s, can_raise=False), e))

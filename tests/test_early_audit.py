@@ -128,7 +128,9 @@ class EarlyAuditTests(unittest.TestCase):
                 )
                 paid_pot = pot + call - (uncapped - call)
                 advice = advice_at(snap)
-                self.assertIn(f"{call / paid_pot:.1%}", advice.why)
+                from leakfinder.opponent_history import heads_up_price
+                self.assertAlmostEqual(heads_up_price(snap), call / paid_pot)
+                self.assertEqual(advice.why, "")
                 self.assertFalse(advice.choices)
                 record = self.records[room, number]
                 changed = replace(record, raw=record.raw.replace(old, new))
@@ -209,7 +211,7 @@ class EarlyAuditTests(unittest.TestCase):
         only = spot("6s 4s Qc Kd", "3d 5c 7h", owed=5, pot=25)
         self.assertIn("Only this straight is possible", advice_at(only).why)
         many = spot("Jh Tc 3d 3c", "7d 8s 9c", owed=5, pot=25)
-        self.assertIn("Lower straights made with", advice_at(many).why)
+        self.assertIn("Lower straights can be", advice_at(many).why)
         royal = spot("As Ks 3h 4c", "Qs Js Ts", owed=5, pot=25)
         closed = advice_at(replace(royal, can_raise=False))
         self.assertEqual(closed.choices, ("call",))

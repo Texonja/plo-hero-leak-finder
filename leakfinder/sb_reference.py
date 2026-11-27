@@ -76,9 +76,8 @@ def compare_sb(snap, event):
         "sb_fold_reference",
         "Small blind first in · 100 BB solver reference",
         alternative,
-        f"Four folds to your small blind. With this exact rank and suit structure "
-        f"the PokerData six-max sample folds {fold:.1%}. You and the big blind "
-        f"were {depth:g} BB effective. The sample reports only fold versus continue here.",
+        f"Four folds to your small blind at {depth:g} BB effective. "
+        f"The 100 BB reference folds this hand class {fold:.1%} of the time.",
         "The model assumes 100 BB, 5% rake capped at 1 BB and its own betting tree. "
         "Actual rake, other stacks and the big blind's response can favor a different play.",
     )

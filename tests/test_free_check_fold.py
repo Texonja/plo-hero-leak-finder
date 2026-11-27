@@ -5,7 +5,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from leakfinder.critique import critique_for
-from leakfinder.demo import load_demo
+from leakfinder.demo import SAMPLES, load_demo
 from leakfinder.engine import replay
 from leakfinder.importers import Excluded, Record, decode
 from leakfinder.replay_view import playback_frames, snapshot_from_record
@@ -163,12 +163,17 @@ class FreeCheckFoldTests(unittest.TestCase):
                     "INSERT INTO imports(path,digest,summary) VALUES(?,?,?)",
                     (str(previous / "iPoker-HeroDemo.sql"), "old", "{}"),
                 )
+            supplement = "iPoker-HeroDemo-Review.xml"
+            (current / supplement).write_bytes((SAMPLES / supplement).read_bytes())
             with patch("leakfinder.demo.SAMPLES", current):
                 load_demo(db)
                 load_demo(db)
             self.assertEqual(
-                db.execute("SELECT count(*) FROM imports").fetchone()[0], 2
+                db.execute("SELECT count(*) FROM imports").fetchone()[0], 3
             )
             self.assertEqual(
-                [r[0] for r in db.execute("SELECT source FROM origins")], [source]
+                db.execute("SELECT count(*) FROM origins WHERE source=?", (source,)).fetchone()[0], 1
+            )
+            self.assertEqual(
+                db.execute("SELECT count(*) FROM hands").fetchone()[0], 5
             )

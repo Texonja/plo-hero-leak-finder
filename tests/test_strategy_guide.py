@@ -191,11 +191,11 @@ class StrategyTests(unittest.TestCase):
             cohort(db)
             index = index_guides(db, "Both")
             queue = build_queue(db, scope="All hands", findings={}, guide_index=index)
-            self.assertEqual(queue.hand_count, 640)
-            self.assertEqual(len(queue.items), 12)
+            self.assertEqual(queue.hand_count, 644)
+            self.assertEqual(len(queue.items), len({i.hand for i in (*queue.critiques, *queue.guide_items)}))
             for item in queue.items:
                 self.assertIn(
-                    item.status, {"Guide", "Exploratory", "Study", "Critique"}
+                    item.status, {"Guide", "Critique"}
                 )
                 self.assertEqual(item.status == "Guide", item.node == "GUIDE")
                 self.assertEqual(
@@ -213,12 +213,12 @@ class StrategyTests(unittest.TestCase):
             e, _, flop = seen["Flop"]
             self.assertEqual(flop.choices, ("check", "bet"))
             self.assertIsNone(flop.difference(e.action, e.amount))
-            self.assertIn("QQ", flop.why)
+            self.assertIn("weaker full houses", flop.why)
             self.assertIn("removing Jx", flop.why)
             self.assertIn("25%", flop.play)
             self.assertNotIn("55", flop.why)
             e, _, turn = seen["Turn"]
-            self.assertIn("full house (QQ, 55)", turn.why)
+            self.assertIn("weaker full houses", turn.why)
             self.assertIn("Flop checked through", turn.why)
             self.assertIsNone(turn.difference(e.action, e.amount))
             e, _, river = seen["River"]
@@ -243,7 +243,7 @@ class StrategyTests(unittest.TestCase):
                 )
 
             river_cases = (
-                ("CoinPoker", "9000002844", "Line 32", None, "25.0%", None),
+                ("CoinPoker", "9000002844", "Line 32", None, None, None),
                 ("CoinPoker", "9000001429", "Line 40", "bet", "Compare checking", None),
                 ("CoinPoker", "9000002860", "Line 23", "check", "33%", 0.33),
                 (
@@ -254,7 +254,7 @@ class StrategyTests(unittest.TestCase):
                     "before the other players act",
                     None,
                 ),
-                ("iPoker", "9000010026", "Action 17", None, "29.5%", None),
+                ("iPoker", "9000010026", "Action 17", None, None, None),
                 ("iPoker", "9000014007", "Action 16", "call", "20.0%", None),
             )
             for room, number, ref, action, phrase, fraction in river_cases:
@@ -267,7 +267,10 @@ class StrategyTests(unittest.TestCase):
                 with self.subTest(room=room, number=number, ref=ref):
                     self.assertEqual(next(iter(advice.choices), None), action)
                     self.assertFalse(advice.rankable)
-                    self.assertIn(phrase, f"{advice.play} {advice.why}")
+                    if phrase is None:
+                        self.assertFalse(advice.choices)
+                    else:
+                        self.assertIn(phrase, f"{advice.play} {advice.why}")
                     if fraction is not None:
                         self.assertAlmostEqual(
                             advice.size.amount / snap.pot, fraction, places=3

@@ -459,7 +459,7 @@ def apply_history(snap, base, history):
             "call" if lo > price + MARGIN else "fold" if hi < price - MARGIN else None
         )
         if action and base.choices != (action,):
-            note = f"In this spot, {shown}/{len(sample.comparable)} past bets showed cards. The conservative range based on prior hand categories is {lo:.1%}–{hi:.1%}. The current call threshold is {price:.1%}. Consider a {action} if the opponent's past behavior carries over to this spot. Base guide · {base.play or 'manual review'}."
+            note = f"This player showed down {shown} of {len(sample.comparable)} comparable bets. If that pattern holds, your estimated share ({lo:.1%}–{hi:.1%}) supports a {action} at this price ({price:.1%})."
             return replace(
                 base,
                 title="River · opponent history",
@@ -482,7 +482,7 @@ def apply_history(snap, base, history):
     lo = wilson(f / n, n)[0]
     threshold = base.size.contestable / (snap.pot + base.size.contestable)
     if lo > threshold + MARGIN:
-        note = f"Among {n} comparable responses to this size group there were {f} folds, {c} calls and {r} raises. The lower Wilson bound is {lo:.1%}. A pure bluff needs {threshold:.1%} folds. This supports betting if checking has negligible showdown value. Base guide · {base.play}."
+        note = f"This player folded {f} of {n} times to a similar size. With little showdown value, a bluff needs {threshold:.1%} folds, below the conservative estimate of {lo:.1%}."
         return replace(
             base,
             title="River · bluff supported by fold history",

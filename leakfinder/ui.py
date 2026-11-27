@@ -10,7 +10,7 @@ import time
 import tkinter as tk
 import traceback
 import webbrowser
-from contextlib import suppress
+from contextlib import closing, suppress
 from datetime import date, datetime, timedelta
 from pathlib import Path
 from queue import Empty, Queue
@@ -28,7 +28,6 @@ from .demo import demo_path, load_demo
 from .engine import METRICS
 from .home import BG, INK, MUTED, NAV, NAV_ACTIVE, ORANGE, HandReview
 from .hover_help import CONFIDENCE_HELP, tree_help
-from .replay_view import load_snapshot
 from .review import Review
 from .review_queue import (
     build_queue,
@@ -36,7 +35,6 @@ from .review_queue import (
     guide_revision,
     has_saved_batch,
     latest_batch_rooms,
-    preview_decisions,
     remember_batch,
     review_selection,
     save_guides,
@@ -153,6 +151,67 @@ def open_library(path):
     return db
 
 
+def prepare_startup(root, path):
+    """Show startup while a worker opens and upgrades the library."""
+    window = tk.Toplevel(root)
+    window.title(f"PLO Hero Leak Finder · Starting · {__version__}")
+    width, height = 510, 170
+    x = (window.winfo_screenwidth() - width) // 2
+    y = (window.winfo_screenheight() - height) // 2
+    window.geometry(f"{width}x{height}+{x}+{y}")
+    window.resizable(False, False)
+    panel = ttk.Frame(window, padding=(24, 18))
+    panel.pack(fill="both", expand=True)
+    status = ttk.Label(
+        panel, text="Starting PLO Hero Leak Finder…", font=("Segoe UI", 16, "bold")
+    )
+    status.pack(anchor="w")
+    ttk.Label(
+        panel,
+        text="Opening the hand library. If it needs an upgrade, the app makes a backup first. "
+        "Large libraries may take a minute or more.",
+        wraplength=450,
+        justify="left",
+    ).pack(anchor="w", pady=(6, 12))
+    progress = ttk.Progressbar(panel, mode="indeterminate")
+    progress.pack(fill="x")
+    finished = tk.BooleanVar(master=root)
+    result = Queue()
+    cancelled = False
+
+    def request_close():
+        nonlocal cancelled
+        cancelled = True
+        status.configure(text="Finishing library setup before closing…")
+
+    def prepare():
+        try:
+            with closing(open_library(path)):
+                pass
+        except Exception as exc:
+            result.put(exc)
+        else:
+            result.put(None)
+
+    def poll():
+        if result.empty():
+            root.after(50, poll)
+        else:
+            finished.set(True)
+
+    window.protocol("WM_DELETE_WINDOW", request_close)
+    progress.start()
+    threading.Thread(target=prepare, name="library-startup").start()
+    root.after(50, poll)
+    root.wait_variable(finished)
+    progress.stop()
+    window.destroy()
+    error = result.get_nowait()
+    if error is not None:
+        raise error
+    return not cancelled
+
+
 class Workspace:
     def __init__(self, root, path, start_demo=False):
         self.root, self.personal_path = root, Path(path).resolve()
@@ -167,7 +226,6 @@ class Workspace:
         self.library_counts = (0, 0)
         self.room_results = {}
         self.review_selections = {}
-        self.preview_ready = False
         self.guide_index = None
         self.view = "home"
         self.jobs = Queue()
@@ -567,7 +625,7 @@ class Workspace:
             return
         self.date_input.set(self.active_review_date)
         self.home.show_hands = True
-        self.home.show_critiques = True
+        self.home.show_critiques = False
         self.home.show_study = False
         self.home.differences.set(False)
         self.home.critique_spot.current(0)
@@ -580,11 +638,11 @@ class Workspace:
             self.notice_label.pack(before=self.body, fill="x", pady=(0, 8))
 
     def open_item(self, item):
-        if self.busy and not (self.preview_ready and item.status == "Recorded"):
+        if self.busy:
             return
         from .table_ui import open_table
 
-        return open_table(self.root, self.path, item.hand, item.ref, hero=item.hero)
+        return open_table(self.root, self.path, item.hand, item.ref, hero=item.hero, study=item.status == "Study")
 
     def explore(self, dimension):
         if self.busy:
@@ -616,6 +674,9 @@ class Workspace:
             self.review_selections.clear()
             self.guide_index = None
             self.queue = None
+            self.home.show_study = self.home.show_critiques = False
+            self.home.show_hands = True
+            self.home.differences.set(False)
             self.home.clear("Finding Hero decisions…")
             self.import_notice("")
             self.show_view("home")
@@ -681,16 +742,11 @@ class Workspace:
         try:
             while True:
                 msg = self.jobs.get_nowait()
-                if msg[0] == "review-preview":
-                    self.preview_ready = True
-                    self.home.preview(msg[1])
-                    continue
                 if msg[0] == "progress":
                     self.status.set(msg[1])
-                    if self.preview_ready:
-                        self.home.summary.set("Recent decisions · " + msg[1])
+                    if self.view == "home" and self.home.current is None:
+                        self.home.summary.set(msg[1])
                     continue
-                self.preview_ready = False
                 self.busy = False
                 self.import_btn.state(["!disabled"])
                 self.hero_btn.state(["!disabled"])
@@ -781,7 +837,8 @@ class Workspace:
         def done(result):
             added, totals, failures, file_count = result
             if added:
-                self.home.show_hands = None
+                self.home.show_hands = True
+                self.home.show_study = False
                 self.home.show_critiques = False
                 self.home.differences.set(False)
                 self.scope.set("Latest import")
@@ -898,6 +955,9 @@ class Workspace:
             else "Matching decision contexts…"
         )
         if self.view == "home":
+            self.home.show_study = self.home.show_critiques = False
+            self.home.show_hands = True
+            self.home.differences.set(False)
             self.home.clear("Finding Hero decisions…")
 
         def done(result):
@@ -906,7 +966,6 @@ class Workspace:
                 e,
                 t,
                 self.queue,
-                pockets,
                 key,
                 revision,
                 guide,
@@ -936,8 +995,8 @@ class Workspace:
             elif self.queue.day and not self.queue.hand_count:
                 empty = f"No eligible Hero hands were played on {self.queue.day} in the selected room."
             else:
-                empty = "No reviewable Hero decision fits these filters. The reports also include hands with no decision on the selected street."
-            self.home.paint(self.queue, pockets, empty, action)
+                empty = "No action flagged for review in this selection."
+            self.home.paint(self.queue, empty, action)
             self.paint()
             coverage = f"{t:,} imported hands   ·   {e:,} eligible Hero hands"
             if t != e:
@@ -975,10 +1034,6 @@ class Workspace:
                 selection = previous_selection[1]
             else:
                 selection = review_selection(db, room, scope, day=day)
-                if (cached_index is None or cached_index[0] != revision) and selection[1] > 1000:
-                    sample = preview_decisions(db, street)
-                    if sample:
-                        self.jobs.put(("review-preview", sample))
             high = db.execute("SELECT coalesce(max(id),0) FROM hands").fetchone()[0]
             population_key = comparison_revision(room, key[1], high, key[2])
             comparison = (
@@ -1028,13 +1083,6 @@ class Workspace:
                 guide_index=guide,
                 selection=selection,
             )
-            pockets = {}
-            for item in queue.items:
-                if item.cards:
-                    continue
-                snapshot = load_snapshot(db, item.hand, item.hero, item.ref)
-                hero = next(seat for seat in snapshot.seats if seat.is_hero)
-                pockets[item.hand] = snapshot.hero_cards or (), hero.position
             db.commit()
             if comparison is None:
                 save_comparison(db, room, population_key, findings, e, t)
@@ -1045,7 +1093,6 @@ class Workspace:
                 e,
                 t,
                 queue,
-                pockets,
                 key,
                 revision,
                 guide,
@@ -1179,11 +1226,12 @@ def main():
         root.report_callback_exception = lambda kind, err, tb: report_error(
             kind, err, tb, default.parent, root
         )
-        app = Workspace(
-            root,
-            args.library or default,
-            start_demo=args.library is None and not default.exists(),
-        )
+        path = (args.library or default).resolve()
+        start_demo = args.library is None and not path.exists()
+        if not prepare_startup(root, demo_path(path) if start_demo else path):
+            root.destroy()
+            return
+        app = Workspace(root, path, start_demo=start_demo)
         try:
             root.deiconify()
             root.mainloop()

@@ -116,10 +116,7 @@ class EarlyCritiqueTests(unittest.TestCase):
         self.assertIn("5.0%", result.reason)
         self.assertIn("19.8%", result.reason)
         self.assertEqual(result.alternative, "Compare call and fold by range")
-        match = re.search(r"Against a possible (\S+ \S+ \S+ \S+) \(.*?\), Hero has ([\d.]+)%", result.reason)
-        self.assertIsNotNone(match)
-        self.assertEqual(match[2], f"{100 * equity(h, match[1], board):.1f}")
-        self.assertIn("40 runouts", result.reason)
+        self.assertNotRegex(result.reason, r"(?:[2-9TJQKA][cdhs] ){3}[2-9TJQKA][cdhs]")
         for villain in ("9s 9c 7d 8d", "Ad Ah 7d 8d", "Js Jd 5h 4h"):
             self.assertLessEqual(equity(h, villain, board), 2 / 40)
         self.assertIsNone(review(snap, "call", 50))  # River betting still possible.

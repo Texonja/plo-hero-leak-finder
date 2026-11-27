@@ -53,7 +53,7 @@ class HandReview(ttk.Frame):
         self.differences = tk.BooleanVar(value=False)
         self.current = None
         self.related_pattern = ""
-        self.show_hands = None
+        self.show_hands = True
         self.show_critiques = False
         self.show_study = False
         self.return_page = 0
@@ -178,8 +178,8 @@ class HandReview(ttk.Frame):
         self.summary.set(message)
         self.canvas.yview_moveto(0)
 
-    def paint(self, queue, pockets, empty, action=None):
-        self.current = queue, pockets, empty, action
+    def paint(self, queue, empty, action=None):
+        self.current = queue, empty, action
         self.mode.state(["!disabled"])
         self.critique_button.state(["!disabled"] if queue.critiques else ["disabled"])
         self.show_critiques = self.show_critiques and bool(queue.critiques)
@@ -190,11 +190,6 @@ class HandReview(ttk.Frame):
         self.related_pattern = ""
         self._render()
 
-    def preview(self, items):
-        self.clear("Recent decisions · preparing the complete review")
-        for item in items:
-            self._card(item, item.cards, item.position)
-
     def _change_mode(self):
         self.show_study = False
         self.show_critiques = False
@@ -204,7 +199,7 @@ class HandReview(ttk.Frame):
 
     def _switch(self):
         self.show_hands = (
-            not self._hands_view() if not self.differences.get() else False
+            not self.show_hands if not self.differences.get() else False
         )
         self.differences.set(False)
         self._change_mode()
@@ -217,13 +212,6 @@ class HandReview(ttk.Frame):
         self.related_pattern = ""
         self.page = 0
         self._render()
-
-    def _hands_view(self):
-        return (
-            bool(self.current[0].critiques)
-            if self.show_hands is None
-            else self.show_hands
-        )
 
     def _toggle_critiques(self):
         self.show_critiques = not self.show_critiques
@@ -260,12 +248,12 @@ class HandReview(ttk.Frame):
     def _render(self):
         if self.current is None:
             return
-        queue, pockets, empty, action = self.current
+        queue, empty, action = self.current
         self._hide_pager()
         self.back.pack_forget()
         self.river_calls_filter.pack_forget()
         selected = queue.items
-        heading = ""
+        heading = "Hands for review"
         pattern_page = False
         self.critique_button.configure(
             text="Back to review"
@@ -277,7 +265,7 @@ class HandReview(ttk.Frame):
         )
         self.switch.configure(
             text="Review patterns"
-            if self._hands_view() or self.differences.get()
+            if self.show_hands or self.differences.get()
             else "Selected hands"
         )
         if self.show_critiques:
@@ -312,14 +300,14 @@ class HandReview(ttk.Frame):
                     empty += " Open Action critiques for specific alternatives to your recorded plays."
                 elif queue.study:
                     empty += " Open Study spots to inspect decisions outside those comparisons."
-        elif queue.patterns and not self._hands_view():
+        elif queue.patterns and not self.show_hands:
             selected = queue.patterns
             heading = "Review patterns"
             pattern_page = True
         if not self.show_critiques:
             self.critique_spot.pack_forget()
         total = len(selected)
-        if heading and total:
+        if total:
             pages = (total + REVIEW_PAGE_SIZE - 1) // REVIEW_PAGE_SIZE
             self.page = min(max(self.page, 0), pages - 1)
             start = self.page * REVIEW_PAGE_SIZE
@@ -341,7 +329,7 @@ class HandReview(ttk.Frame):
         if queue.day:
             count = f"{queue.hand_count:,} Hero hands played on {queue.day}"
         summary = f"{n} selected hand{'s' if n != 1 else ''}   ·   {count}"
-        if heading and n:
+        if n:
             summary = (
                 f"{heading} {start + 1:,}–{start + n:,} of {total:,}   ·   {count}"
             )
@@ -362,7 +350,7 @@ class HandReview(ttk.Frame):
             elif queue.day:
                 summary += "\nAction critiques: 0."
         if self.show_critiques:
-            summary += "\nOne per rule first: solver comparisons, equity bounds, river value, then other critiques. Larger pots first within a rule. EV is unevaluated."
+            summary += "\nOne hand per rule first, then the remaining decisions."
         self._clear_cards(summary)
         if not n:
             box = tk.Frame(
@@ -393,24 +381,17 @@ class HandReview(ttk.Frame):
                     text=f"See all {len(queue.critiques):,} action critiques",
                     command=self._toggle_critiques,
                 ).pack(anchor="w", pady=(8, 0))
-                for item in queue.critiques[:3]:
-                    self._card(item, item.cards, item.position)
             elif self.differences.get() and queue.study:
                 ttk.Button(
                     box, text="See study spots", command=self._toggle_study
                 ).pack(anchor="w", pady=(8, 0))
-                item = queue.study[0].card()
-                self._card(item, item.cards, item.position)
         for item in selected:
             if pattern_page:
                 self._pattern_card(item)
                 continue
             if self.show_study:
                 item = item.card()
-            cards, pos = (
-                (item.cards, item.position) if item.cards else pockets[item.hand]
-            )
-            self._card(item, cards, pos)
+            self._card(item, item.cards, item.position)
         self.canvas.yview_moveto(0)
 
     def _pattern_card(self, group):

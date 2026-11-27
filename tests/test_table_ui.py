@@ -390,7 +390,10 @@ class TableUITests(unittest.TestCase):
                 "SELECT id,hint FROM hands WHERE room=? AND number=?",
                 (hand["room"], hand["id"]),
             ).fetchone()
-        dlg = open_table(self.root, self.path, hid, hand["action_ref"], hero, hero)
+        regular = open_table(self.root, self.path, hid, hand["action_ref"], hero, hero)
+        self.assertNotIn("Manual review", regular.timeline.get("1.0", "end"))
+        regular.close()
+        dlg = open_table(self.root, self.path, hid, hand["action_ref"], hero, hero, study=True)
         self.addCleanup(dlg.close)
         timeline = dlg.timeline.get("1.0", "end")
         self.assertIn("GUIDE · FACING AN OPEN · BTN VS CO\nManual review", timeline)

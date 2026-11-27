@@ -3,14 +3,14 @@
 import unittest
 from dataclasses import replace
 
-from leakfinder.critique import critique_for, stack_context
+from leakfinder.critique import action_critique, stack_context
 from leakfinder.strategy_guide import advice_at
 from tests.test_strategy_guide import move, view
 
 
 def evaluate(snap, action, amount):
     event = move(snap.hero, action, amount, street=snap.street)
-    return critique_for(snap, event, advice_at(snap))
+    return action_critique(snap, event, advice_at(snap))
 
 
 def blind_spot(cards, position, entries, stacks=None):

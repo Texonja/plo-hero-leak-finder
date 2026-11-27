@@ -75,18 +75,18 @@ class LuckLibrary(unittest.TestCase):
         )
         self.ingest("first.xml", h)
         luck.refresh(self.db)
-        luck.report(self.db)
+        before = luck.report(self.db)["hands"]
         self.ingest("second.xml", h.replace("9989000041", "9989005041"))
         self.assertEqual(luck.refresh(self.db), 1)
         with patch.object(luck, "unpack", wraps=luck.unpack) as unpack:
-            self.assertEqual(luck.report(self.db)["hands"], 642)
+            self.assertEqual(luck.report(self.db)["hands"], before + 1)
             self.assertEqual(unpack.call_count, 1)
-            self.assertEqual(luck.report(self.db)["hands"], 642)
+            self.assertEqual(luck.report(self.db)["hands"], before + 1)
             self.assertEqual(unpack.call_count, 1)
         self.ingest("conflict.xml", h.replace(">C7<", ">D7<"))
         self.assertEqual(luck.refresh(self.db), 1)
         with patch.object(luck, "unpack", wraps=luck.unpack) as unpack:
-            self.assertEqual(luck.report(self.db)["hands"], 641)
+            self.assertEqual(luck.report(self.db)["hands"], before)
             self.assertEqual(unpack.call_count, 1)
 
     def test_coin_summary_disagrees_with_board(self):

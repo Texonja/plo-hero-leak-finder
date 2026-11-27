@@ -4,7 +4,6 @@ from collections import Counter
 from itertools import combinations
 
 from .critique import Critique
-from .early_equity import showdown_example
 from .early_postflop import _straight_pairs, next_draws
 from .opponent_history import heads_up_price
 from .postflop_value import RANK_LABEL, bet_size
@@ -225,7 +224,6 @@ def _closing_call(hole, board, price, cost):
     if bound + 0.05 > price:
         return None
     weak = (price - bound) / (1 - bound)
-    example = showdown_example(hole, board, minimum, price)
     return Critique(
         "flop-cbet-stackoff-bound",
         "Closing flop call against different betting ranges",
@@ -233,7 +231,7 @@ def _closing_call(hole, board, price, cost):
         f"{cost} No further betting is possible. Against {value}, at most {favorable} of "
         f"820 possible turn–river pairs per fixed opponent can even reach that category for Hero. "
         f"Treating all of them as wins gives a generous {bound:.1%} equity ceiling. "
-        f"Even if you always beat the rest, at least {weak:.1%} of the betting range must be outside that value group. {example}".strip(),
+        f"Even if you always beat the rest, at least {weak:.1%} of the betting range must be outside that value group.",
         "Draws and weaker made hands can raise your equity enough to call. Check what else "
         "this opponent bets for this size and stack depth.",
     )
@@ -369,7 +367,7 @@ def _checked(snap, event, hero, villain, raiser, hole, board):
     return None
 
 
-def review_flop(snap, event):
+def review_flop(snap, event, *, study=True):
     if event.action not in {"check", "bet", "call", "fold"}:
         return None
     hole, board = tuple(sorted(snap.hero_cards or ())), tuple(sorted(snap.board))
@@ -387,6 +385,8 @@ def review_flop(snap, event):
             idea = _weak_oop_call(snap, hero, opponent, hole, board, spot == "raised")
             if idea:
                 return idea
+    if not study:
+        return None
     if spot == "cbet" and event.action == "call":
         return _cbet(snap, hero, opponent, hole, board)
     if spot == "checked" and event.action in {"bet", "check"}:

@@ -19,7 +19,6 @@ from leakfinder.review_queue import (
     guide_revision,
     has_saved_batch,
     index_guides,
-    preview_decisions,
     rank_guides,
     rank_critiques,
     remember_batch,
@@ -156,20 +155,12 @@ class QueueTests(unittest.TestCase):
         self.aliases = {"CoinPoker": ["Hero"], "iPoker": ["BigNeonMax"]}
         set_profile(self.db, self.aliases)
 
-    def test_preview_opens_recorded_decisions_and_saved_scope_survives_room_switch(
+    def test_saved_scope_survives_room_switch(
         self,
     ):
         coin, ip = self.both()
         remember_batch(self.db, [coin, ip])
         both = review_selection(self.db, "Both", "Latest import")
-        preview = preview_decisions(self.db, "Flop")
-        self.assertEqual({i.room for i in preview}, {"CoinPoker", "iPoker"})
-        for item in preview:
-            snapshot = load_snapshot(self.db, item.hand, item.hero, item.ref)
-            self.assertEqual(
-                (snapshot.street, snapshot.hero_cards), ("Flop", item.cards)
-            )
-            self.assertEqual((item.status, item.suggested), ("Recorded", ""))
         index = index_guides(self.db, "Both")
         direct = build_queue(self.db, findings={}, guide_index=index, street="Flop")
         review_selection(self.db, "CoinPoker", "All hands")
@@ -217,32 +208,11 @@ class QueueTests(unittest.TestCase):
         self.assertEqual(
             (all_.scope, all_.hand_count, all_.library_hands), ("All hands", 2, 2)
         )
-        self.assertCountEqual(
-            [(r.room, r.number, r.ref, r.hero, r.action, r.node) for r in all_.items],
-            [
-                (
-                    "CoinPoker",
-                    "9000000030",
-                    "Line 28",
-                    "Hero",
-                    "check",
-                    "BET_IP_VS_MISSED_FLOP_CB",
-                ),
-                (
-                    "iPoker",
-                    "9000000601",
-                    "Action 10",
-                    "BigNeonMax",
-                    "check",
-                    "BET_IP_VS_MISSED_FLOP_CB",
-                ),
-            ],
-        )
-        for r in all_.items:
-            self.assertEqual((r.street, r.status), ("Flop", "Exploratory"))
-            self.assertIn("checked", r.reason)
-            self.assertIn("0 of 1", r.evidence)
-            self.assertNotIn("showdown", r.reason.lower())
+        self.assertEqual(all_.items, ())
+        self.assertEqual({r.room for r in all_.study}, {"iPoker", "CoinPoker"})
+        for spot in all_.study:
+            snapshot = load_snapshot(self.db, spot.hand, spot.hero, spot.ref)
+            self.assertEqual((snapshot.street, snapshot.hero_cards), ("Flop", spot.cards))
         self.assertEqual(remember_batch(self.db, [ip, ip]), 1)
         self.assertTrue(has_saved_batch(self.db))
         latest = build_queue(self.db, street="Turn")
@@ -255,11 +225,8 @@ class QueueTests(unittest.TestCase):
             ),
             ("Latest import", 1, 2, 1),
         )
-        self.assertEqual(
-            [(r.ref, r.action, r.node) for r in latest.items],
-            [("Action 12", "fold", "TURNF")],
-        )
-        self.assertIn("One observed hand", latest.items[0].evidence)
+        self.assertEqual(latest.items, ())
+        self.assertIn(("Action 12", "fold"), [(r.ref, r.action) for r in latest.study])
         self.assertEqual(build_queue(self.db, "CoinPoker").items, ())
         self.assertEqual(
             build_queue(self.db, "CoinPoker", scope="All hands").hand_count, 1
@@ -279,7 +246,7 @@ class QueueTests(unittest.TestCase):
         finally:
             reopened.close()
 
-    def test_date_selection_includes_older_imports_and_filters_fallback(self):
+    def test_date_selection_includes_older_imports_and_filters_study(self):
         _, ip = self.both()
         remember_batch(self.db, [ip])
         day = "2026-01-01"
@@ -291,7 +258,7 @@ class QueueTests(unittest.TestCase):
             self.db, scope="By date", day=day, street="Flop", selection=selection
         )
         self.assertEqual(queue.day, day)
-        self.assertEqual([i.number for i in queue.items], ["9000000030"])
+        self.assertEqual({i.number for i in queue.study}, {"9000000030"})
         self.assertEqual(
             build_queue(self.db, "iPoker", scope="By date", day=day).hand_count, 0
         )
@@ -315,7 +282,7 @@ class QueueTests(unittest.TestCase):
         self.assertEqual(
             (latest.hand_count, latest.library_hands, latest.source_count), (1, 2, 1)
         )
-        self.assertEqual({r.hand for r in latest.items}, {2})
+        self.assertEqual({r.hand for r in latest.study}, {2})
         self.assertEqual(remember_batch(self.db, []), 0)
         self.assertEqual(build_queue(self.db), latest)
         counts, bad = self.ingest(
@@ -324,29 +291,21 @@ class QueueTests(unittest.TestCase):
         self.assertEqual(counts, {"excluded": 1})
         self.assertEqual(remember_batch(self.db, [bad], after_revision=start), 0)
         self.assertEqual(build_queue(self.db), latest)
-        self.assertEqual(len(build_queue(self.db, scope="All hands").items), 2)
+        self.assertEqual(len({r.hand for r in build_queue(self.db, scope="All hands").study}), 2)
 
-    def test_supported_node_needs_an_aligned_action_and_a_matching_cell(self):
+    def test_population_difference_alone_does_not_flag_an_individual_hand(self):
         _, src = self.ingest("coin.txt", original("coin-heads-up.hh"))
         remember_batch(self.db, [src])
         findings = {f.node: f for f in analyze(self.db, "CoinPoker")[0]}
         key = next(iter(findings["THREEBET"].cells))
         # Manufactured high-evidence library; the Home example itself is
         # a real recorded BB fold and can only illustrate a lower raise rate.
-        for hx, px, expect in ((200, 7200, "Supported"), (1800, 800, "Exploratory")):
+        for hx, px in ((200, 7200), (1800, 800)):
             findings["THREEBET"] = summarize(
                 "THREEBET", {key: cell(2000, hx, 8000, px)}, "CoinPoker"
             )
             self.assertEqual(findings["THREEBET"].status, "Supported")
-            item = build_queue(self.db, "CoinPoker", findings=findings, limit=1).items[
-                0
-            ]
-            self.assertEqual(
-                (item.ref, item.action, item.status), ("Line 13", "fold", expect)
-            )
-            if expect == "Supported":
-                self.assertIn("8,000", item.evidence)
-                self.assertIn("Adjusted range", item.evidence)
+            self.assertFalse(build_queue(self.db, "CoinPoker", findings=findings, limit=1).items)
         other = json.loads(key)
         other[7] += 1
         findings["THREEBET"] = summarize(
@@ -358,9 +317,7 @@ class QueueTests(unittest.TestCase):
             "CoinPoker",
         )
         self.assertEqual(findings["THREEBET"].status, "Supported")
-        item = build_queue(self.db, "CoinPoker", findings=findings, limit=1).items[0]
-        self.assertEqual(item.status, "Exploratory")
-        self.assertIn("No matching opponent", item.evidence)
+        self.assertFalse(build_queue(self.db, "CoinPoker", findings=findings, limit=1).items)
 
     def test_exploratory_and_unsupported_definitions_never_become_supported(self):
         self.both()
@@ -381,15 +338,11 @@ class QueueTests(unittest.TestCase):
             )
         self.assertEqual(build_queue(self.db, limit=0).items, ())
 
-    def test_matched_tiny_sample_uses_plain_language(self):
+    def test_tiny_population_sample_does_not_flag_an_individual_hand(self):
         self.ingest("coin.txt", original("coin-heads-up.hh"))
         findings = {f.node: f for f in analyze(self.db, "CoinPoker")[0]}
         key = next(iter(findings["THREEBET"].cells))
         findings["THREEBET"] = summarize(
             "THREEBET", {key: cell(3, 0, 1, 1, 1)}, "CoinPoker"
         )
-        item = build_queue(self.db, "CoinPoker", findings=findings).items[0]
-        self.assertEqual(item.status, "Exploratory")
-        self.assertIn("you raised on 0 of 3", item.evidence)
-        self.assertIn("1 opponent decision", item.evidence)
-        self.assertIn("too small", item.evidence)
+        self.assertFalse(build_queue(self.db, "CoinPoker", findings=findings).items)

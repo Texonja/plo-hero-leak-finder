@@ -52,9 +52,9 @@ class RiverAuditTests(unittest.TestCase):
     def test_a_river_blocker_is_not_automatically_a_missed_draw(self):
         snap = self.snapshot("CoinPoker", "9000005612", "Line 31")
         why = advice_at(snap).why
-        missed, blocker = why.split("Another possible bluff uses a flush blocker")
-        self.assertNotIn("Ad 5s 2c 3c", missed)
-        self.assertIn("Ad 5s 2c 3c", blocker)
+        self.assertNotIn("Ad 5s 2c 3c", why)
+        self.assertFalse(any(ex.holding == ("Ad", "5s", "2c", "3c")
+                             for ex in river_holdings(snap.hero_cards, snap.board).missed_straight))
         turn = snap.board[:4]
         hole = ("Ad", "5s", "2c", "3c")
         for river in set(DECK) - set(snap.hero_cards + turn + hole):
@@ -63,8 +63,8 @@ class RiverAuditTests(unittest.TestCase):
     def test_checked_through_nut_straight_and_non_nut_boats_offer_size_comparison(self):
         for room, number, ref, text in (
             ("iPoker", "9000005983", "Action 13", "weaker straights"),
-            ("iPoker", "9000000095", "Action 13", "Value targets"),
-            ("CoinPoker", "9000001429", "Line 40", "Value targets"),
+            ("iPoker", "9000000095", "Action 13", "weaker calls"),
+            ("CoinPoker", "9000001429", "Line 40", "weaker calls"),
         ):
             snap = self.snapshot(room, number, ref)
             guide = advice_at(snap)
@@ -76,8 +76,8 @@ class RiverAuditTests(unittest.TestCase):
     def test_demo_bottom_set_on_four_broadway_cards_has_no_default_bet_size(self):
         snap = self.snapshot("iPoker", "9000012016", "Action 13")
         guide = advice_at(snap)
-        self.assertIn("bottom set", guide.why)
-        self.assertIn("straight", guide.why)
+        self.assertIn("bottom set", guide.why.lower())
+        self.assertIn("straight", guide.why.lower())
         self.assertEqual(guide.choices, ())
         self.assertIsNone(guide.size)
         self.assertFalse(guide.can_compare(snap))
@@ -124,8 +124,7 @@ class RiverAuditTests(unittest.TestCase):
                        board=("Qs", "Th", "Kc", "4s", "2d"))
         holdings = river_holdings(snap.hero_cards, snap.board)
         self.assertEqual(holdings.missed_flush[0].holding, holdings.missed_straight[0].holding)
-        evidence = advice_at(snap).why.split("Possible bluffs include ")[1].split(".")[0]
-        self.assertEqual(evidence.count(holdings.missed_flush[0].text), 1)
+        self.assertNotIn(holdings.missed_flush[0].text, advice_at(snap).why)
 
     def test_barrels_and_missed_draw_removal_respect_prior_action(self):
         from leakfinder.river_guide import _barrel_blockers
@@ -147,13 +146,8 @@ class RiverAuditTests(unittest.TestCase):
         snap = replace(self.snapshot("CoinPoker", "9000002844", "Line 32"),
                        hero_cards=("9c", "4d", "8h", "2d"), board=("Th", "6s", "6h", "Jc", "Ts"))
         guide = advice_at(snap).why
-        self.assertIn("Count that holding once", guide)
-        def examples(marker):
-            section = guide.split(marker, 1)[1].split(".")[0]
-            return {frozenset(x.split()) for x in re.findall(r"((?:[2-9TJQKA][cdhs] ){3}[2-9TJQKA][cdhs])", section)}
-        value, bluffs = examples("weaker made hands include "), examples("Possible bluffs include ")
-        self.assertTrue(value and bluffs)
-        self.assertFalse(value & bluffs)
+        self.assertNotRegex(guide, r"(?:[2-9TJQKA][cdhs] ){3}[2-9TJQKA][cdhs]")
+        self.assertFalse(advice_at(snap).choices)
 
     def test_identical_public_line_can_favor_either_call_or_fold(self):
         # Each side of each example is a complete legal four-card holding.
@@ -176,7 +170,7 @@ class RiverAuditTests(unittest.TestCase):
                     self.assertEqual(call_gain > 0, positive)
                     self.assertEqual(win > price, positive)
                 guide = advice_at(snap)
-                self.assertIn(f"{price:.1%}", guide.why)
+                self.assertFalse(guide.choices)
                 for action in ("raise", "fold", "call"):
                     self.assertIsNone(guide.difference(action, snap.to_call))
                 self.assertFalse(guide.rankable)
@@ -185,7 +179,7 @@ class RiverAuditTests(unittest.TestCase):
         snap = self.snapshot("CoinPoker", "9000002844", "Line 32")
         short = replace(snap, price_to_match=100, to_call=10, pot=120, bb=1)
         self.assertEqual(heads_up_price(short), 0.25)
-        self.assertIn("25.0%", advice_at(short).why)
+        self.assertFalse(advice_at(short).choices)
         multi = self.snapshot("iPoker", "9000005984", "Action 16")
         side = advice_at(replace(multi, price_to_match=100, to_call=10, pot=120))
         self.assertIn("side pot", side.title)
@@ -196,8 +190,8 @@ class RiverAuditTests(unittest.TestCase):
         snap = self.snapshot("iPoker", "9000010026", "Action 17")
         snap = replace(snap, pot=99, to_call=1, price_to_match=1, bb=1)
         guide = advice_at(snap)
-        self.assertIn("1.0%", guide.why)
-        self.assertIn("raises specifically", guide.why)
+        self.assertAlmostEqual(heads_up_price(snap), .01)
+        self.assertEqual(guide.choices, ())
         self.assertIsNone(guide.difference("call", 1))
         self.assertIsNone(guide.difference("fold", 0))
 
@@ -227,10 +221,7 @@ class RiverAuditTests(unittest.TestCase):
                     "Only one hole-card pair" in guide.why, unique and legal
                 )
                 if unique and legal:
-                    for card in better[0]:
-                        self.assertIn(card, guide.why)
-                    self.assertIn("value raise if worse hands pay", guide.why)
-                    self.assertIn("only better hands continue", guide.why)
+                    self.assertIn("value raise needs calls from worse", guide.why)
                     self.assertFalse(guide.rankable)
 
     def test_multiway_line_keeps_each_check_bet_and_pending_player(self):

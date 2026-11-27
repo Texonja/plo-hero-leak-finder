@@ -7,6 +7,7 @@ import tkinter as tk
 import unittest
 from pathlib import Path
 from tempfile import TemporaryDirectory
+from threading import Event, get_ident
 from tkinter import ttk
 from tkinter.scrolledtext import ScrolledText
 from types import SimpleNamespace
@@ -19,7 +20,7 @@ from leakfinder.demo import demo_path
 from leakfinder.home import PLAYED_RED, SUGGESTED_GREEN
 from leakfinder.importers import Record, decode
 from leakfinder.storage import profile, set_profile
-from leakfinder.ui import Workspace, main
+from leakfinder.ui import Workspace, main, open_library, prepare_startup
 from tests.test_library import original, repaired_session
 
 
@@ -77,7 +78,7 @@ class DesktopTests(unittest.TestCase):
 
         try:
             wait_report()
-            self.assertEqual(report.result["hands"], 640)
+            self.assertEqual(report.result["hands"], 644)
             self.assertEqual(len(report.table.get_children()), 19)
             report.chart_on.set(True)
             report.chart()
@@ -96,7 +97,17 @@ class DesktopTests(unittest.TestCase):
         counts = dict(
             self.app.db.execute("SELECT room,count(*) FROM hands GROUP BY room")
         )
-        self.assertEqual(counts, {"CoinPoker": 320, "iPoker": 320})
+        self.assertEqual(counts, {"CoinPoker": 320, "iPoker": 324})
+        self.assertCountEqual(
+            [(item.number, item.node) for item in self.app.queue.items],
+            [
+                ("9000000086", "rfi_supported_hand"),
+                ("9000020001", "aa_closing_squeeze"),
+                ("9000020002", "low_blind_backraise"),
+                ("9000020003", "flop_raise_call_no_draw"),
+                ("9000020004", "flop_cbet_call_low_gutshot"),
+            ],
+        )
         self.assertEqual(
             profile(self.app.db), {"CoinPoker": ["HeroDemo"], "iPoker": ["HeroDemo"]}
         )
@@ -152,10 +163,47 @@ class DesktopTests(unittest.TestCase):
         self.assertIn(str(log), dialog.call_args.args[1])
         self.assertIn("OperationalError", log.read_text(encoding="utf-8"))
 
-    def test_home_has_twelve_cards_and_filtering_reuses_the_index(self):
-        self.assertEqual(len(self.app.queue.items), 12)
+    def test_startup_window_is_visible_and_responsive_during_library_open(self):
+        started = Event()
+        release = Event()
+        worker = []
+        visible = []
+        ui_thread = get_ident()
+
+        def slow_open(path):
+            worker.append(get_ident())
+            started.set()
+            if not release.wait(timeout=5):
+                raise TimeoutError("Startup window did not respond")
+            return open_library(path)
+
+        def inspect_startup():
+            window = next(
+                (w for w in self.root.winfo_children() if isinstance(w, tk.Toplevel)),
+                None,
+            )
+            if not started.is_set() or window is None or not window.winfo_ismapped():
+                self.root.after(10, inspect_startup)
+                return
+            for widget in child_widgets(window):
+                if isinstance(widget, ttk.Label):
+                    visible.append(widget.cget("text"))
+                elif isinstance(widget, ttk.Progressbar):
+                    visible.append(str(widget.cget("mode")))
+            release.set()
+
+        self.root.after(10, inspect_startup)
+        with patch("leakfinder.ui.open_library", side_effect=slow_open):
+            self.assertTrue(prepare_startup(self.root, self.personal))
+        self.assertIn("Starting PLO Hero Leak Finder…", visible)
+        self.assertIn("indeterminate", visible)
+        self.assertEqual(len(worker), 1)
+        self.assertNotEqual(worker[0], ui_thread)
+
+    def test_home_shows_only_actionable_hands_and_filtering_reuses_the_index(self):
+        self.assertEqual({i.hand for i in self.app.queue.items}, {i.hand for i in (*self.app.queue.guide_items, *self.app.queue.critiques)})
         home = self.app.home
-        self.assertIn("selected hands", home.summary.get())
+        self.assertIn("Hands for review", home.summary.get())
         home.study_button.invoke()
         self.assertIn("Study spots 1–12", home.summary.get())
         self.assertIn("largest first", home.summary.get())
@@ -183,7 +231,7 @@ class DesktopTests(unittest.TestCase):
                 self.app.street.set(street)
                 self.app.refresh(filters_only=True)
                 self.wait()
-                self.assertTrue(self.app.queue.items)
+                self.assertTrue(all(i.status in {"Guide", "Critique"} for i in self.app.queue.items))
                 self.assertTrue(
                     all(item.street == street for item in self.app.queue.items)
                 )
@@ -212,7 +260,7 @@ class DesktopTests(unittest.TestCase):
         all_critiques = app.queue.critiques
         days = dict(app.db.execute("SELECT id, day FROM hands"))
         target = days[all_critiques[0].hand]
-        other = next(days[i.hand] for i in all_critiques if days[i.hand] != target)
+        other = next(day for day in days.values() if day != target)
         self.assertIn("By date", app.scope_box.cget("values"))
         with patch(
             "leakfinder.ui.update_guides", side_effect=AssertionError("reindexed")
@@ -232,7 +280,7 @@ class DesktopTests(unittest.TestCase):
                 self.assertCountEqual(
                     app.queue.critiques, (i for i in all_critiques if days[i.hand] == day)
                 )
-                self.assertIn("Action critiques 1", app.home.summary.get())
+                self.assertEqual(len(app.queue.items), len({i.hand for i in (*app.queue.guide_items, *app.queue.critiques)}))
                 self.assertIn(day, app.home.summary.get())
                 self.assertTrue(all(days[i.hand] == day for i in app.queue.study))
             critique = app.queue.critiques[0]
@@ -309,6 +357,8 @@ class DesktopTests(unittest.TestCase):
         self.app.import_paths([path])
         self.wait()
         home = self.app.home
+        self.assertIn("Hands for review 1–12 of 13", home.summary.get())
+        home.switch.invoke()
         self.assertIn("Review patterns 1–1", home.summary.get())
         group = self.app.queue.patterns[0]
         related = next(
@@ -369,7 +419,7 @@ class DesktopTests(unittest.TestCase):
         self.app.switch_library(True)
         self.wait()
         self.assertEqual(
-            self.app.db.execute("SELECT count(*) FROM hands").fetchone()[0], 640
+            self.app.db.execute("SELECT count(*) FROM hands").fetchone()[0], 644
         )
         self.app.switch_library(False)
         self.wait()
@@ -441,7 +491,7 @@ class DesktopTests(unittest.TestCase):
             self.app.import_menu.invoke("Import files…")
             self.wait()
             self.assertEqual(
-                [item.room for item in self.app.queue.items], ["CoinPoker"]
+                {item.room for item in self.app.queue.study}, {"CoinPoker"}
             )
             with ZipFile(packed, "a", ZIP_DEFLATED) as archive:
                 archive.writestr(
@@ -453,7 +503,7 @@ class DesktopTests(unittest.TestCase):
         self.assertEqual(self.app.queue.scope, "Latest import")
         self.assertEqual(self.app.queue.hand_count, 1)
         self.assertEqual(self.app.queue.library_hands, 2)
-        self.assertEqual([item.room for item in self.app.queue.items], ["iPoker"])
+        self.assertEqual({item.room for item in self.app.queue.study}, {"iPoker"})
         self.assertIn("1 known hands skipped", self.app.notice.get())
         self.assertEqual(
             self.app.db.execute("SELECT count(*) FROM origins").fetchone()[0], 2
@@ -473,16 +523,17 @@ class DesktopTests(unittest.TestCase):
         self.assertEqual(self.app.scope.get(), "Latest import")
         self.assertEqual(self.app.queue.hand_count, 2)
         self.assertEqual(
-            {item.room for item in self.app.queue.items}, {"CoinPoker", "iPoker"}
+            {item.room for item in self.app.queue.study}, {"CoinPoker", "iPoker"}
         )
         self.assertIn("2 new hands", self.app.notice.get())
         self.app.street.set("Flop")
         self.app.refresh(filters_only=True)
         self.wait()
-        self.assertTrue(self.app.queue.items)
-        self.assertTrue(all(item.street == "Flop" for item in self.app.queue.items))
+        self.assertFalse(self.app.queue.items)
+        self.app.home.study_button.invoke()
+        self.assertTrue(all(item.street == "Flop" for item in self.app.queue.study))
         for widget, item in zip(
-            self.app.home.rows.winfo_children(), self.app.queue.items, strict=True
+            self.app.home.rows.winfo_children(), self.app.queue.study, strict=True
         ):
             button = next(
                 w
@@ -526,7 +577,7 @@ class DesktopTests(unittest.TestCase):
         self.app.import_paths([coin, xml, day])
         self.wait()
         self.assertEqual(self.app.queue.hand_count, 1)
-        self.assertEqual({item.number for item in self.app.queue.items}, {"9000000001"})
+        self.assertEqual({item.number for item in self.app.queue.study}, {"9000000001"})
         self.assertEqual(self.app.queue.library_hands, 3)
         self.app.scope.set("All hands")
         self.app.refresh(filters_only=True)
@@ -548,7 +599,17 @@ class DesktopTests(unittest.TestCase):
         self.wait()
         self.assertEqual(profile(self.app.db)["CoinPoker"], ["Hero"])
         self.assertEqual(self.app.view, "home")
-        self.assertEqual(self.app.queue.items[0].number, "9000000030")
+        self.assertEqual(self.app.queue.study[0].number, "9000000030")
+        home = self.app.home
+        def open_buttons():
+            return [w for w in child_widgets(home.rows)
+                    if isinstance(w, ttk.Button) and "Open table" in w.cget("text")]
+        self.assertFalse(self.app.queue.items)
+        self.assertFalse(open_buttons())
+        home.study_button.invoke()
+        self.assertTrue(open_buttons())
+        home.study_button.invoke()
+        self.assertFalse(open_buttons())
 
     def test_position_report_receives_active_demo_room(self):
         self.app.room.set("CoinPoker")
@@ -613,8 +674,8 @@ class DesktopTests(unittest.TestCase):
         self.app.street.set("Preflop")
         self.app.refresh(filters_only=True)
         self.wait()
-        item = next(i for i in self.app.queue.items if i.room == "iPoker")
-        self.assertEqual((item.number, item.status), (ip["id"], "Exploratory"))
+        item = next(i.card() for i in self.app.queue.study if i.room == "iPoker")
+        self.assertEqual((item.number, item.status), (ip["id"], "Study"))
         self.assertFalse(self.app.queue.guide_items)
         self.app.home.mode.invoke()
         dlg = self.app.open_item(item)

@@ -287,11 +287,7 @@ def _early_review(snap, hero, opponent, history):
                     )
                 )
             if step.rule:
-                lines.append(
-                    f"    {step.rule} Example holding · {step.example}"
-                    if step.example
-                    else f"    {step.rule}"
-                )
+                lines.append(f"    {step.rule}")
 
     lines.extend(("", f"SCENARIOS FOR {snap.street.upper()}"))
     models = []
@@ -453,14 +449,6 @@ def _river_pivot(snap, stage, history):
             f"Holding stronger hands and ties fixed, call breaks even when holdings Hero beats bet {threshold:.2f}× "
             "their modeled weight. They include weaker value bets as well as bluffs."
         )
-    for key, label in (
-        ("value", "Stronger value"),
-        ("weak_call", "Weaker made hand"),
-        ("bluff", "Possible bluff"),
-    ):
-        example = stage.examples.get(key)
-        if example:
-            lines.append(f"{label} · {example.text}.")
     lines.extend(river_holdings(snap.hero_cards, snap.board).blockers)
     return lines
 
@@ -604,16 +592,6 @@ def build_range_review(snap, hero, opponent, history):
         lines.append(f"  {stage.reason}")
         if stage.rules:
             lines.append("  " + " ".join(stage.rules))
-    for label, example in stages.stages[-1].examples.items():
-        translated = {
-            "value": "stronger hand",
-            "bluff": "possible bluff",
-            "weak_call": "possible weaker call",
-            "tie": "tie",
-        }
-        lines.append(
-            f"{translated.get(label, label).capitalize()} · {example.text} · {example.reason}"
-        )
     lines.extend(("", stages.limitations))
     lines.extend(("", "DECISION UNDER DIFFERENT MODEL ASSUMPTIONS"))
     models = []
@@ -689,7 +667,7 @@ def build_range_review(snap, hero, opponent, history):
         )
     else:
         lines.append(
-            "The numerical comparison assumes bet/fold after a heads-up check to Hero. With the nuts, in a multiway pot or out of position, the view shows the line and example holdings."
+            "The numerical comparison assumes bet/fold after a heads-up check to Hero. With the nuts, in a multiway pot or out of position, the view shows the betting line and range composition."
         )
     lines.append(
         "These scenarios use assumptions for study. Comparable earlier hands against this opponent can help evaluate them."
